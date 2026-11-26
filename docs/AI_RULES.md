@@ -17,10 +17,20 @@ Sebelum tugas apa pun, baca berurutan:
 8. `docs/REUSE_MAP.md` — kode rujukan dari repo lain
 9. Tugas di `docs/TODO.md`
 
-## 2. Alur kerja satu tugas (wajib)
+## 2. Alur kerja per paket (wajib, berlaku sejak 2026-11-27)
 
-1. Ambil **satu** tugas dari `TODO.md`, urut per fase. Jangan loncat fase, jangan mengerjakan dua tugas sekaligus. Tugas yang bergantung pada keputusan **[TERBUKA]** dilewati sampai diputuskan.
-2. Bekerja di working tree yang ada. **Jangan** membuat branch atau push — lakukan `git commit` per tugas setelah semua KP lulus dan TODO dicentang; `git push` dilakukan pemilik setelah fase selesai (§8).
+**Paket** = kumpulan tugas yang tercantum di `TODO.md` bagian "Rencana rilis & paket". Satu putaran agen = satu paket, di jalur yang ditugaskan.
+
+- Kerjakan tugas di dalam paket **berurutan, satu per satu**. Setiap tugas menjalani langkah 3–9 di bawah sampai commit, **baru** tugas berikutnya. Jangan mencampur dua tugas dalam satu commit.
+- Paket bertanda **risiko tinggi** (uang, ledger, otorisasi, Midtrans, sesi ujian) dikerjakan Claude atau, bila oleh agen lain, berhenti untuk ditinjau setelah setiap tugas.
+- **Berhenti di tengah paket** (laporkan, jangan lanjut) bila: `composer check` merah dua kali berturut-turut pada tugas yang sama · aturan di dokumen ambigu atau bertentangan · tugas bergantung pada **[TERBUKA]** · butuh dependensi baru · perlu mengubah migration/ADR yang ada · menyentuh berkas milik jalur lain di luar aturan berkas bersama.
+- **Jalur paralel** bekerja di git worktree + branch yang **dibuat pemilik** (`jalur-a`, `jalur-b`, ...). Agen commit di branch jalurnya saja; merge dilakukan pemilik. Berkas bersama: rute per modul (`routes/<modul>.php`), navigasi per modul, seeder per modul, migration dengan timestamp baru. Perubahan pada berkas bersama yang sudah ada (`routes/web.php`, `HandleInertiaRequests`, `DatabaseSeeder`, `app.css`) dibatasi tambahan satu baris pemanggil dan disebut di laporan.
+- **Laporan** dibuat sekali di akhir paket (format di `GEMINI.md`).
+
+Langkah per tugas:
+
+1. Ambil tugas berikutnya di paket. Tugas yang bergantung pada keputusan **[TERBUKA]** dilewati sampai diputuskan.
+2. Bekerja di working tree / worktree jalur yang ada. **Jangan** membuat branch sendiri, push, merge, atau rebase — lakukan `git commit` per tugas setelah semua KP lulus dan TODO dicentang; `git push` dan merge dilakukan pemilik (§8).
 3. Tulis **tes dulu** dari KP tugas (harus merah karena alasan yang benar).
 4. Implementasi minimal sampai hijau.
 5. `composer check` (Pint, Larastan 7, Pest, `tsc`, `vp check`) **harus hijau**. Untuk tugas bertanda `[mysql]`: juga `composer check:mysql`.

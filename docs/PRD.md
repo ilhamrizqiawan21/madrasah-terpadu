@@ -185,6 +185,13 @@ kalender libur, konfigurasi Midtrans (mode sandbox/production dibaca dari `.env`
 - **Pengawasan**: monitor admin (status, progres, pelanggaran, mode perangkat), buka kunci, tambah waktu, paksa selesai. Soal terkunci setelah ujian dimulai; koreksi kunci hanya oleh admin dengan alasan + hitung ulang + audit.
 - **Kapasitas**: 250 siswa serentak (kriteria uji di ADR-020 dan T-1406).
 
+### 4.15 Masa paralel dan modul kerangka (ADR-021, ADR-022)
+
+- Selama aplikasi lama masih dipakai, **alur uang tetap di aplikasi lama**; modul keuangan, Midtrans, dan dompet di aplikasi ini dibangun tetapi nonaktif sampai tanggal peralihan.
+- Setiap modul dapat dinyalakan/dimatikan admin di **Pengaturan > Kunci fitur**. Modul nonaktif tidak tampil di menu.
+- Modul **kerangka** (CRUD dasar, isi menyusul): presensi & izin pegawai, jadwal pelajaran, tugas & PR, e-rapor (unggah PDF), buku kas sederhana, asrama.
+- Kartu presensi lama (**RFID**) tetap dipakai; QR tetap didukung.
+
 ## 5. Persyaratan fungsional (ringkas, ID dipakai di TODO)
 
 - **FR-AUTH**: login dengan username/NIS/no. HP + password, rate limit, reset password oleh admin, ganti password, 2FA opsional untuk admin/bendahara.

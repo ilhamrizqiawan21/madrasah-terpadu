@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Middleware;
 
+use App\Support\Navigation;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -40,8 +41,20 @@ class HandleInertiaRequests extends Middleware
         return [
             ...parent::share($request),
             'name' => config('app.name'),
+            'branding' => fn (): array => [
+                'appName' => (string) config('app.name'),
+                'foundationName' => (string) config('sekolah.foundation_name', 'Yayasan Amal Jaya Berkah'),
+                'logoUrl' => null,
+            ],
             'auth' => [
                 'user' => $request->user(),
+            ],
+            'navigation' => fn (): array => Navigation::forUser($request->user()),
+            'schoolContext' => fn (): array => [
+                'unit' => (string) $request->session()->get('active_unit', 'MI'),
+                'academicYear' => (string) $request->session()->get('active_academic_year', '2026/2027'),
+                'units' => ['MI', 'RA', 'TPQ'],
+                'academicYears' => ['2026/2027', '2025/2026'],
             ],
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
         ];

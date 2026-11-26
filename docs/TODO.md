@@ -1,12 +1,58 @@
 # TODO — Rencana Eksekusi
 
-Aturan: kerjakan **berurutan per fase, satu tugas per kali** (`AI_RULES.md` §2). Centang `[x]` hanya bila semua KP terbukti dan `composer check` hijau, lalu tulis bukti di baris tugas.
+Aturan: kerjakan **per paket** sesuai "Rencana rilis & paket" di bawah; di dalam paket satu tugas per commit, berurutan (`AI_RULES.md` §2). Centang `[x]` hanya bila semua KP terbukti dan `composer check` hijau, lalu tulis bukti di baris tugas.
 Format tugas: **Ref** = dokumen/kode acuan · **Berkas** = tempat kode · **KP** = kriteria penerimaan · **Tes** = tes minimum.
 Prioritas: **P0** wajib rilis 1.0 · **P1** sebaiknya ada di 1.0 · **P2** setelah 1.0. Tanda `[mysql]` = wajib lulus juga di `composer check:mysql`. Tanda `[UI]` = wajib gerbang UI (`DESIGN.md` §9 + antislop).
 Tugas yang bergantung pada keputusan **[TERBUKA]** (`DECISIONS.md` U-xx) tidak boleh dimulai sebelum keputusan dicatat.
 
 Ringkasan fase: 0 Fondasi · 1 Cangkang & keamanan · 2 Data induk · 3 Portal wali & PWA · 4 Notifikasi · 5 Presensi · 6 Keuangan · 7 Midtrans · 8 Dompet kantin ·
 9 Buku Saku BK & reward · 10 Pembiasaan · 11 Hafalan & PIB · 12 Nilai sikap · 13 Laporan · 14 Mutu, deploy, serah terima · 15 Ujian CBT.
+
+---
+
+## Rencana rilis & paket (berlaku sejak 2026-11-27)
+
+Arah klien (2026-11-27): **kerangka aplikasi dengan semua fitur dikerjakan sekarang**, minimal setara aplikasi lama (REUSE_MAP §4) dan lebih baik. **Kunci Midtrans dan data asli diserahkan klien di akhir**, jadi pengembangan memakai akun Midtrans **sandbox milik pengembang** dan data uji dari `DemoSeeder` (lokal/staging saja). Urutan rilis di bawah menjadi urutan pengerjaan; jalur dijalankan paralel selebar mungkin. Kerja per **paket** dan **jalur paralel** (AI_RULES §2).
+Jalur **A** = Claude (risiko tinggi: uang, Midtrans, ledger, sesi ujian). Jalur **B** = Gemini. Jalur **C** = Gemini kedua bila dijalankan. Risiko: **T** tinggi (tinjau tiap tugas) · **S** sedang (tinjau per paket) · **R** rendah (boleh satu fase penuh).
+
+### Urutan baru (ADR-021, 2026-11-27): uang tetap di aplikasi lama selama masa paralel
+
+#### Rilis 1.0 — kerangka lengkap tanpa uang (minggu ini)
+
+| Paket                         | Jalur | Risiko | Tugas                            | Catatan                                                                              |
+| ----------------------------- | ----- | ------ | -------------------------------- | ------------------------------------------------------------------------------------ |
+| P-01 Cangkang aplikasi        | B     | S      | T-110, T-111, T-113              | Selesai (menunggu commit)                                                            |
+| P-02 Kit CRUD + pengguna staf | B     | S      | T-112, T-114                     | Kit CRUD jadi contoh baku untuk semua kerangka                                       |
+| P-03 Data induk               | B     | R      | T-201–T-207, T-210, T-211, T-212 | Termasuk kunci fitur, kenaikan kelas & mutasi                                        |
+| P-06 Portal wali & notifikasi | B     | S      | T-301–T-305, T-401–T-404         | Kartu tagihan di beranda wali disembunyikan saat `billing` nonaktif                  |
+| P-07 Presensi gerbang + RFID  | C     | S      | T-501–T-509                      | T-501/T-502 menerima UID RFID (ADR-022)                                              |
+| P-16 CBT inti                 | A     | T      | T-1501–T-1506                    | Jalur A mulai dari sini; tanpa periode ujian selama masa paralel                     |
+| P-11 Buku Saku BK & reward    | B     | S      | T-901–T-906                      | Reward menerbitkan voucher kantin: simpan voucher, pemakaian menunggu `wallet` aktif |
+| P-12 Pembiasaan               | C     | R      | T-1001–T-1004                    |                                                                                      |
+| P-14 Hafalan & PIB            | C     | S      | T-1101–T-1108                    |                                                                                      |
+| P-17 CBT pengawasan & hasil   | A     | S      | T-1507–T-1511                    |                                                                                      |
+| P-21 Kerangka paritas         | B     | R      | T-1601–T-1606                    | [KERANGKA], semua di balik kunci fitur                                               |
+| P-09a Staging                 | A + B | T      | T-1402, deploy staging           | DemoSeeder; semua modul uang nonaktif                                                |
+
+#### Rilis 1.1 — pelengkap
+
+P-13 Pelengkap (T-208, T-209, T-405) · P-18 Nilai sikap (setelah U-01) · P-19 Laporan non-keuangan (Fase 13 bagian presensi, BK, hafalan, pembiasaan).
+
+#### Rilis peralihan — saat klien memindahkan uang ke aplikasi ini
+
+| Paket                   | Jalur | Risiko | Tugas                                   |
+| ----------------------- | ----- | ------ | --------------------------------------- |
+| P-04 Fondasi pembayaran | A     | T      | T-701, T-706, T-005                     |
+| P-05 Tagihan & kasir    | A     | T      | T-601–T-605, T-607, T-610, T-615, T-616 |
+| P-08 Midtrans wali      | A     | T      | T-702–T-705, T-608, T-606, T-708        |
+| P-10 Dompet kantin      | A     | T      | T-801–T-806                             |
+| P-15 Kelayakan ujian    | A     | T      | T-611–T-614                             |
+| P-09b Produksi uang     | A + B | T      | T-1404, T-1411, T-1414, T-707, T-609    |
+
+Selama menunggu peralihan, paket uang boleh dikerjakan lebih awal bila jalur A kosong, tetapi tetap **nonaktif** lewat kunci fitur.
+
+**Ketergantungan dari klien (di akhir, hanya untuk P-09b):** Excel siswa + wali + no. HP · tanggal peralihan tagihan (PAYMENTS §8) · kunci Midtrans produksi lewat `.env` server.
+**Ketergantungan dari pemilik:** akun Midtrans sandbox pengembang (gratis) baru dibutuhkan saat paket uang dikerjakan · contoh tampilan/field aplikasi lama bila kerangka perlu dibuat lebih mirip.
 
 ---
 
@@ -53,12 +99,12 @@ Sisa Fase 0 (eksekutor):
 - [x] **T-108 `app:create-admin` + `ProductionSeeder`** (P0) — Berkas: `app/Console/Commands/CreateAdmin.php`, `database/seeders/ProductionSeeder.php`.
       KP: perintah interaktif (nama, username, password tersembunyi ≥ 12) + opsi non-interaktif; idempoten; `ProductionSeeder` hanya peran, izin, unit dasar (MI, RA, TPQ), surah — **tanpa akun**. Tes: membuat admin; menolak password pendek/duplikat. Bukti: `tests/Feature/Console/CreateAdminCommandTest.php` (5 tes) + Pint/Larastan/Pest (110 tes)/tsc ✔ (2026-11-26).
 - [x] **T-109 `EnsureActiveUser` + `SecurityHeaders`** (P0) — Ref: ARCHITECTURE §9. KP: akun nonaktif yang sedang login dikeluarkan pada request berikutnya; header keamanan di semua respons web; CSP mengizinkan Vite dev, build, dan `app(.sandbox).midtrans.com` hanya untuk script Snap. Tes: header ada; pengguna dinonaktifkan → logout. Bukti: `tests/Feature/Security/SecurityMiddlewareTest.php` (2 tes) + Pint/Larastan/Pest (112 tes)/tsc ✔ (2026-11-26).
-- [ ] **T-110 Arahkan pasca-login sesuai peran** (P0) — Ref: ARCHITECTURE §4. KP: `/dashboard` → `/wali` / `/gerbang` / `/kantin` / `/admin` sesuai peran; pengguna tanpa peran melihat `NoAccessState`. Tes: per peran.
-- [ ] **T-111 Layout staf + navigasi dari server** (P0) [UI] — Ref: DESIGN §3, standar 02. Berkas: `layouts/staff-layout.tsx`, `HandleInertiaRequests` (`navigation`), `app/Support/Navigation.php`.
-      KP: topbar dengan grup menu rata tengah (desktop), sheet + hamburger (<1024 px), breadcrumb, pemilih unit & tahun ajaran aktif (disimpan di sesi), menu aktif bertahan di semua ukuran; item menu hanya muncul bila pengguna punya izin rute tujuannya. Tes: guru tidak menerima item menu Keuangan; tiap item menu → rute yang lolos otorisasi untuk peran itu (tes iterasi semua peran × semua item).
+- [x] **T-110 Arahkan pasca-login sesuai peran** (P0) — Ref: ARCHITECTURE §4. KP: `/dashboard` → `/wali` / `/gerbang` / `/kantin` / `/admin` sesuai peran; pengguna tanpa peran melihat `NoAccessState`. Tes: per peran. Bukti: `tests/Feature/Auth/RoleRedirectTest.php` + `composer check` ✔ (133 tes, 2026-11-27).
+- [x] **T-111 Layout staf + navigasi dari server** (P0) [UI] — Ref: DESIGN §3, standar 02. Berkas: `layouts/staff-layout.tsx`, `HandleInertiaRequests` (`navigation`), `app/Support/Navigation.php`.
+      KP: topbar dengan grup menu rata tengah (desktop), sheet + hamburger (<1024 px), breadcrumb, pemilih unit & tahun ajaran aktif (disimpan di sesi), menu aktif bertahan di semua ukuran; item menu hanya muncul bila pengguna punya izin rute tujuannya. Tes: guru tidak menerima item menu Keuangan; tiap item menu → rute yang lolos otorisasi untuk peran itu (tes iterasi semua peran × semua item). Bukti: `tests/Feature/Navigation/StaffNavigationTest.php` + `composer check` ✔ (133 tes, 2026-11-27).
 - [ ] **T-112 Komponen aplikasi dasar** (P0) [UI] — Ref: DESIGN §4–5. Berkas: `components/app/*`, `lib/format.ts`.
       KP: `PageHeader`, `DataTable` (server pagination, sort, skeleton, empty), `RowActions`, `ExportButtons`, `FormDialog`, `ConfirmDialog`, `MoneyText`, `DateText`, `StatusBadge`, `EmptyState`, `ErrorState`, `NoAccessState`, toast (sonner) dari flash server; `format.ts` (`formatRupiah`, `formatDate`, `formatTime` dalam WITA, memakai `Intl` dengan locale `id-ID` dan zona `Asia/Makassar`); padanan PHP `App\Support\Money` untuk PDF/notifikasi. Tes: Pest untuk `App\Support\Money` (0, ribuan, jutaan, negatif); `format.ts` dijaga `tsc` + pemeriksaan visual (Vitest tidak dipasang).
-- [ ] **T-113 Halaman login & akun** (P0) [UI] — Ref: DESIGN §3 Auth, standar 04. KP: form terpusat, logo + nama yayasan dari pengaturan, show/hide password, pesan generik; halaman ganti password sukarela (password lama wajib), profil (nama, HP). **Tanpa** paksa ganti password (ADR-015). Tes: ganti password butuh password lama; login dengan password baru berhasil.
+- [x] **T-113 Halaman login & akun** (P0) [UI] — Ref: DESIGN §3 Auth, standar 04. KP: form terpusat, logo + nama yayasan dari pengaturan, show/hide password, pesan generik; halaman ganti password sukarela (password lama wajib), profil (nama, HP). **Tanpa** paksa ganti password (ADR-015). Tes: ganti password butuh password lama; login dengan password baru berhasil. Bukti: `tests/Feature/Settings/AccountSettingsTest.php` + `composer check` ✔ (137 tes, 2026-11-27).
 - [ ] **T-114 Pengguna staf (CRUD)** (P0) — Berkas: `Admin/UserController`, `pages/admin/users`. KP: tambah/ubah/nonaktifkan staf, atur peran (multi), reset password (password acak ditampilkan sekali ke admin); admin tidak bisa menonaktifkan dirinya sendiri; audit. Tes: otorisasi; audit; tidak bisa menghapus admin terakhir.
 
 ---
@@ -74,6 +120,9 @@ Sisa Fase 0 (eksekutor):
 - [ ] **T-207 Impor Excel siswa + wali** (P0) — Ref: REUSE_MAP §2 (StudentImporter). Dep: `openspout/openspout`. KP: template unduhan; ≤ 1.500 baris, ≤ 2 MB; pratinjau (baru/ubah/galat per baris); transaksi per chunk; hasil `{created, updated, failed[{row, error}]}`; membuat/menautkan wali berdasarkan nomor HP; audit ringkas. Tes: baris galat dilaporkan, sisanya masuk; impor ulang idempoten.
 - [ ] **T-208 Tampilan (branding)** (P1) [UI] — Ref: DESIGN §2, standar 05. KP: unggah logo/favicon, pilih warna utama; turunan hover/active/focus otomatis; pemeriksaan kontras AA (tolak bila gagal); reset ke default; berlaku untuk light & dark. Tes: kontras rendah ditolak.
 - [ ] **T-209 Profil staf + penugasan** (P1) — KP: unit, NIP, jabatan; guru dapat ditugaskan ke rombel (wali kelas) dan ke kelompok tahfidz (dipakai Fase 11).
+- [ ] **T-210 `DemoSeeder`** (P0) — KP: data uji lengkap lewat factory (unit MI/RA/TPQ, tahun ajaran aktif, rombel, siswa + wali, staf per peran, jenis tagihan) untuk lokal/staging; **menolak berjalan** bila `APP_ENV=production`; nama berpola uji jelas (mis. "Siswa Uji 001"), bukan nama orang sungguhan. Tes: seeder gagal di production; `migrate:fresh --seed` lokal berhasil.
+- [ ] **T-211 Kunci fitur per modul** (P0) [UI] — Ref: ADR-021/022, SCHEMA §L `feature_flags`. KP: halaman Pengaturan > Kunci fitur (admin); middleware `feature:<key>` (nonaktif → 404); menu dari server menyembunyikan modul nonaktif; bawaan: `billing`, `midtrans`, `wallet`, `exam_eligibility` **nonaktif**, modul lain aktif. Tes: rute modul nonaktif 404; menu tidak memuatnya; perubahan diaudit.
+- [ ] **T-212 Kenaikan kelas & mutasi siswa** (P0) [UI] — Ref: ADR-022. KP: kenaikan massal per rombel ke tahun ajaran berikutnya (pratinjau, pengecualian siswa tinggal kelas, enrollment baru; riwayat tetap); mutasi keluar/masuk dengan tanggal + alasan (status siswa berubah, wali dinonaktifkan bila tidak punya anak aktif). Tes: kenaikan idempoten; riwayat enrollment utuh; otorisasi admin.
 
 ---
 
@@ -99,7 +148,7 @@ Sisa Fase 0 (eksekutor):
 
 ## Fase 5 — Presensi gerbang
 
-- [ ] **T-501 Kartu QR siswa** (P0) — Ref: ADR-008, SCHEMA §C. KP: terbitkan/cabut/terbitkan ulang; token 32 byte acak, simpan hash SHA-256; maks satu kartu aktif; audit. Tes: token mentah tidak tersimpan; kartu dicabut tidak bisa dipakai.
+- [ ] **T-501 Kartu QR siswa** (P0) — Ref: ADR-008, ADR-022 (kartu RFID lama: simpan UID ter-hash, `kind=rfid`), SCHEMA §C dan §L. KP: terbitkan/cabut/terbitkan ulang; token 32 byte acak, simpan hash SHA-256; maks satu kartu aktif; audit. Tes: token mentah tidak tersimpan; kartu dicabut tidak bisa dipakai.
 - [ ] **T-502 `AttendanceClassifier` + `GateScanService`** (P0) [mysql] — Ref: PRD §4.2, ARCHITECTURE §8. KP: Domain murni mengklasifikasi (masuk tepat waktu / terlambat / pulang / duplikat < 120 dtk / di luar jam / hari libur) berdasarkan jam unit (WITA); Service menyimpan `gate_scans` + upsert `attendance_days` dalam transaksi; notifikasi masuk/pulang ke wali (afterCommit). Tes: tabel kasus jam (data-driven) untuk classifier; scan ganda bersamaan → satu `attendance_days`.
 - [ ] **T-503 Cetak kartu** (P0) — Dep: npm `qrcode` (atau render QR di PHP bila sudah ada pustaka yang diizinkan; pilih salah satu dan catat). KP: PDF kartu ukuran ID-1 (85,6 × 54 mm), 10 per A4, berisi foto, nama, NIS, rombel, unit, QR; cetak per rombel atau per siswa. Tes: PDF terbuat untuk 30 siswa < 10 detik.
 - [ ] **T-504 Layar scan gerbang** (P0) [UI] — Dep: `qr-scanner` (fallback kamera). Ref: DESIGN §3 Kiosk. KP: input selalu fokus (scanner barcode); tombol kamera (BarcodeDetector → fallback); hasil besar + suara; 10 scan terakhir; status koneksi; throttle 300/menit/petugas; respons server ≤ 300 ms (ukur di tes dengan 1.000 siswa). Tes: endpoint scan (sukses, terlambat, duplikat, kartu dicabut, bukan petugas → 403).
@@ -123,6 +172,8 @@ Sisa Fase 0 (eksekutor):
 - [ ] **T-608 Tagihan di portal wali** (P0) [UI] — KP: daftar per anak (jatuh tempo terdekat di atas, menunggak ditandai `--accent-attention`), total keluarga, riwayat pembayaran + kuitansi; tombol bayar online (aktif setelah Fase 7). Tes: total keluarga = jumlah sisa semua anak.
 - [ ] **T-609 Pengingat jatuh tempo** (P1) — KP: scheduler harian 07.00 WITA: notifikasi H-3 dan H+1 jatuh tempo, maks satu notifikasi per tagihan per jenis. Tes: idempoten.
 - [ ] **T-610 Saldo awal migrasi** (P0) — Ref: PRD §8 no. 10. KP: impor Excel tunggakan dari aplikasi lama sebagai tagihan dengan jenis "Saldo Awal" dan deskripsi asli; pratinjau; audit. Tes: impor ulang idempoten.
+- [ ] **T-615 Diskon & beasiswa berulang** (P0) [UI] — Ref: ADR-022. KP: master potongan per siswa per jenis tagihan (persen atau nominal, masa berlaku, alasan); diterapkan otomatis saat penerbitan (tercatat sebagai penyesuaian, bukan mengubah nominal diam-diam). Tes: potongan berlaku hanya dalam masa berlaku; tagihan tidak negatif.
+- [ ] **T-616 Unggah bukti transfer oleh wali** (P1) [UI] — Ref: ADR-022. KP: wali mengunggah foto bukti untuk tagihan (≤ 2 MB, disk privat); bendahara memverifikasi → membuat pembayaran `transfer` lewat `PaymentService`, atau menolak dengan alasan. Tes: wali hanya tagihan anaknya; verifikasi ganda tidak membuat pembayaran ganda.
 - [ ] **T-611 Periode ujian & syarat tagihan** (P0) [UI] — Ref: PRD §4.4, ADR-016, SCHEMA §D. KP: bendahara/admin membuat periode (unit MI dulu, `cbt|paper`, tanggal) dan memilih jenis tagihan + batas periode yang wajib lunas; `ExamEligibilityResolver` (Domain) menghitung layak/tidak dari tagihan (cicilan sebagian = belum layak). Tes: unit resolver (lunas, sebagian, tagihan di luar syarat diabaikan, dibatalkan diabaikan); pembayaran masuk → langsung layak.
 - [ ] **T-612 Dispensasi ujian** (P0) [UI] — Ref: ADR-016. KP: hanya admin memberi/mencabut dispensasi per siswa per periode, alasan wajib, `AuditLogger`; tidak mengubah tagihan. Tes: bendahara/guru → 403; dicabut → tidak layak lagi.
 - [ ] **T-613 Daftar kelayakan & peringatan ujian kertas** (P0) [UI] — KP: daftar per rombel (layak/tidak/dispensasi) dengan pola antrean (mockup menu 13); ekspor PDF/Excel untuk panitia; wali kelas baca saja. Tes: otorisasi; ekspor aman formula injection.
@@ -250,3 +301,16 @@ Bergantung pada Fase 2 (data induk) dan T-611–T-612 (kelayakan). Unit pertama 
 - [ ] **T-1509 Monitor pengawas** (P0) [UI] — KP: status per siswa (belum mulai, mengerjakan, terkunci, selesai), progres, pelanggaran, mode perangkat, terakhir terlihat; aksi buka kunci, tambah waktu, paksa selesai (diaudit); polling 5 detik dengan satu kueri agregat. Tes: otorisasi; tanpa N+1; checklist keamanan REUSE_MAP §5.
 - [ ] **T-1510 Hasil & ekspor** (P0) [UI] — KP: rekap nilai per ujian/rombel, ekspor Excel (netral formula), hasil ke wali bila `show_result_to_guardian` dan status final. Tes: wali hanya anaknya; nilai non-final tidak tampil.
 - [ ] **T-1511 Panduan hari-H** (P1) — KP: `docs/handover/ujian-cbt.md`: persiapan per mode perangkat (lab/SEB, tablet mode kios, HP + Exambro), PIN, token, simulasi putus Wi-Fi, uji beban sebelum hari-H.
+
+---
+
+## Fase 16 — Kerangka paritas aplikasi lama (ADR-022)
+
+Semua tugas di fase ini **[KERANGKA]**: tabel + Service + CRUD dasar (kit T-112) + menu + empty state berkonteks + otorisasi + tes otorisasi, di balik kunci fitur (T-211). Tanpa aturan bisnis lanjutan, laporan, atau notifikasi. Field minimal: SCHEMA §L.
+
+- [ ] **T-1601 Presensi & izin pegawai** [KERANGKA] (P1) [UI] — KP: rekap harian pegawai (manual + dari gerbang bila kartu pegawai terdaftar); pengajuan izin pegawai oleh pegawai, keputusan oleh admin/kepala unit. Kunci fitur `staff_attendance`.
+- [ ] **T-1602 Jadwal pelajaran** [KERANGKA] (P1) [UI] — KP: jam pelajaran per unit; jadwal mingguan per rombel (mapel + guru); tampilan "jadwal hari ini" di beranda wali bila aktif. Kunci `lesson_schedule`. Bergantung T-1501 (mapel).
+- [ ] **T-1603 Tugas & PR** [KERANGKA] (P1) [UI] — KP: guru membuat tugas per mapel/rombel dengan tenggat; wali melihat daftar tugas anak (baca saja). Kunci `assignments`.
+- [ ] **T-1604 E-rapor (unggah PDF)** [KERANGKA] (P1) [UI] — KP: wali kelas/admin mengunggah PDF rapor per siswa per semester; terbit → wali dapat mengunduh lewat URL bertanda tangan. Kunci `report_cards`.
+- [ ] **T-1605 Buku kas sederhana** [KERANGKA] (P1) [UI] — KP: kategori kas per unit; entri masuk/keluar append-only (koreksi = pembalik); saldo berjalan per unit. Hanya bendahara/admin. Kunci `cash_book`.
+- [ ] **T-1606 Asrama** [KERANGKA] (P2) [UI] — KP: kamar (kapasitas, gender) dan penempatan siswa; tolak penempatan melebihi kapasitas. Kunci `dormitory` (bawaan nonaktif sampai klien mengonfirmasi cakupan).

@@ -27,6 +27,14 @@ URL notifikasi diisi di dashboard Midtrans: `https://<domain>/webhooks/midtrans`
 
 Pengecekan siap produksi (T-1404): `MIDTRANS_IS_PRODUCTION=true` **dan** Server Key berawalan `Mid-server-` (bukan `SB-Mid-server-`). Perintah `php artisan payments:check-config` menolak kombinasi yang tidak konsisten. (Aplikasi lama tertangkap memakai sandbox di produksi; ini tidak boleh terulang.)
 
+### 2a. Satu akun Midtrans untuk dua aplikasi (masa peralihan)
+
+Aplikasi lama sekolah sudah memakai akun Midtrans yang sama. Dasbor Midtrans hanya punya satu URL notifikasi, jadi **jangan mengubah URL notifikasi di dasbor** selama aplikasi lama masih menerima pembayaran.
+
+- Setiap permintaan Snap dari aplikasi ini mengirim header **`X-Override-Notification: https://<domain>/webhooks/midtrans`** sehingga notifikasi order kita dikirim ke aplikasi ini saja, dan pengaturan dasbor (milik aplikasi lama) tidak tersentuh. Header ini terdokumentasi untuk Core API; untuk Snap, **verifikasi di sandbox** pada T-701/T-708 bahwa notifikasi benar datang ke URL override. Bila tidak berlaku untuk Snap, berhenti dan laporkan ke arsitek (alternatif: `X-Append-Notification` + aplikasi lama mengabaikan order berawalan kita).
+- `order_id` aplikasi ini selalu berawalan `INV-` / `TOP-` + ULID, sehingga tidak bentrok dengan order aplikasi lama. Webhook yang `order_id`-nya tidak dikenal dicatat di `payment_notifications` lalu diabaikan dengan respons 200 (bukan galat), supaya Midtrans tidak mengulang terus.
+- Sebelum memakai kunci produksi, pastikan akun benar-benar produksi: Server Key berawalan `Mid-server-` dan halaman bayar aplikasi lama beralamat `app.midtrans.com` (bukan `app.sandbox.midtrans.com`).
+
 ## 3. Membuat order (Snap)
 
 `PaymentOrderService::createForInvoices(Guardian, Student, invoiceIds)` / `createForTopUp(Guardian, Student, amount)`:
@@ -129,3 +137,9 @@ Pengecekan siap produksi (T-1404): `MIDTRANS_IS_PRODUCTION=true` **dan** Server 
 ## 7. Uji manual di sandbox (T-708)
 
 Pakai simulator pembayaran sandbox Midtrans untuk QRIS/GoPay/VA. Untuk webhook di lokal, gunakan tunnel (mis. `cloudflared tunnel --url http://localhost:8000`) dan isi URL notifikasi sandbox ke URL tunnel. Catat hasil setiap skenario §6 di bukti tugas.
+
+## 8. Peralihan dari aplikasi lama
+
+- **Tanggal peralihan** ditetapkan klien. Mulai tanggal itu, tagihan baru **hanya** terbit di aplikasi ini; aplikasi lama hanya untuk melihat riwayat.
+- Tunggakan aplikasi lama per tanggal peralihan diimpor sebagai **saldo awal** (T-610) dan diperiksa bersama bendahara (T-1411).
+- Setelah aplikasi lama berhenti menerima pembayaran, URL notifikasi di dasbor boleh diarahkan ke aplikasi ini; header override tetap dikirim.

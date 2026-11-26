@@ -198,6 +198,28 @@ Akun wali dibuat lewat impor/data induk dengan password awal acak. Tidak ada hal
 
 **Akibat:** PRD §2, §3 (peran/konteks siswa ujian), §4 bagian baru "Ujian CBT", §5 FR-CBT; SCHEMA bagian baru; ARCHITECTURE (guard `student`, job penutupan sesi); REUSE_MAP §5 (CBT-Sekolah); TODO **Fase 15 — CBT** (setelah Fase 6 karena bergantung pada kelayakan U-07); DESIGN area baru `exam-layout`; mockup: bank soal, buat ujian, monitor, layar siswa ujian, input nilai essay, kelayakan ujian.
 
+## ADR-021 — Masa paralel dengan aplikasi lama: uang tetap di aplikasi lama (Diterima, 2026-11-27; keputusan pemilik dari obrolan dengan klien)
+
+**Konteks:** klien masih akan memakai aplikasi lama (amaljayaberkah.id) untuk sementara. Pembayaran (tagihan, cicilan, Midtrans, saldo e-wallet) di sana sudah berjalan dengan kunci Midtrans produksi.
+**Keputusan:**
+
+- Selama **masa paralel**, semua alur uang tetap di aplikasi lama: tagihan, kasir, Midtrans, dan dompet kantin. Modul keuangan, Midtrans, dan dompet di aplikasi ini tetap dibangun sesuai PRD, tetapi **dinonaktifkan lewat kunci fitur** (T-211) sampai tanggal peralihan (PAYMENTS §8). Tidak ada dua aplikasi yang menerbitkan tagihan bersamaan.
+- Prioritas pengerjaan bergeser ke modul tanpa uang: data induk, portal wali, notifikasi, presensi, BK, pembiasaan, hafalan, CBT, dan kerangka paritas (ADR-022).
+- Kelayakan ujian (ADR-016) membutuhkan tagihan di aplikasi ini, jadi **ditunda sampai peralihan**. Selama masa paralel, CBT berjalan tanpa periode ujian (kolom `exam_period_id` kosong).
+- Data induk selama masa paralel: impor dari ekspor Excel aplikasi lama (T-207). Penyelarasan ulang dilakukan manual oleh admin sebelum peralihan; tidak ada sinkronisasi otomatis antar-aplikasi.
+  **Akibat:** urutan paket di TODO berubah (P-04, P-05, P-08, P-10, P-15 pindah ke "Rilis peralihan"); jalur A (Claude) mengerjakan CBT lebih dulu.
+
+## ADR-022 — Paritas bertahap: kerangka dulu, isi menyusul, di balik kunci fitur (Diterima, 2026-11-27; menjawab sebagian U-12)
+
+**Konteks:** klien ingin fitur setara aplikasi lama. Untuk fitur U-12 (d)–(i), arahan pemilik: buat **kerangka yang mirip dulu, konten menyusul**.
+**Keputusan:**
+
+- **Kerangka** = tabel + model + Service + CRUD dasar memakai kit CRUD (T-112) + menu + empty state + otorisasi + tes otorisasi. **Tanpa** aturan bisnis lanjutan, laporan, atau notifikasi. Tugas bertanda **[KERANGKA]** di TODO.
+- Setiap modul (termasuk modul PRD) punya **kunci fitur** di Pengaturan (T-211). Modul nonaktif tidak tampil di menu dan rutenya 404. Kerangka yang belum siap dipakai dinonaktifkan, bukan ditampilkan sebagai halaman kosong ("dead navigation").
+- Kerangka yang dibangun: presensi & izin pegawai, jadwal pelajaran, tugas & PR, e-rapor (unggah PDF per siswa), buku kas sederhana, asrama (kamar + penempatan). Field minimal di SCHEMA §L.
+- **Diambil penuh** (bukan kerangka): kartu **RFID** sebagai token presensi (ADR-008 diperluas: token kartu boleh UID RFID; QR tetap didukung), diskon & beasiswa berulang per siswa, unggah bukti transfer (keduanya bagian Rilis peralihan), kenaikan kelas & mutasi siswa.
+- Tetap bukan tujuan: PPDB, CMS website, perpustakaan, armada, koperasi, helpdesk, payroll, dana BOS, ZIS.
+
 ---
 
 ## Usulan terbuka (menunggu klien, lihat PRD §8)
@@ -208,3 +230,24 @@ Akun wali dibuat lewat impor/data induk dengan password awal acak. Tidak ada hal
 - **U-04** Streak mutabaah menghasilkan poin (PRD §4.9). Default: tidak.
 - **U-05** ADR-009 kelebihan bayar.
 - **U-06** Nama pencatat perilaku terlihat oleh wali. Default: tidak terlihat.
+- **U-12** Fitur aplikasi lama yang belum ada di rencana (paritas, REUSE_MAP §4). Sebagian diputuskan lewat ADR-021/ADR-022; yang tersisa: format e-rapor resmi, kebutuhan akuntansi lanjutan, cakupan asrama.
+
+### U-12 — Paritas dengan aplikasi lama (Usulan, 2026-11-27)
+
+**Konteks:** klien meminta "semua fitur sama, bahkan lebih baik". Observasi admin aplikasi lama (REUSE_MAP §4) menemukan fitur **yang dipakai** tetapi tidak ada di PRD; sebagian bertentangan dengan PRD §2 (bukan tujuan).
+
+| #   | Fitur                                                            | Bukti pemakaian            | Usulan arsitek                                                                                                                                 | Perkiraan                        |
+| --- | ---------------------------------------------------------------- | -------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------- |
+| a   | Kartu **RFID** presensi (bukan QR)                               | 223 kartu aktif            | **Ambil.** UID RFID diterima sebagai token kartu (pembaca RFID USB mengetik UID seperti keyboard); QR tetap opsional; kartu lama dipakai ulang | Kecil: ubah ADR-008, T-501/T-502 |
+| b   | Diskon & beasiswa berulang per siswa                             | 754 baris                  | **Ambil.** Master potongan per siswa per jenis tagihan (persen/nominal, masa berlaku), diterapkan otomatis saat penerbitan                     | Sedang, Fase 6                   |
+| c   | Unggah bukti transfer oleh wali + verifikasi bendahara           | menu ada                   | **Ambil.** Pelengkap Midtrans                                                                                                                  | Sedang, Fase 6                   |
+| d   | Presensi & izin guru/staf                                        | 35 baris                   | Ambil bila klien butuh; gerbang yang sama                                                                                                      | Sedang                           |
+| e   | Jadwal pelajaran                                                 | 10 baris                   | Ambil versi sederhana (beranda wali + CBT)                                                                                                     | Kecil–sedang                     |
+| f   | Tugas & PR                                                       | 13 baris                   | Tunda (e-learning = bukan tujuan PRD §2)                                                                                                       | Besar                            |
+| g   | E-Rapor                                                          | 9 baris                    | Tunda; butuh format rapor resmi                                                                                                                | Besar                            |
+| h   | Akuntansi: COA, pemasukan non-siswa, buku kas, payroll, BOS, ZIS | buku kas 1.551, payroll 30 | **Tunda / proyek terpisah**; berisiko tinggi, butuh aturan akuntansi yayasan                                                                   | Sangat besar                     |
+| i   | Asrama (kamar, boarding pass)                                    | 143 baris                  | Konfirmasi: dipakai MI/RA/TPQ atau unit pesantren di luar cakupan?                                                                             | Sedang                           |
+| j   | Kenaikan kelas, arsip mutasi                                     | 10 baris                   | **Ambil** di data induk (enrollment sudah menyimpan riwayat)                                                                                   | Kecil                            |
+| k   | PPDB, CMS, perpustakaan, armada, koperasi, helpdesk              | hampir kosong              | Tetap bukan tujuan                                                                                                                             | —                                |
+
+**Pertanyaan untuk klien:** dari (d)–(i), mana yang **wajib** saat peralihan dan mana yang boleh menyusul? Untuk akuntansi (h), apakah tetap di aplikasi lama/terpisah sementara?

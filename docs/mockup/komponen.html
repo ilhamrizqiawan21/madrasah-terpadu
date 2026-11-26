@@ -1,637 +1,3170 @@
 <!doctype html>
 <html lang="id">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Madrasah Terpadu — Katalog Komponen</title>
-<style>
-:root{
-  --background:oklch(0.985 0.004 85);--foreground:oklch(0.22 0.02 160);--card:oklch(1 0 0);
-  --muted:oklch(0.955 0.006 85);--muted-foreground:oklch(0.48 0.015 160);--border:oklch(0.9 0.008 85);
-  --primary:oklch(0.42 0.08 165);--primary-foreground:oklch(0.98 0.005 85);--accent-attention:oklch(0.75 0.14 75);
-  --success:oklch(0.55 0.12 150);--warning:oklch(0.68 0.14 70);--destructive:oklch(0.55 0.19 27);--ring:var(--primary);
-  --radius:8px;--radius-sm:6px;--shadow:0 8px 24px oklch(0.22 0.02 160 / .12);
-  --font:"Plus Jakarta Sans","Plus Jakarta Sans Variable",ui-sans-serif,system-ui,sans-serif;
-  color-scheme:light;
-}
-[data-theme=dark]{
-  --background:oklch(0.17 0.01 160);--foreground:oklch(0.95 0.01 85);--card:oklch(0.21 0.012 160);
-  --muted:oklch(0.26 0.012 160);--muted-foreground:oklch(0.72 0.01 160);--border:oklch(0.32 0.012 160);
-  --primary:oklch(0.72 0.09 165);--primary-foreground:oklch(0.18 0.02 165);--accent-attention:oklch(0.78 0.13 75);
-  --success:oklch(0.72 0.12 150);--warning:oklch(0.78 0.13 70);--destructive:oklch(0.68 0.17 27);
-  --shadow:0 8px 24px oklch(0 0 0 / .45);color-scheme:dark;
-}
-*{box-sizing:border-box}
-body{margin:0;background:var(--background);color:var(--foreground);font:14px/1.5 var(--font);-webkit-font-smoothing:antialiased}
-h1,h2,h3,h4{margin:0;font-weight:600;line-height:1.25}
-p{margin:0}
-.num{font-variant-numeric:tabular-nums}
-.muted{color:var(--muted-foreground)}
-.small{font-size:12px}
-svg.i{width:16px;height:16px;stroke:currentColor;stroke-width:1.75;fill:none;stroke-linecap:round;stroke-linejoin:round;flex:none}
-svg.i20{width:20px;height:20px}
-:focus-visible{outline:2px solid var(--ring);outline-offset:2px}
-@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>Madrasah Terpadu — Katalog Komponen</title>
+        <style>
+            :root {
+                --background: oklch(0.985 0.004 85);
+                --foreground: oklch(0.22 0.02 160);
+                --card: oklch(1 0 0);
+                --muted: oklch(0.955 0.006 85);
+                --muted-foreground: oklch(0.48 0.015 160);
+                --border: oklch(0.9 0.008 85);
+                --primary: oklch(0.42 0.08 165);
+                --primary-foreground: oklch(0.98 0.005 85);
+                --accent-attention: oklch(0.75 0.14 75);
+                --success: oklch(0.55 0.12 150);
+                --warning: oklch(0.68 0.14 70);
+                --destructive: oklch(0.55 0.19 27);
+                --ring: var(--primary);
+                --radius: 8px;
+                --radius-sm: 6px;
+                --shadow: 0 8px 24px oklch(0.22 0.02 160 / 0.12);
+                --font:
+                    'Plus Jakarta Sans', 'Plus Jakarta Sans Variable',
+                    ui-sans-serif, system-ui, sans-serif;
+                color-scheme: light;
+            }
+            [data-theme='dark'] {
+                --background: oklch(0.17 0.01 160);
+                --foreground: oklch(0.95 0.01 85);
+                --card: oklch(0.21 0.012 160);
+                --muted: oklch(0.26 0.012 160);
+                --muted-foreground: oklch(0.72 0.01 160);
+                --border: oklch(0.32 0.012 160);
+                --primary: oklch(0.72 0.09 165);
+                --primary-foreground: oklch(0.18 0.02 165);
+                --accent-attention: oklch(0.78 0.13 75);
+                --success: oklch(0.72 0.12 150);
+                --warning: oklch(0.78 0.13 70);
+                --destructive: oklch(0.68 0.17 27);
+                --shadow: 0 8px 24px oklch(0 0 0 / 0.45);
+                color-scheme: dark;
+            }
+            * {
+                box-sizing: border-box;
+            }
+            body {
+                margin: 0;
+                background: var(--background);
+                color: var(--foreground);
+                font: 14px/1.5 var(--font);
+                -webkit-font-smoothing: antialiased;
+            }
+            h1,
+            h2,
+            h3,
+            h4 {
+                margin: 0;
+                font-weight: 600;
+                line-height: 1.25;
+            }
+            p {
+                margin: 0;
+            }
+            .num {
+                font-variant-numeric: tabular-nums;
+            }
+            .muted {
+                color: var(--muted-foreground);
+            }
+            .small {
+                font-size: 12px;
+            }
+            svg.i {
+                width: 16px;
+                height: 16px;
+                stroke: currentColor;
+                stroke-width: 1.75;
+                fill: none;
+                stroke-linecap: round;
+                stroke-linejoin: round;
+                flex: none;
+            }
+            svg.i20 {
+                width: 20px;
+                height: 20px;
+            }
+            :focus-visible {
+                outline: 2px solid var(--ring);
+                outline-offset: 2px;
+            }
+            @media (prefers-reduced-motion: reduce) {
+                * {
+                    transition: none !important;
+                    animation: none !important;
+                }
+            }
 
-.top{position:sticky;top:0;z-index:20;background:var(--background);border-bottom:1px solid var(--border)}
-.top-in{max-width:1240px;margin:auto;display:flex;align-items:center;gap:16px;padding:12px 24px}
-.top nav{display:flex;gap:4px;margin-left:auto;flex-wrap:wrap}
-.top nav a{color:var(--muted-foreground);text-decoration:none;padding:6px 10px;border-radius:var(--radius-sm);font-weight:500}
-.top nav a:hover{background:var(--muted);color:var(--foreground)}
-main{max-width:1240px;margin:auto;padding:32px 24px 80px}
-.intro{display:grid;grid-template-columns:1.4fr 1fr;gap:32px;padding-bottom:32px;border-bottom:1px solid var(--border)}
-.intro h1{font-size:30px}
-.intro p{margin-top:8px;max-width:60ch}
-.legend{border:1px solid var(--border);border-radius:var(--radius);padding:16px;background:var(--card);font-size:13px;margin:0}
-.legend dt{font-weight:600}.legend dd{margin:0 0 8px;color:var(--muted-foreground)}
-section.blk{padding:48px 0 8px}
-section.blk>header{display:flex;align-items:baseline;gap:12px;margin-bottom:20px}
-section.blk>header h2{font-size:24px}
-section.blk>header code{font-size:12px;color:var(--muted-foreground)}
-.spec{display:grid;grid-template-columns:220px 1fr;gap:24px;padding:20px 0;border-top:1px solid var(--border)}
-.spec>.meta h3{font-size:16px}
-.spec>.meta p{margin-top:4px;font-size:13px;color:var(--muted-foreground)}
-.spec>.meta code{display:inline-block;margin-top:8px;font-size:12px;background:var(--muted);padding:1px 6px;border-radius:4px}
-.stage{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
-.col{display:flex;flex-direction:column;gap:12px}
+            .top {
+                position: sticky;
+                top: 0;
+                z-index: 20;
+                background: var(--background);
+                border-bottom: 1px solid var(--border);
+            }
+            .top-in {
+                max-width: 1240px;
+                margin: auto;
+                display: flex;
+                align-items: center;
+                gap: 16px;
+                padding: 12px 24px;
+            }
+            .top nav {
+                display: flex;
+                gap: 4px;
+                margin-left: auto;
+                flex-wrap: wrap;
+            }
+            .top nav a {
+                color: var(--muted-foreground);
+                text-decoration: none;
+                padding: 6px 10px;
+                border-radius: var(--radius-sm);
+                font-weight: 500;
+            }
+            .top nav a:hover {
+                background: var(--muted);
+                color: var(--foreground);
+            }
+            main {
+                max-width: 1240px;
+                margin: auto;
+                padding: 32px 24px 80px;
+            }
+            .intro {
+                display: grid;
+                grid-template-columns: 1.4fr 1fr;
+                gap: 32px;
+                padding-bottom: 32px;
+                border-bottom: 1px solid var(--border);
+            }
+            .intro h1 {
+                font-size: 30px;
+            }
+            .intro p {
+                margin-top: 8px;
+                max-width: 60ch;
+            }
+            .legend {
+                border: 1px solid var(--border);
+                border-radius: var(--radius);
+                padding: 16px;
+                background: var(--card);
+                font-size: 13px;
+                margin: 0;
+            }
+            .legend dt {
+                font-weight: 600;
+            }
+            .legend dd {
+                margin: 0 0 8px;
+                color: var(--muted-foreground);
+            }
+            section.blk {
+                padding: 48px 0 8px;
+            }
+            section.blk > header {
+                display: flex;
+                align-items: baseline;
+                gap: 12px;
+                margin-bottom: 20px;
+            }
+            section.blk > header h2 {
+                font-size: 24px;
+            }
+            section.blk > header code {
+                font-size: 12px;
+                color: var(--muted-foreground);
+            }
+            .spec {
+                display: grid;
+                grid-template-columns: 220px 1fr;
+                gap: 24px;
+                padding: 20px 0;
+                border-top: 1px solid var(--border);
+            }
+            .spec > .meta h3 {
+                font-size: 16px;
+            }
+            .spec > .meta p {
+                margin-top: 4px;
+                font-size: 13px;
+                color: var(--muted-foreground);
+            }
+            .spec > .meta code {
+                display: inline-block;
+                margin-top: 8px;
+                font-size: 12px;
+                background: var(--muted);
+                padding: 1px 6px;
+                border-radius: 4px;
+            }
+            .stage {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 12px;
+                align-items: center;
+            }
+            .col {
+                display: flex;
+                flex-direction: column;
+                gap: 12px;
+            }
 
-.sw{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px}
-.sw div{border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;background:var(--card)}
-.sw i{display:block;height:56px;border-bottom:1px solid var(--border)}
-.sw b{display:block;padding:8px 10px 0;font-size:13px}
-.sw span{display:block;padding:0 10px 10px;font-size:12px;color:var(--muted-foreground)}
-.type-row{display:grid;grid-template-columns:64px 1fr 160px;align-items:baseline;gap:16px;padding:6px 0;border-bottom:1px dashed var(--border)}
+            .sw {
+                display: grid;
+                grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+                gap: 12px;
+            }
+            .sw div {
+                border: 1px solid var(--border);
+                border-radius: var(--radius);
+                overflow: hidden;
+                background: var(--card);
+            }
+            .sw i {
+                display: block;
+                height: 56px;
+                border-bottom: 1px solid var(--border);
+            }
+            .sw b {
+                display: block;
+                padding: 8px 10px 0;
+                font-size: 13px;
+            }
+            .sw span {
+                display: block;
+                padding: 0 10px 10px;
+                font-size: 12px;
+                color: var(--muted-foreground);
+            }
+            .type-row {
+                display: grid;
+                grid-template-columns: 64px 1fr 160px;
+                align-items: baseline;
+                gap: 16px;
+                padding: 6px 0;
+                border-bottom: 1px dashed var(--border);
+            }
 
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:36px;padding:0 14px;border-radius:var(--radius-sm);border:1px solid transparent;font:500 14px var(--font);cursor:pointer;transition:background .15s ease-out,border-color .15s ease-out;color:inherit;background:none;text-decoration:none}
-.btn-default{background:var(--primary);color:var(--primary-foreground)}
-.btn-default:hover{background:color-mix(in oklch,var(--primary) 88%,var(--foreground))}
-.btn-secondary{background:var(--muted)}
-.btn-secondary:hover{background:color-mix(in oklch,var(--muted) 85%,var(--foreground))}
-.btn-outline{border-color:var(--border);background:var(--card)}
-.btn-outline:hover,.btn-ghost:hover{background:var(--muted)}
-.btn-destructive{background:var(--destructive);color:#fff}
-.btn-link{color:var(--primary);text-decoration:underline;text-underline-offset:3px;padding:0 4px}
-.btn-sm{height:32px;padding:0 10px;font-size:13px}.btn-lg{height:44px;padding:0 20px;font-size:16px}
-.btn-icon{width:36px;padding:0}.btn-icon.btn-sm{width:32px}
-.btn[disabled]{opacity:.5;cursor:not-allowed}
-.spin{width:16px;height:16px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;animation:r .7s linear infinite}
-@keyframes r{to{transform:rotate(360deg)}}
-.field{display:flex;flex-direction:column;gap:6px;min-width:240px}
-.field label{font-weight:500}
-.inp{height:36px;border:1px solid var(--border);border-radius:var(--radius-sm);padding:0 12px;background:var(--card);color:inherit;font:14px var(--font);width:100%}
-.inp:focus-visible{outline:none;border-color:var(--ring);box-shadow:0 0 0 3px color-mix(in oklch,var(--ring) 25%,transparent)}
-.inp.err{border-color:var(--destructive)}
-.ferr{color:var(--destructive);font-size:12px}
-.pw{position:relative}.pw .btn{position:absolute;right:2px;top:2px;height:32px;width:32px;padding:0}
-.chk{display:flex;align-items:center;gap:8px}
-.chk input{width:16px;height:16px;accent-color:var(--primary);margin:0}
-.tg{display:inline-flex;padding:3px;border-radius:var(--radius-sm);background:var(--muted);gap:2px}
-.tg button{border:0;background:none;font:500 13px var(--font);color:var(--muted-foreground);padding:6px 12px;border-radius:4px;display:flex;gap:6px;align-items:center;cursor:pointer}
-.tg button[aria-pressed=true]{background:var(--card);color:var(--foreground);box-shadow:0 1px 2px oklch(0 0 0/.08)}
-.badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:500;padding:2px 8px;border-radius:4px;border:1px solid;white-space:nowrap}
-.b-success{color:var(--success);border-color:color-mix(in oklch,var(--success) 40%,transparent);background:color-mix(in oklch,var(--success) 10%,transparent)}
-.b-warning{color:color-mix(in oklch,var(--warning) 70%,var(--foreground));border-color:color-mix(in oklch,var(--warning) 45%,transparent);background:color-mix(in oklch,var(--warning) 12%,transparent)}
-.b-danger{color:var(--destructive);border-color:color-mix(in oklch,var(--destructive) 40%,transparent);background:color-mix(in oklch,var(--destructive) 8%,transparent)}
-.b-neutral{color:var(--muted-foreground);border-color:var(--border);background:var(--muted)}
-.b-attn{color:var(--foreground);border-color:var(--accent-attention);background:color-mix(in oklch,var(--accent-attention) 18%,transparent)}
-.alert{display:flex;gap:12px;border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px;background:var(--card);max-width:460px}
-.alert svg{margin-top:2px}
-.alert.danger{border-color:color-mix(in oklch,var(--destructive) 45%,transparent);color:var(--destructive)}
-.alert p{color:var(--muted-foreground)}.alert.danger p{color:inherit;opacity:.9}
-.av{width:36px;height:36px;border-radius:50%;background:var(--muted);display:grid;place-items:center;font-weight:600;font-size:13px;color:var(--muted-foreground);flex:none}
-.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius)}
-.card-h{padding:16px 16px 0}.card-b{padding:16px}
-.sk{background:var(--muted);border-radius:4px;height:12px;animation:pl 1.6s ease-in-out infinite}
-@keyframes pl{50%{opacity:.55}}
-.tip{position:relative;display:inline-flex}
-.tip span{position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);background:var(--foreground);color:var(--background);font-size:12px;padding:4px 8px;border-radius:4px;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .15s ease-out}
-.tip:hover span,.tip:focus-within span{opacity:1}
-.crumb{display:flex;gap:6px;align-items:center;font-size:13px;color:var(--muted-foreground)}
-.crumb a{color:inherit;text-decoration:none}.crumb a:hover{color:var(--foreground)}
-.crumb b{font-weight:500;color:var(--foreground)}
-.menu{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:4px;min-width:220px}
-.menu .lbl{font-size:12px;color:var(--muted-foreground);padding:6px 8px}
-.menu a{display:flex;gap:8px;align-items:center;padding:7px 8px;border-radius:4px;color:inherit;text-decoration:none}
-.menu a:hover,.menu a:focus{background:var(--muted)}
-.menu hr{border:0;border-top:1px solid var(--border);margin:4px}
-.otp{display:flex;gap:6px}.otp span{width:40px;height:44px;border:1px solid var(--border);border-radius:var(--radius-sm);display:grid;place-items:center;font-size:18px;background:var(--card)}
-.otp span.on{border-color:var(--ring);box-shadow:0 0 0 3px color-mix(in oklch,var(--ring) 25%,transparent)}
-.toast{display:flex;gap:10px;align-items:flex-start;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:12px 14px;width:340px}
-.toast svg{color:var(--success);margin-top:2px}
-#toasts{position:fixed;right:24px;bottom:24px;display:flex;flex-direction:column;gap:8px;z-index:60}
-.dlg{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);width:440px;max-width:100%}
-.dlg-h{padding:20px 20px 0;display:flex;justify-content:space-between;gap:16px}
-.dlg-h p{margin-top:4px;color:var(--muted-foreground)}
-.dlg-b{padding:16px 20px;display:flex;flex-direction:column;gap:16px}
-.dlg-f{padding:16px 20px 20px;display:flex;justify-content:flex-end;gap:8px}
-dialog{border:0;padding:0;background:none;color:inherit}
-dialog::backdrop{background:oklch(0.17 0.01 160 / .55)}
-.sheet{width:300px;height:340px;background:var(--card);border:1px solid var(--border);box-shadow:var(--shadow);border-radius:0 var(--radius) var(--radius) 0;padding:16px;display:flex;flex-direction:column;gap:4px}
-.sheet h4{font-size:12px;font-weight:500;color:var(--muted-foreground);margin:12px 8px 4px}
-.sheet a{padding:8px;border-radius:4px;color:inherit;text-decoration:none}
-.sheet a[aria-current]{background:var(--muted);font-weight:600}
+            .btn {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                gap: 8px;
+                height: 36px;
+                padding: 0 14px;
+                border-radius: var(--radius-sm);
+                border: 1px solid transparent;
+                font: 500 14px var(--font);
+                cursor: pointer;
+                transition:
+                    background 0.15s ease-out,
+                    border-color 0.15s ease-out;
+                color: inherit;
+                background: none;
+                text-decoration: none;
+            }
+            .btn-default {
+                background: var(--primary);
+                color: var(--primary-foreground);
+            }
+            .btn-default:hover {
+                background: color-mix(
+                    in oklch,
+                    var(--primary) 88%,
+                    var(--foreground)
+                );
+            }
+            .btn-secondary {
+                background: var(--muted);
+            }
+            .btn-secondary:hover {
+                background: color-mix(
+                    in oklch,
+                    var(--muted) 85%,
+                    var(--foreground)
+                );
+            }
+            .btn-outline {
+                border-color: var(--border);
+                background: var(--card);
+            }
+            .btn-outline:hover,
+            .btn-ghost:hover {
+                background: var(--muted);
+            }
+            .btn-destructive {
+                background: var(--destructive);
+                color: #fff;
+            }
+            .btn-link {
+                color: var(--primary);
+                text-decoration: underline;
+                text-underline-offset: 3px;
+                padding: 0 4px;
+            }
+            .btn-sm {
+                height: 32px;
+                padding: 0 10px;
+                font-size: 13px;
+            }
+            .btn-lg {
+                height: 44px;
+                padding: 0 20px;
+                font-size: 16px;
+            }
+            .btn-icon {
+                width: 36px;
+                padding: 0;
+            }
+            .btn-icon.btn-sm {
+                width: 32px;
+            }
+            .btn[disabled] {
+                opacity: 0.5;
+                cursor: not-allowed;
+            }
+            .spin {
+                width: 16px;
+                height: 16px;
+                border: 2px solid currentColor;
+                border-right-color: transparent;
+                border-radius: 50%;
+                animation: r 0.7s linear infinite;
+            }
+            @keyframes r {
+                to {
+                    transform: rotate(360deg);
+                }
+            }
+            .field {
+                display: flex;
+                flex-direction: column;
+                gap: 6px;
+                min-width: 240px;
+            }
+            .field label {
+                font-weight: 500;
+            }
+            .inp {
+                height: 36px;
+                border: 1px solid var(--border);
+                border-radius: var(--radius-sm);
+                padding: 0 12px;
+                background: var(--card);
+                color: inherit;
+                font: 14px var(--font);
+                width: 100%;
+            }
+            .inp:focus-visible {
+                outline: none;
+                border-color: var(--ring);
+                box-shadow: 0 0 0 3px
+                    color-mix(in oklch, var(--ring) 25%, transparent);
+            }
+            .inp.err {
+                border-color: var(--destructive);
+            }
+            .ferr {
+                color: var(--destructive);
+                font-size: 12px;
+            }
+            .pw {
+                position: relative;
+            }
+            .pw .btn {
+                position: absolute;
+                right: 2px;
+                top: 2px;
+                height: 32px;
+                width: 32px;
+                padding: 0;
+            }
+            .chk {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
+            .chk input {
+                width: 16px;
+                height: 16px;
+                accent-color: var(--primary);
+                margin: 0;
+            }
+            .tg {
+                display: inline-flex;
+                padding: 3px;
+                border-radius: var(--radius-sm);
+                background: var(--muted);
+                gap: 2px;
+            }
+            .tg button {
+                border: 0;
+                background: none;
+                font: 500 13px var(--font);
+                color: var(--muted-foreground);
+                padding: 6px 12px;
+                border-radius: 4px;
+                display: flex;
+                gap: 6px;
+                align-items: center;
+                cursor: pointer;
+            }
+            .tg button[aria-pressed='true'] {
+                background: var(--card);
+                color: var(--foreground);
+                box-shadow: 0 1px 2px oklch(0 0 0/0.08);
+            }
+            .badge {
+                display: inline-flex;
+                align-items: center;
+                gap: 6px;
+                font-size: 12px;
+                font-weight: 500;
+                padding: 2px 8px;
+                border-radius: 4px;
+                border: 1px solid;
+                white-space: nowrap;
+            }
+            .b-success {
+                color: var(--success);
+                border-color: color-mix(
+                    in oklch,
+                    var(--success) 40%,
+                    transparent
+                );
+                background: color-mix(
+                    in oklch,
+                    var(--success) 10%,
+                    transparent
+                );
+            }
+            .b-warning {
+                color: color-mix(
+                    in oklch,
+                    var(--warning) 70%,
+                    var(--foreground)
+                );
+                border-color: color-mix(
+                    in oklch,
+                    var(--warning) 45%,
+                    transparent
+                );
+                background: color-mix(
+                    in oklch,
+                    var(--warning) 12%,
+                    transparent
+                );
+            }
+            .b-danger {
+                color: var(--destructive);
+                border-color: color-mix(
+                    in oklch,
+                    var(--destructive) 40%,
+                    transparent
+                );
+                background: color-mix(
+                    in oklch,
+                    var(--destructive) 8%,
+                    transparent
+                );
+            }
+            .b-neutral {
+                color: var(--muted-foreground);
+                border-color: var(--border);
+                background: var(--muted);
+            }
+            .b-attn {
+                color: var(--foreground);
+                border-color: var(--accent-attention);
+                background: color-mix(
+                    in oklch,
+                    var(--accent-attention) 18%,
+                    transparent
+                );
+            }
+            .alert {
+                display: flex;
+                gap: 12px;
+                border: 1px solid var(--border);
+                border-radius: var(--radius);
+                padding: 12px 14px;
+                background: var(--card);
+                max-width: 460px;
+            }
+            .alert svg {
+                margin-top: 2px;
+            }
+            .alert.danger {
+                border-color: color-mix(
+                    in oklch,
+                    var(--destructive) 45%,
+                    transparent
+                );
+                color: var(--destructive);
+            }
+            .alert p {
+                color: var(--muted-foreground);
+            }
+            .alert.danger p {
+                color: inherit;
+                opacity: 0.9;
+            }
+            .av {
+                width: 36px;
+                height: 36px;
+                border-radius: 50%;
+                background: var(--muted);
+                display: grid;
+                place-items: center;
+                font-weight: 600;
+                font-size: 13px;
+                color: var(--muted-foreground);
+                flex: none;
+            }
+            .card {
+                background: var(--card);
+                border: 1px solid var(--border);
+                border-radius: var(--radius);
+            }
+            .card-h {
+                padding: 16px 16px 0;
+            }
+            .card-b {
+                padding: 16px;
+            }
+            .sk {
+                background: var(--muted);
+                border-radius: 4px;
+                height: 12px;
+                animation: pl 1.6s ease-in-out infinite;
+            }
+            @keyframes pl {
+                50% {
+                    opacity: 0.55;
+                }
+            }
+            .tip {
+                position: relative;
+                display: inline-flex;
+            }
+            .tip span {
+                position: absolute;
+                bottom: calc(100% + 6px);
+                left: 50%;
+                transform: translateX(-50%);
+                background: var(--foreground);
+                color: var(--background);
+                font-size: 12px;
+                padding: 4px 8px;
+                border-radius: 4px;
+                white-space: nowrap;
+                opacity: 0;
+                pointer-events: none;
+                transition: opacity 0.15s ease-out;
+            }
+            .tip:hover span,
+            .tip:focus-within span {
+                opacity: 1;
+            }
+            .crumb {
+                display: flex;
+                gap: 6px;
+                align-items: center;
+                font-size: 13px;
+                color: var(--muted-foreground);
+            }
+            .crumb a {
+                color: inherit;
+                text-decoration: none;
+            }
+            .crumb a:hover {
+                color: var(--foreground);
+            }
+            .crumb b {
+                font-weight: 500;
+                color: var(--foreground);
+            }
+            .menu {
+                background: var(--card);
+                border: 1px solid var(--border);
+                border-radius: var(--radius);
+                box-shadow: var(--shadow);
+                padding: 4px;
+                min-width: 220px;
+            }
+            .menu .lbl {
+                font-size: 12px;
+                color: var(--muted-foreground);
+                padding: 6px 8px;
+            }
+            .menu a {
+                display: flex;
+                gap: 8px;
+                align-items: center;
+                padding: 7px 8px;
+                border-radius: 4px;
+                color: inherit;
+                text-decoration: none;
+            }
+            .menu a:hover,
+            .menu a:focus {
+                background: var(--muted);
+            }
+            .menu hr {
+                border: 0;
+                border-top: 1px solid var(--border);
+                margin: 4px;
+            }
+            .otp {
+                display: flex;
+                gap: 6px;
+            }
+            .otp span {
+                width: 40px;
+                height: 44px;
+                border: 1px solid var(--border);
+                border-radius: var(--radius-sm);
+                display: grid;
+                place-items: center;
+                font-size: 18px;
+                background: var(--card);
+            }
+            .otp span.on {
+                border-color: var(--ring);
+                box-shadow: 0 0 0 3px
+                    color-mix(in oklch, var(--ring) 25%, transparent);
+            }
+            .toast {
+                display: flex;
+                gap: 10px;
+                align-items: flex-start;
+                background: var(--card);
+                border: 1px solid var(--border);
+                border-radius: var(--radius);
+                box-shadow: var(--shadow);
+                padding: 12px 14px;
+                width: 340px;
+            }
+            .toast svg {
+                color: var(--success);
+                margin-top: 2px;
+            }
+            #toasts {
+                position: fixed;
+                right: 24px;
+                bottom: 24px;
+                display: flex;
+                flex-direction: column;
+                gap: 8px;
+                z-index: 60;
+            }
+            .dlg {
+                background: var(--card);
+                border: 1px solid var(--border);
+                border-radius: var(--radius);
+                box-shadow: var(--shadow);
+                width: 440px;
+                max-width: 100%;
+            }
+            .dlg-h {
+                padding: 20px 20px 0;
+                display: flex;
+                justify-content: space-between;
+                gap: 16px;
+            }
+            .dlg-h p {
+                margin-top: 4px;
+                color: var(--muted-foreground);
+            }
+            .dlg-b {
+                padding: 16px 20px;
+                display: flex;
+                flex-direction: column;
+                gap: 16px;
+            }
+            .dlg-f {
+                padding: 16px 20px 20px;
+                display: flex;
+                justify-content: flex-end;
+                gap: 8px;
+            }
+            dialog {
+                border: 0;
+                padding: 0;
+                background: none;
+                color: inherit;
+            }
+            dialog::backdrop {
+                background: oklch(0.17 0.01 160 / 0.55);
+            }
+            .sheet {
+                width: 300px;
+                height: 340px;
+                background: var(--card);
+                border: 1px solid var(--border);
+                box-shadow: var(--shadow);
+                border-radius: 0 var(--radius) var(--radius) 0;
+                padding: 16px;
+                display: flex;
+                flex-direction: column;
+                gap: 4px;
+            }
+            .sheet h4 {
+                font-size: 12px;
+                font-weight: 500;
+                color: var(--muted-foreground);
+                margin: 12px 8px 4px;
+            }
+            .sheet a {
+                padding: 8px;
+                border-radius: 4px;
+                color: inherit;
+                text-decoration: none;
+            }
+            .sheet a[aria-current] {
+                background: var(--muted);
+                font-weight: 600;
+            }
 
-.ph{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;width:100%}
-.ph h3{font-size:20px}.ph p{color:var(--muted-foreground);margin-top:2px}
-.ph .act{display:flex;gap:8px}
-.filters{display:flex;gap:8px;width:100%;flex-wrap:wrap}
-.srch{position:relative;flex:1;max-width:280px}.srch svg{position:absolute;left:10px;top:10px;color:var(--muted-foreground)}.srch .inp{padding-left:32px}
-.tblw{border:1px solid var(--border);border-radius:var(--radius);overflow:auto;width:100%;background:var(--card)}
-.tbl{width:100%;border-collapse:collapse;font-size:14px}
-.tbl th{font-weight:500;font-size:13px;color:var(--muted-foreground);background:var(--muted);padding:8px 12px;text-align:center;white-space:nowrap}
-.tbl td{padding:8px 12px;border-top:1px solid var(--border)}
-.tbl td.t{text-align:left}.tbl td.n{text-align:right}.tbl td.c{text-align:center}
-.tbl th button{all:unset;cursor:pointer;display:inline-flex;gap:4px;align-items:center}
-.ra{display:inline-flex;gap:2px}
-.ra .del{color:var(--destructive)}
-.pg{display:flex;justify-content:space-between;align-items:center;width:100%;font-size:13px;color:var(--muted-foreground)}
-.pg .stage{gap:4px}
-.state{padding:40px 24px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:8px}
-.state svg{color:var(--muted-foreground);width:24px;height:24px}
-.state p{max-width:44ch;color:var(--muted-foreground)}
-.state .btn{margin-top:8px}
-.tabs{display:flex;gap:4px;border-bottom:1px solid var(--border);width:100%}
-.tabs button{all:unset;cursor:pointer;padding:8px 12px;color:var(--muted-foreground);font-weight:500;border-bottom:2px solid transparent;margin-bottom:-1px}
-.tabs button[aria-selected=true]{color:var(--foreground);border-color:var(--foreground)}
-.tabs button:focus-visible{outline:2px solid var(--ring)}
-.exp-pdf{color:oklch(0.55 0.19 27)}.exp-xls{color:oklch(0.5 0.12 150)}
-.picker{width:340px}
-.picker .opt{display:flex;gap:10px;align-items:center;padding:8px;border-radius:4px}
-.picker .opt:hover,.picker .opt.on{background:var(--muted)}
-.offline{display:flex;gap:10px;align-items:center;width:100%;padding:10px 14px;border-radius:var(--radius);background:var(--muted);border:1px solid var(--border)}
-.offline span{flex:1}
+            .ph {
+                display: flex;
+                align-items: flex-start;
+                justify-content: space-between;
+                gap: 16px;
+                width: 100%;
+            }
+            .ph h3 {
+                font-size: 20px;
+            }
+            .ph p {
+                color: var(--muted-foreground);
+                margin-top: 2px;
+            }
+            .ph .act {
+                display: flex;
+                gap: 8px;
+            }
+            .filters {
+                display: flex;
+                gap: 8px;
+                width: 100%;
+                flex-wrap: wrap;
+            }
+            .srch {
+                position: relative;
+                flex: 1;
+                max-width: 280px;
+            }
+            .srch svg {
+                position: absolute;
+                left: 10px;
+                top: 10px;
+                color: var(--muted-foreground);
+            }
+            .srch .inp {
+                padding-left: 32px;
+            }
+            .tblw {
+                border: 1px solid var(--border);
+                border-radius: var(--radius);
+                overflow: auto;
+                width: 100%;
+                background: var(--card);
+            }
+            .tbl {
+                width: 100%;
+                border-collapse: collapse;
+                font-size: 14px;
+            }
+            .tbl th {
+                font-weight: 500;
+                font-size: 13px;
+                color: var(--muted-foreground);
+                background: var(--muted);
+                padding: 8px 12px;
+                text-align: center;
+                white-space: nowrap;
+            }
+            .tbl td {
+                padding: 8px 12px;
+                border-top: 1px solid var(--border);
+            }
+            .tbl td.t {
+                text-align: left;
+            }
+            .tbl td.n {
+                text-align: right;
+            }
+            .tbl td.c {
+                text-align: center;
+            }
+            .tbl th button {
+                all: unset;
+                cursor: pointer;
+                display: inline-flex;
+                gap: 4px;
+                align-items: center;
+            }
+            .ra {
+                display: inline-flex;
+                gap: 2px;
+            }
+            .ra .del {
+                color: var(--destructive);
+            }
+            .pg {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                width: 100%;
+                font-size: 13px;
+                color: var(--muted-foreground);
+            }
+            .pg .stage {
+                gap: 4px;
+            }
+            .state {
+                padding: 40px 24px;
+                text-align: center;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 8px;
+            }
+            .state svg {
+                color: var(--muted-foreground);
+                width: 24px;
+                height: 24px;
+            }
+            .state p {
+                max-width: 44ch;
+                color: var(--muted-foreground);
+            }
+            .state .btn {
+                margin-top: 8px;
+            }
+            .tabs {
+                display: flex;
+                gap: 4px;
+                border-bottom: 1px solid var(--border);
+                width: 100%;
+            }
+            .tabs button {
+                all: unset;
+                cursor: pointer;
+                padding: 8px 12px;
+                color: var(--muted-foreground);
+                font-weight: 500;
+                border-bottom: 2px solid transparent;
+                margin-bottom: -1px;
+            }
+            .tabs button[aria-selected='true'] {
+                color: var(--foreground);
+                border-color: var(--foreground);
+            }
+            .tabs button:focus-visible {
+                outline: 2px solid var(--ring);
+            }
+            .exp-pdf {
+                color: oklch(0.55 0.19 27);
+            }
+            .exp-xls {
+                color: oklch(0.5 0.12 150);
+            }
+            .picker {
+                width: 340px;
+            }
+            .picker .opt {
+                display: flex;
+                gap: 10px;
+                align-items: center;
+                padding: 8px;
+                border-radius: 4px;
+            }
+            .picker .opt:hover,
+            .picker .opt.on {
+                background: var(--muted);
+            }
+            .offline {
+                display: flex;
+                gap: 10px;
+                align-items: center;
+                width: 100%;
+                padding: 10px 14px;
+                border-radius: var(--radius);
+                background: var(--muted);
+                border: 1px solid var(--border);
+            }
+            .offline span {
+                flex: 1;
+            }
 
-.screens{display:grid;gap:32px}
-.frame{border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;background:var(--background)}
-.cap{display:flex;justify-content:space-between;font-size:12px;color:var(--muted-foreground);margin-bottom:8px}
-.stf-top{display:flex;align-items:center;gap:16px;padding:0 20px;height:56px;background:var(--card);border-bottom:1px solid var(--border)}
-.logo{display:flex;align-items:center;gap:10px;font-weight:600}
-.logo i{width:28px;height:28px;border-radius:6px;background:var(--primary);display:grid;place-items:center;color:var(--primary-foreground);font-style:normal;font-size:12px}
-.logo small{display:block;font-weight:400;font-size:12px;color:var(--muted-foreground);line-height:1.1}
-.stf-nav{display:flex;gap:2px;margin:0 auto}
-.stf-nav a{padding:6px 10px;border-radius:var(--radius-sm);color:var(--muted-foreground);text-decoration:none;font-weight:500;display:flex;gap:4px;align-items:center}
-.stf-nav a[aria-current]{color:var(--foreground);background:var(--muted)}
-.stf-body{padding:16px 20px 24px;display:flex;flex-direction:column;gap:16px}
-.home-grid{display:grid;grid-template-columns:1.6fr 1fr;gap:16px}
-.list{list-style:none;margin:0;padding:0}
-.list li{display:flex;justify-content:space-between;gap:12px;padding:10px 16px;border-top:1px solid var(--border);align-items:center}
-.phones{display:flex;gap:32px;flex-wrap:wrap;align-items:flex-start}
-.phone{width:360px;border:1px solid var(--border);border-radius:20px;overflow:hidden;background:var(--background);display:flex;flex-direction:column;height:720px}
-.g-head{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--border);background:var(--card)}
-.g-head .who{flex:1}.g-head .who b{display:flex;gap:4px;align-items:center;font-size:16px}
-.g-body{flex:1;overflow:auto;padding:16px;display:flex;flex-direction:column;gap:12px;font-size:16px}
-.g-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px}
-.g-card h4{font-size:14px;font-weight:500;color:var(--muted-foreground);margin-bottom:8px}
-.g-card.attn{border-color:var(--accent-attention)}
-.att{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.att div{background:var(--muted);border-radius:var(--radius-sm);padding:10px;display:flex;flex-direction:column;gap:4px;align-items:flex-start}
-.att b{font-size:20px}
-.bal{font-size:24px;font-weight:600}
-.g-btn{height:44px;width:100%;margin-top:12px;font-size:16px}
-.bnav{display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid var(--border);background:var(--card)}
-.bnav a{display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 0 10px;font-size:12px;color:var(--muted-foreground);text-decoration:none;position:relative;min-height:56px}
-.bnav a[aria-current]{color:var(--foreground);font-weight:600}
-.bnav a[aria-current]::before{content:"";position:absolute;top:0;left:30%;right:30%;height:3px;border-radius:0 0 3px 3px;background:var(--primary)}
-.kiosk{display:grid;grid-template-columns:1fr 300px;min-height:420px}
-.k-main{padding:24px;display:flex;flex-direction:column;gap:20px}
-.k-side{border-left:1px solid var(--border);background:var(--card)}
-.k-side h4{padding:14px 16px;font-size:14px}
-.scan{display:flex;gap:20px;align-items:center;padding:24px;border-radius:var(--radius);border:2px solid var(--success);background:color-mix(in oklch,var(--success) 7%,var(--card))}
-.photo{width:96px;height:120px;border-radius:var(--radius-sm);background:var(--muted);display:grid;place-items:center;color:var(--muted-foreground);font-size:12px;text-align:center;flex:none}
-.scan h3{font-size:30px}
-.pos{display:grid;grid-template-columns:1fr 1fr;gap:20px}
-.keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-.keypad button{height:56px;font:600 20px var(--font);border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--card);color:inherit;cursor:pointer;display:grid;place-items:center}
-.keypad button:hover{background:var(--muted)}
-.amount{font-size:36px;font-weight:600;text-align:right;padding:12px 16px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--card)}
-.login{display:grid;place-items:center;padding:48px 16px;min-height:520px}
-.login .card{width:380px;max-width:100%;padding:28px}
-.login .logo{flex-direction:column;text-align:center;margin-bottom:8px}
-.login .logo i{width:44px;height:44px;font-size:14px;border-radius:8px}
+            .screens {
+                display: grid;
+                gap: 32px;
+            }
+            .frame {
+                border: 1px solid var(--border);
+                border-radius: var(--radius);
+                overflow: hidden;
+                background: var(--background);
+            }
+            .cap {
+                display: flex;
+                justify-content: space-between;
+                font-size: 12px;
+                color: var(--muted-foreground);
+                margin-bottom: 8px;
+            }
+            .stf-top {
+                display: flex;
+                align-items: center;
+                gap: 16px;
+                padding: 0 20px;
+                height: 56px;
+                background: var(--card);
+                border-bottom: 1px solid var(--border);
+            }
+            .logo {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                font-weight: 600;
+            }
+            .logo i {
+                width: 28px;
+                height: 28px;
+                border-radius: 6px;
+                background: var(--primary);
+                display: grid;
+                place-items: center;
+                color: var(--primary-foreground);
+                font-style: normal;
+                font-size: 12px;
+            }
+            .logo small {
+                display: block;
+                font-weight: 400;
+                font-size: 12px;
+                color: var(--muted-foreground);
+                line-height: 1.1;
+            }
+            .stf-nav {
+                display: flex;
+                gap: 2px;
+                margin: 0 auto;
+            }
+            .stf-nav a {
+                padding: 6px 10px;
+                border-radius: var(--radius-sm);
+                color: var(--muted-foreground);
+                text-decoration: none;
+                font-weight: 500;
+                display: flex;
+                gap: 4px;
+                align-items: center;
+            }
+            .stf-nav a[aria-current] {
+                color: var(--foreground);
+                background: var(--muted);
+            }
+            .stf-body {
+                padding: 16px 20px 24px;
+                display: flex;
+                flex-direction: column;
+                gap: 16px;
+            }
+            .home-grid {
+                display: grid;
+                grid-template-columns: 1.6fr 1fr;
+                gap: 16px;
+            }
+            .list {
+                list-style: none;
+                margin: 0;
+                padding: 0;
+            }
+            .list li {
+                display: flex;
+                justify-content: space-between;
+                gap: 12px;
+                padding: 10px 16px;
+                border-top: 1px solid var(--border);
+                align-items: center;
+            }
+            .phones {
+                display: flex;
+                gap: 32px;
+                flex-wrap: wrap;
+                align-items: flex-start;
+            }
+            .phone {
+                width: 360px;
+                border: 1px solid var(--border);
+                border-radius: 20px;
+                overflow: hidden;
+                background: var(--background);
+                display: flex;
+                flex-direction: column;
+                height: 720px;
+            }
+            .g-head {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                padding: 12px 16px;
+                border-bottom: 1px solid var(--border);
+                background: var(--card);
+            }
+            .g-head .who {
+                flex: 1;
+            }
+            .g-head .who b {
+                display: flex;
+                gap: 4px;
+                align-items: center;
+                font-size: 16px;
+            }
+            .g-body {
+                flex: 1;
+                overflow: auto;
+                padding: 16px;
+                display: flex;
+                flex-direction: column;
+                gap: 12px;
+                font-size: 16px;
+            }
+            .g-card {
+                background: var(--card);
+                border: 1px solid var(--border);
+                border-radius: var(--radius);
+                padding: 16px;
+            }
+            .g-card h4 {
+                font-size: 14px;
+                font-weight: 500;
+                color: var(--muted-foreground);
+                margin-bottom: 8px;
+            }
+            .g-card.attn {
+                border-color: var(--accent-attention);
+            }
+            .att {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 8px;
+            }
+            .att div {
+                background: var(--muted);
+                border-radius: var(--radius-sm);
+                padding: 10px;
+                display: flex;
+                flex-direction: column;
+                gap: 4px;
+                align-items: flex-start;
+            }
+            .att b {
+                font-size: 20px;
+            }
+            .bal {
+                font-size: 24px;
+                font-weight: 600;
+            }
+            .g-btn {
+                height: 44px;
+                width: 100%;
+                margin-top: 12px;
+                font-size: 16px;
+            }
+            .bnav {
+                display: grid;
+                grid-template-columns: repeat(4, 1fr);
+                border-top: 1px solid var(--border);
+                background: var(--card);
+            }
+            .bnav a {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 2px;
+                padding: 8px 0 10px;
+                font-size: 12px;
+                color: var(--muted-foreground);
+                text-decoration: none;
+                position: relative;
+                min-height: 56px;
+            }
+            .bnav a[aria-current] {
+                color: var(--foreground);
+                font-weight: 600;
+            }
+            .bnav a[aria-current]::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 30%;
+                right: 30%;
+                height: 3px;
+                border-radius: 0 0 3px 3px;
+                background: var(--primary);
+            }
+            .kiosk {
+                display: grid;
+                grid-template-columns: 1fr 300px;
+                min-height: 420px;
+            }
+            .k-main {
+                padding: 24px;
+                display: flex;
+                flex-direction: column;
+                gap: 20px;
+            }
+            .k-side {
+                border-left: 1px solid var(--border);
+                background: var(--card);
+            }
+            .k-side h4 {
+                padding: 14px 16px;
+                font-size: 14px;
+            }
+            .scan {
+                display: flex;
+                gap: 20px;
+                align-items: center;
+                padding: 24px;
+                border-radius: var(--radius);
+                border: 2px solid var(--success);
+                background: color-mix(in oklch, var(--success) 7%, var(--card));
+            }
+            .photo {
+                width: 96px;
+                height: 120px;
+                border-radius: var(--radius-sm);
+                background: var(--muted);
+                display: grid;
+                place-items: center;
+                color: var(--muted-foreground);
+                font-size: 12px;
+                text-align: center;
+                flex: none;
+            }
+            .scan h3 {
+                font-size: 30px;
+            }
+            .pos {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 20px;
+            }
+            .keypad {
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 8px;
+            }
+            .keypad button {
+                height: 56px;
+                font: 600 20px var(--font);
+                border: 1px solid var(--border);
+                border-radius: var(--radius-sm);
+                background: var(--card);
+                color: inherit;
+                cursor: pointer;
+                display: grid;
+                place-items: center;
+            }
+            .keypad button:hover {
+                background: var(--muted);
+            }
+            .amount {
+                font-size: 36px;
+                font-weight: 600;
+                text-align: right;
+                padding: 12px 16px;
+                border: 1px solid var(--border);
+                border-radius: var(--radius-sm);
+                background: var(--card);
+            }
+            .login {
+                display: grid;
+                place-items: center;
+                padding: 48px 16px;
+                min-height: 520px;
+            }
+            .login .card {
+                width: 380px;
+                max-width: 100%;
+                padding: 28px;
+            }
+            .login .logo {
+                flex-direction: column;
+                text-align: center;
+                margin-bottom: 8px;
+            }
+            .login .logo i {
+                width: 44px;
+                height: 44px;
+                font-size: 14px;
+                border-radius: 8px;
+            }
 
-@media (max-width:900px){
-  .intro,.home-grid,.pos,.kiosk{grid-template-columns:1fr}
-  .spec{grid-template-columns:1fr;gap:12px}
-  .top nav,.stf-nav{display:none}
-  .k-side{border-left:0;border-top:1px solid var(--border)}
-  .phone{width:100%;max-width:360px}
-}
-</style>
-</head>
-<body>
-<svg width="0" height="0" style="position:absolute" aria-hidden="true">
-  <symbol id="search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></symbol>
-  <symbol id="eye" viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></symbol>
-  <symbol id="eyeoff" viewBox="0 0 24 24"><path d="M10.7 5.1A10 10 0 0 1 12 5c6.5 0 10 7 10 7a17 17 0 0 1-2.4 3.4M6.6 6.6C3.7 8.4 2 12 2 12s3.5 7 10 7a9.7 9.7 0 0 0 5.4-1.6M3 3l18 18M9.9 9.9a3 3 0 0 0 4.2 4.2"/></symbol>
-  <symbol id="pencil" viewBox="0 0 24 24"><path d="M17 3a2.8 2.8 0 0 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></symbol>
-  <symbol id="trash" viewBox="0 0 24 24"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6M10 11v6M14 11v6"/></symbol>
-  <symbol id="plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
-  <symbol id="chev" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
-  <symbol id="chevr" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></symbol>
-  <symbol id="chevl" viewBox="0 0 24 24"><path d="m15 6-6 6 6 6"/></symbol>
-  <symbol id="sort" viewBox="0 0 24 24"><path d="m7 9 5-5 5 5M7 15l5 5 5-5"/></symbol>
-  <symbol id="x" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></symbol>
-  <symbol id="check" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/></symbol>
-  <symbol id="alert" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></symbol>
-  <symbol id="lock" viewBox="0 0 24 24"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></symbol>
-  <symbol id="wifioff" viewBox="0 0 24 24"><path d="M2 8.8a15 15 0 0 1 4.2-2.6M10.7 5.1A15 15 0 0 1 22 8.8M5 12.9a10 10 0 0 1 5.2-2.6M19 12.9a10 10 0 0 0-2-1.4M8.5 16.4a5 5 0 0 1 7 0M12 20h.01M2 2l20 20"/></symbol>
-  <symbol id="file" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6M9 15h6"/></symbol>
-  <symbol id="grid" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18"/></symbol>
-  <symbol id="bell" viewBox="0 0 24 24"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10.3 21a2 2 0 0 0 3.4 0"/></symbol>
-  <symbol id="home" viewBox="0 0 24 24"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1Z"/></symbol>
-  <symbol id="receipt" viewBox="0 0 24 24"><path d="M5 3v18l2-1.5L9 21l2-1.5L13 21l2-1.5L17 21l2-1.5V3l-2 1.5L15 3l-2 1.5L11 3 9 4.5 7 3ZM9 9h6M9 13h6"/></symbol>
-  <symbol id="clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
-  <symbol id="user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></symbol>
-  <symbol id="logout" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></symbol>
-  <symbol id="sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></symbol>
-  <symbol id="moon" viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/></symbol>
-  <symbol id="monitor" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></symbol>
-</svg>
+            @media (max-width: 900px) {
+                .intro,
+                .home-grid,
+                .pos,
+                .kiosk {
+                    grid-template-columns: 1fr;
+                }
+                .spec {
+                    grid-template-columns: 1fr;
+                    gap: 12px;
+                }
+                .top nav,
+                .stf-nav {
+                    display: none;
+                }
+                .k-side {
+                    border-left: 0;
+                    border-top: 1px solid var(--border);
+                }
+                .phone {
+                    width: 100%;
+                    max-width: 360px;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <svg width="0" height="0" style="position: absolute" aria-hidden="true">
+            <symbol id="search" viewBox="0 0 24 24">
+                <circle cx="11" cy="11" r="7" />
+                <path d="m20 20-3.5-3.5" />
+            </symbol>
+            <symbol id="eye" viewBox="0 0 24 24">
+                <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z" />
+                <circle cx="12" cy="12" r="3" />
+            </symbol>
+            <symbol id="eyeoff" viewBox="0 0 24 24">
+                <path
+                    d="M10.7 5.1A10 10 0 0 1 12 5c6.5 0 10 7 10 7a17 17 0 0 1-2.4 3.4M6.6 6.6C3.7 8.4 2 12 2 12s3.5 7 10 7a9.7 9.7 0 0 0 5.4-1.6M3 3l18 18M9.9 9.9a3 3 0 0 0 4.2 4.2"
+                />
+            </symbol>
+            <symbol id="pencil" viewBox="0 0 24 24">
+                <path d="M17 3a2.8 2.8 0 0 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
+            </symbol>
+            <symbol id="trash" viewBox="0 0 24 24">
+                <path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6M10 11v6M14 11v6" />
+            </symbol>
+            <symbol id="plus" viewBox="0 0 24 24">
+                <path d="M12 5v14M5 12h14" />
+            </symbol>
+            <symbol id="chev" viewBox="0 0 24 24">
+                <path d="m6 9 6 6 6-6" />
+            </symbol>
+            <symbol id="chevr" viewBox="0 0 24 24">
+                <path d="m9 6 6 6-6 6" />
+            </symbol>
+            <symbol id="chevl" viewBox="0 0 24 24">
+                <path d="m15 6-6 6 6 6" />
+            </symbol>
+            <symbol id="sort" viewBox="0 0 24 24">
+                <path d="m7 9 5-5 5 5M7 15l5 5 5-5" />
+            </symbol>
+            <symbol id="x" viewBox="0 0 24 24">
+                <path d="M18 6 6 18M6 6l12 12" />
+            </symbol>
+            <symbol id="check" viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="9" />
+                <path d="m8 12 3 3 5-6" />
+            </symbol>
+            <symbol id="alert" viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="9" />
+                <path d="M12 8v5M12 16h.01" />
+            </symbol>
+            <symbol id="lock" viewBox="0 0 24 24">
+                <rect x="4" y="11" width="16" height="10" rx="2" />
+                <path d="M8 11V7a4 4 0 0 1 8 0v4" />
+            </symbol>
+            <symbol id="wifioff" viewBox="0 0 24 24">
+                <path
+                    d="M2 8.8a15 15 0 0 1 4.2-2.6M10.7 5.1A15 15 0 0 1 22 8.8M5 12.9a10 10 0 0 1 5.2-2.6M19 12.9a10 10 0 0 0-2-1.4M8.5 16.4a5 5 0 0 1 7 0M12 20h.01M2 2l20 20"
+                />
+            </symbol>
+            <symbol id="file" viewBox="0 0 24 24">
+                <path
+                    d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"
+                />
+                <path d="M14 2v6h6M9 15h6" />
+            </symbol>
+            <symbol id="grid" viewBox="0 0 24 24">
+                <rect x="3" y="3" width="18" height="18" rx="2" />
+                <path d="M3 9h18M3 15h18M9 3v18" />
+            </symbol>
+            <symbol id="bell" viewBox="0 0 24 24">
+                <path
+                    d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10.3 21a2 2 0 0 0 3.4 0"
+                />
+            </symbol>
+            <symbol id="home" viewBox="0 0 24 24">
+                <path
+                    d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1Z"
+                />
+            </symbol>
+            <symbol id="receipt" viewBox="0 0 24 24">
+                <path
+                    d="M5 3v18l2-1.5L9 21l2-1.5L13 21l2-1.5L17 21l2-1.5V3l-2 1.5L15 3l-2 1.5L11 3 9 4.5 7 3ZM9 9h6M9 13h6"
+                />
+            </symbol>
+            <symbol id="clock" viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="9" />
+                <path d="M12 7v5l3 2" />
+            </symbol>
+            <symbol id="user" viewBox="0 0 24 24">
+                <circle cx="12" cy="8" r="4" />
+                <path d="M4 21a8 8 0 0 1 16 0" />
+            </symbol>
+            <symbol id="logout" viewBox="0 0 24 24">
+                <path
+                    d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"
+                />
+            </symbol>
+            <symbol id="sun" viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="4" />
+                <path
+                    d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"
+                />
+            </symbol>
+            <symbol id="moon" viewBox="0 0 24 24">
+                <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z" />
+            </symbol>
+            <symbol id="monitor" viewBox="0 0 24 24">
+                <rect x="2" y="3" width="20" height="14" rx="2" />
+                <path d="M8 21h8M12 17v4" />
+            </symbol>
+        </svg>
 
-<div class="top"><div class="top-in">
-  <div class="logo"><i>MT</i><div>Madrasah Terpadu<small>Katalog komponen &amp; mockup</small></div></div>
-  <nav aria-label="Bagian katalog">
-    <a href="#token">Token</a><a href="#primitif">Primitif</a><a href="#aplikasi">Komponen aplikasi</a><a href="#layar">Layar</a>
-  </nav>
-  <div class="tg" role="group" aria-label="Tema" id="themeTg">
-    <button aria-pressed="true" data-t="light"><svg class="i"><use href="#sun"/></svg>Terang</button>
-    <button aria-pressed="false" data-t="dark"><svg class="i"><use href="#moon"/></svg>Gelap</button>
-  </div>
-</div></div>
-
-<main>
-<div class="intro">
-  <div>
-    <h1>Komponen Madrasah Terpadu</h1>
-    <p class="muted">Semua komponen di <code>resources/js/components/ui</code>, komponen aplikasi yang direncanakan di <code>DESIGN.md §4</code>, dan empat area layar (staf, wali, kiosk, masuk). Warna mengikuti token <code>DESIGN.md §2</code>, bukan nilai bawaan starter yang masih ada di <code>app.css</code>.</p>
-  </div>
-  <dl class="legend">
-    <dt>Data di mockup</dt><dd>Teks dalam kurung siku, mis. <b>[Nama siswa]</b>, adalah tempat data nyata. Nominal dan jam diambil dari contoh di DESIGN.md dan PRD.</dd>
-    <dt>Status</dt><dd>Bagian bertanda <span class="badge b-neutral">rencana</span> belum ada di kode; primitif sudah terpasang dari shadcn.</dd>
-  </dl>
-</div>
-
-<section class="blk" id="token">
-  <header><h2>Token</h2><code>resources/css/app.css · @theme</code></header>
-  <div class="spec"><div class="meta"><h3>Warna</h3><p>Netral hangat seperti kertas, primary hijau tua kebiruan. Satu warna status per layar.</p></div>
-    <div class="sw">
-      <div><i style="background:var(--background)"></i><b>background</b><span>latar halaman</span></div>
-      <div><i style="background:var(--card)"></i><b>card</b><span>kartu, tabel</span></div>
-      <div><i style="background:var(--muted)"></i><b>muted</b><span>latar sekunder</span></div>
-      <div><i style="background:var(--muted-foreground)"></i><b>muted-foreground</b><span>teks sekunder</span></div>
-      <div><i style="background:var(--foreground)"></i><b>foreground</b><span>teks utama</span></div>
-      <div><i style="background:var(--border)"></i><b>border / input</b><span>garis</span></div>
-      <div><i style="background:var(--primary)"></i><b>primary</b><span>aksi utama, menu aktif, ring</span></div>
-      <div><i style="background:var(--accent-attention)"></i><b>accent-attention</b><span>hanya "perlu tindakan"</span></div>
-      <div><i style="background:var(--success)"></i><b>success</b><span>lunas, hadir tepat waktu</span></div>
-      <div><i style="background:var(--warning)"></i><b>warning</b><span>terlambat, saldo menipis</span></div>
-      <div><i style="background:var(--destructive)"></i><b>destructive</b><span>hapus, alpa, pelanggaran</span></div>
-    </div>
-  </div>
-  <div class="spec"><div class="meta"><h3>Tipografi</h3><p>Plus Jakarta Sans, self-hosted. Angka uang pakai <code>tabular-nums</code>, rata kanan.</p></div>
-    <div>
-      <div class="type-row"><span class="muted small">30 / 600</span><span style="font-size:30px;font-weight:600">Tagihan jatuh tempo</span><span class="muted small">judul layar besar</span></div>
-      <div class="type-row"><span class="muted small">24 / 600</span><span style="font-size:24px;font-weight:600">Saldo kantin</span><span class="muted small">judul bagian</span></div>
-      <div class="type-row"><span class="muted small">20 / 600</span><span style="font-size:20px;font-weight:600">Catatan perilaku</span><span class="muted small">PageHeader</span></div>
-      <div class="type-row"><span class="muted small">16 / 400</span><span style="font-size:16px">Ananda tiba di sekolah pukul 06.52.</span><span class="muted small">teks dasar wali</span></div>
-      <div class="type-row"><span class="muted small">14 / 400</span><span>Pilih rombel untuk menerbitkan tagihan.</span><span class="muted small">teks dasar staf</span></div>
-      <div class="type-row"><span class="muted small">12 / 500</span><span class="small" style="font-weight:500">NIS · Rombel · WITA</span><span class="muted small">label, keterangan</span></div>
-      <div class="type-row"><span class="muted small">angka</span><span class="num" style="font-size:20px;font-weight:600">Rp 1.250.000</span><span class="muted small">tabular-nums</span></div>
-    </div>
-  </div>
-  <div class="spec"><div class="meta"><h3>Radius, bayangan, gerak</h3><p>Kartu datar dengan border. Bayangan hanya untuk elemen melayang.</p></div>
-    <div class="stage">
-      <div class="card card-b" style="width:160px"><b>8 px</b><p class="muted small">kartu, dialog</p></div>
-      <div class="card card-b" style="width:160px;border-radius:6px"><b>6 px</b><p class="muted small">tombol, input</p></div>
-      <div class="card card-b" style="width:160px;box-shadow:var(--shadow)"><b>Melayang</b><p class="muted small">dialog, dropdown, sheet, toast</p></div>
-      <div class="card card-b" style="width:200px"><b>150 / 200 ms</b><p class="muted small">hover-fokus / sheet-dialog, ease-out</p></div>
-    </div>
-  </div>
-</section>
-
-<section class="blk" id="primitif">
-  <header><h2>Primitif</h2><code>resources/js/components/ui · shadcn</code></header>
-
-  <div class="spec"><div class="meta"><h3>Button</h3><p>Label kata kerja. Ikon hanya bila menambah makna.</p><code>button.tsx</code></div>
-    <div class="col">
-      <div class="stage">
-        <button class="btn btn-default">Terbitkan tagihan</button>
-        <button class="btn btn-secondary">Simpan draf</button>
-        <button class="btn btn-outline">Batal</button>
-        <button class="btn btn-ghost">Lewati</button>
-        <button class="btn btn-destructive">Hapus catatan</button>
-        <a class="btn btn-link" href="#primitif">Lihat kuitansi</a>
-      </div>
-      <div class="stage">
-        <button class="btn btn-default btn-sm">Kecil</button>
-        <button class="btn btn-default">Bawaan</button>
-        <button class="btn btn-default btn-lg">Besar 44 px</button>
-        <button class="btn btn-outline btn-icon" aria-label="Tambah"><svg class="i"><use href="#plus"/></svg></button>
-        <button class="btn btn-default" disabled><span class="spin" aria-hidden="true"></span>Menyimpan</button>
-        <button class="btn btn-outline" disabled>Nonaktif</button>
-      </div>
-    </div>
-  </div>
-
-  <div class="spec"><div class="meta"><h3>Input, Label, InputError, PasswordInput</h3><p>Label selalu ada. Galat inline di bawah field.</p><code>input · label · input-error · password-input</code></div>
-    <div class="stage" style="align-items:flex-start">
-      <div class="field"><label for="f1">Nama lengkap</label><input id="f1" class="inp" placeholder="Nama sesuai akta"></div>
-      <div class="field"><label for="f2">NIS</label><input id="f2" class="inp err" value="12" aria-invalid="true" aria-describedby="f2e"><span id="f2e" class="ferr">NIS terdiri dari 10 angka.</span></div>
-      <div class="field"><label for="f3">Kata sandi</label><div class="pw"><input id="f3" class="inp" type="password" value="katasandi"><button class="btn btn-ghost" type="button" aria-label="Tampilkan kata sandi" data-pw><svg class="i"><use href="#eye"/></svg></button></div></div>
-    </div>
-  </div>
-
-  <div class="spec"><div class="meta"><h3>Select, Checkbox</h3><code>select.tsx · checkbox.tsx</code></div>
-    <div class="stage">
-      <div class="field"><label for="f4">Unit</label><select id="f4" class="inp"><option>MI</option><option>RA</option><option>TPQ</option></select></div>
-      <label class="chk"><input type="checkbox" checked>Kirim notifikasi ke wali</label>
-      <label class="chk"><input type="checkbox">Cicilan diizinkan</label>
-    </div>
-  </div>
-
-  <div class="spec"><div class="meta"><h3>Toggle group</h3><p>Dipakai untuk tampilan tema di pengaturan.</p><code>toggle · toggle-group · appearance-tabs</code></div>
-    <div class="tg" role="group" aria-label="Pilihan tampilan">
-      <button aria-pressed="true"><svg class="i"><use href="#sun"/></svg>Terang</button>
-      <button aria-pressed="false"><svg class="i"><use href="#moon"/></svg>Gelap</button>
-      <button aria-pressed="false"><svg class="i"><use href="#monitor"/></svg>Ikuti sistem</button>
-    </div>
-  </div>
-
-  <div class="spec"><div class="meta"><h3>StatusBadge</h3><p>Hanya status nyata: teks + warna token, tanpa titik.</p><code>badge.tsx → app/StatusBadge</code></div>
-    <div class="stage">
-      <span class="badge b-success">Lunas</span><span class="badge b-success">Hadir</span>
-      <span class="badge b-warning">Terlambat</span><span class="badge b-warning">Sebagian</span>
-      <span class="badge b-danger">Alpa</span><span class="badge b-danger">Gagal</span>
-      <span class="badge b-attn">Jatuh tempo</span><span class="badge b-attn">Izin menunggu</span>
-      <span class="badge b-neutral">Kedaluwarsa</span><span class="badge b-neutral">Draf</span>
-    </div>
-  </div>
-
-  <div class="spec"><div class="meta"><h3>Alert, AlertError</h3><code>alert.tsx · alert-error.tsx</code></div>
-    <div class="stage" style="align-items:flex-start">
-      <div class="alert" role="status"><svg class="i"><use href="#alert"/></svg><div><b>Tahun ajaran belum aktif</b><p>Aktifkan tahun ajaran di Pengaturan sebelum mendaftarkan rombel.</p></div></div>
-      <div class="alert danger" role="alert"><svg class="i"><use href="#alert"/></svg><div><b>Gagal masuk</b><p>Nama pengguna atau kata sandi tidak cocok.</p></div></div>
-    </div>
-  </div>
-
-  <div class="spec"><div class="meta"><h3>Avatar, Card, Separator</h3><code>avatar · card · separator · user-info</code></div>
-    <div class="card" style="width:300px">
-      <div class="card-h"><h4>Profil</h4><p class="muted small">Data akun yang tampil di menu pengguna.</p></div>
-      <div class="card-b" style="display:flex;gap:12px;align-items:center"><div class="av">NP</div><div><b>[Nama pengguna]</b><p class="muted small">[email@sekolah.sch.id]</p></div></div>
-      <hr style="border:0;border-top:1px solid var(--border);margin:0">
-      <div class="card-b" style="display:flex;justify-content:flex-end"><button class="btn btn-outline btn-sm">Ubah profil</button></div>
-    </div>
-  </div>
-
-  <div class="spec"><div class="meta"><h3>Skeleton, Spinner</h3><p>Skeleton mengikuti bentuk data. Spinner hanya saat menunggu aksi.</p><code>skeleton · spinner</code></div>
-    <div class="stage">
-      <div class="card card-b col" style="width:280px;gap:10px"><div class="sk" style="width:60%"></div><div class="sk"></div><div class="sk" style="width:80%"></div></div>
-      <span class="spin" role="status" aria-label="Memuat"></span>
-    </div>
-  </div>
-
-  <div class="spec"><div class="meta"><h3>Tooltip, Breadcrumb</h3><code>tooltip · breadcrumb · breadcrumbs</code></div>
-    <div class="col">
-      <div class="stage"><span class="tip"><button class="btn btn-outline btn-icon btn-sm" aria-label="Ubah"><svg class="i"><use href="#pencil"/></svg></button><span role="tooltip">Ubah</span></span><span class="muted small">arahkan kursor atau fokus untuk melihat tooltip</span></div>
-      <nav class="crumb" aria-label="Breadcrumb"><a href="#primitif">Keuangan</a><svg class="i"><use href="#chevr"/></svg><a href="#primitif">Tagihan</a><svg class="i"><use href="#chevr"/></svg><b aria-current="page">Terbitkan tagihan</b></nav>
-    </div>
-  </div>
-
-  <div class="spec"><div class="meta"><h3>Dropdown menu, Sheet</h3><p>Sheet menggantikan menu topbar di bawah 1024 px.</p><code>dropdown-menu · navigation-menu · sheet · user-menu-content</code></div>
-    <div class="stage" style="align-items:flex-start">
-      <div class="menu" role="menu"><div class="lbl">[Nama pengguna]</div><a href="#primitif" role="menuitem"><svg class="i"><use href="#user"/></svg>Pengaturan akun</a><hr><a href="#primitif" role="menuitem"><svg class="i"><use href="#logout"/></svg>Keluar</a></div>
-      <div class="sheet" aria-label="Menu staf"><div style="display:flex;justify-content:space-between"><b>Menu</b><svg class="i"><use href="#x"/></svg></div>
-        <h4>Keuangan</h4><a href="#primitif" aria-current="page">Tagihan</a><a href="#primitif">Pembayaran</a><a href="#primitif">Kasir</a>
-        <h4>Kesiswaan</h4><a href="#primitif">Catatan perilaku</a><a href="#primitif">Reward</a></div>
-    </div>
-  </div>
-
-  <div class="spec"><div class="meta"><h3>Input OTP</h3><p>Verifikasi dua langkah untuk admin dan bendahara.</p><code>input-otp · manage-two-factor</code></div>
-    <div class="otp" role="group" aria-label="Kode 6 digit"><span>4</span><span>8</span><span class="on"></span><span></span><span></span><span></span></div>
-  </div>
-
-  <div class="spec"><div class="meta"><h3>Dialog, Toast</h3><p>Escape menutup, fokus kembali ke pemicu.</p><code>dialog · sonner</code></div>
-    <div class="stage">
-      <button class="btn btn-outline" data-open="dConfirm">Buka ConfirmDialog</button>
-      <button class="btn btn-outline" data-open="dForm">Buka FormDialog</button>
-      <button class="btn btn-outline" data-toast>Tampilkan toast</button>
-    </div>
-  </div>
-</section>
-
-<section class="blk" id="aplikasi">
-  <header><h2>Komponen aplikasi</h2><code>resources/js/components/app</code><span class="badge b-neutral">rencana</span></header>
-
-  <div class="spec"><div class="meta"><h3>PageHeader + ExportButtons</h3><p>Satu aksi utama di kanan, ekspor icon-only berwarna format.</p></div>
-    <div class="ph">
-      <div><h3>Jenis tagihan</h3><p>Atur nominal default per unit sebelum menerbitkan tagihan.</p></div>
-      <div class="act">
-        <span class="tip"><button class="btn btn-outline btn-icon exp-pdf" aria-label="Ekspor PDF"><svg class="i"><use href="#file"/></svg></button><span role="tooltip">Ekspor PDF</span></span>
-        <span class="tip"><button class="btn btn-outline btn-icon exp-xls" aria-label="Ekspor Excel"><svg class="i"><use href="#grid"/></svg></button><span role="tooltip">Ekspor Excel</span></span>
-        <button class="btn btn-default"><svg class="i"><use href="#plus"/></svg>Tambah jenis</button>
-      </div>
-    </div>
-  </div>
-
-  <div class="spec"><div class="meta"><h3>DataTable + RowActions</h3><p>Header rata tengah; teks kiri, angka kanan, status &amp; aksi tengah. Pilih tab untuk melihat keadaan lain.</p></div>
-    <div class="col" style="width:100%;min-width:0">
-      <div class="filters">
-        <div class="srch"><svg class="i"><use href="#search"/></svg><input class="inp" placeholder="Cari nama atau NIS" aria-label="Cari"></div>
-        <select class="inp" aria-label="Rombel" style="width:160px"><option>Semua rombel</option></select>
-        <select class="inp" aria-label="Status" style="width:160px"><option>Semua status</option></select>
-      </div>
-      <div class="tabs" role="tablist" aria-label="Keadaan tabel">
-        <button role="tab" aria-selected="true" data-st="ok">Berisi</button>
-        <button role="tab" aria-selected="false" data-st="load">Memuat</button>
-        <button role="tab" aria-selected="false" data-st="empty">Kosong</button>
-        <button role="tab" aria-selected="false" data-st="err">Galat</button>
-        <button role="tab" aria-selected="false" data-st="lock">Tanpa izin</button>
-      </div>
-      <div class="tblw" id="tbl">
-        <table class="tbl" data-v="ok">
-          <thead><tr><th><button>Siswa <svg class="i"><use href="#sort"/></svg></button></th><th>Rombel</th><th>Tagihan</th><th><button>Nominal <svg class="i"><use href="#sort"/></svg></button></th><th>Jatuh tempo</th><th>Status</th><th>Aksi</th></tr></thead>
-          <tbody>
-            <tr><td class="t"><b>[Nama siswa]</b><div class="muted small">NIS [nomor]</div></td><td class="t">[Rombel]</td><td class="t">SPP</td><td class="n num">Rp 1.250.000</td><td class="c num">26 Nov 2026</td><td class="c"><span class="badge b-attn">Jatuh tempo</span></td><td class="c"><span class="ra"><button class="btn btn-ghost btn-icon btn-sm" aria-label="Lihat"><svg class="i"><use href="#eye"/></svg></button><button class="btn btn-ghost btn-icon btn-sm" aria-label="Ubah"><svg class="i"><use href="#pencil"/></svg></button><button class="btn btn-ghost btn-icon btn-sm del" aria-label="Hapus" data-open="dConfirm"><svg class="i"><use href="#trash"/></svg></button></span></td></tr>
-            <tr><td class="t"><b>[Nama siswa]</b><div class="muted small">NIS [nomor]</div></td><td class="t">[Rombel]</td><td class="t">Uang Pangkal</td><td class="n num">Rp 1.250.000</td><td class="c num">26 Nov 2026</td><td class="c"><span class="badge b-warning">Sebagian</span></td><td class="c"><span class="ra"><button class="btn btn-ghost btn-icon btn-sm" aria-label="Lihat"><svg class="i"><use href="#eye"/></svg></button><button class="btn btn-ghost btn-icon btn-sm" aria-label="Ubah"><svg class="i"><use href="#pencil"/></svg></button><button class="btn btn-ghost btn-icon btn-sm del" aria-label="Hapus" data-open="dConfirm"><svg class="i"><use href="#trash"/></svg></button></span></td></tr>
-            <tr><td class="t"><b>[Nama siswa]</b><div class="muted small">NIS [nomor]</div></td><td class="t">[Rombel]</td><td class="t">Kegiatan</td><td class="n num">Rp 50.000</td><td class="c num">26 Nov 2026</td><td class="c"><span class="badge b-success">Lunas</span></td><td class="c"><span class="ra"><button class="btn btn-ghost btn-icon btn-sm" aria-label="Lihat"><svg class="i"><use href="#eye"/></svg></button><button class="btn btn-ghost btn-icon btn-sm" aria-label="Ubah"><svg class="i"><use href="#pencil"/></svg></button><button class="btn btn-ghost btn-icon btn-sm del" aria-label="Hapus" data-open="dConfirm"><svg class="i"><use href="#trash"/></svg></button></span></td></tr>
-          </tbody>
-        </table>
-        <table class="tbl" data-v="load" hidden><thead><tr><th>Siswa</th><th>Rombel</th><th>Tagihan</th><th>Nominal</th><th>Jatuh tempo</th><th>Status</th><th>Aksi</th></tr></thead>
-          <tbody aria-busy="true"><tr><td><div class="sk" style="width:140px"></div></td><td><div class="sk"></div></td><td><div class="sk"></div></td><td><div class="sk" style="margin-left:auto;width:80px"></div></td><td><div class="sk"></div></td><td><div class="sk" style="width:60px;margin:auto"></div></td><td><div class="sk" style="width:72px;margin:auto"></div></td></tr>
-          <tr><td><div class="sk" style="width:120px"></div></td><td><div class="sk"></div></td><td><div class="sk"></div></td><td><div class="sk" style="margin-left:auto;width:80px"></div></td><td><div class="sk"></div></td><td><div class="sk" style="width:60px;margin:auto"></div></td><td><div class="sk" style="width:72px;margin:auto"></div></td></tr></tbody></table>
-        <div class="state" data-v="empty" hidden><svg class="i"><use href="#receipt"/></svg><b>Belum ada jenis tagihan</b><p>Tambahkan SPP untuk mulai menerbitkan tagihan.</p><button class="btn btn-default"><svg class="i"><use href="#plus"/></svg>Tambah jenis tagihan</button></div>
-        <div class="state" data-v="err" hidden><svg class="i"><use href="#alert"/></svg><b>Daftar tagihan gagal dimuat</b><p>Server tidak menjawab. Periksa koneksi lalu muat ulang.</p><button class="btn btn-outline">Coba lagi</button></div>
-        <div class="state" data-v="lock" hidden><svg class="i"><use href="#lock"/></svg><b>Halaman ini khusus bendahara</b><p>Minta admin menambahkan peran bendahara ke akun Anda.</p><a class="btn btn-outline" href="#aplikasi">Kembali ke beranda</a></div>
-      </div>
-      <div class="pg"><span>Menampilkan 1–3 dari [total]</span><div class="stage"><button class="btn btn-outline btn-icon btn-sm" aria-label="Sebelumnya" disabled><svg class="i"><use href="#chevl"/></svg></button><button class="btn btn-default btn-sm" aria-current="page">1</button><button class="btn btn-ghost btn-sm">2</button><button class="btn btn-outline btn-icon btn-sm" aria-label="Berikutnya"><svg class="i"><use href="#chevr"/></svg></button></div></div>
-    </div>
-  </div>
-
-  <div class="spec"><div class="meta"><h3>MoneyText, DateText</h3><p>Rupiah integer, tanda minus untuk negatif. Tanggal dan jam WITA.</p></div>
-    <div class="stage" style="gap:32px">
-      <div><div class="num" style="font-size:20px;font-weight:600">Rp 1.250.000</div><span class="muted small">positif</span></div>
-      <div><div class="num" style="font-size:20px;font-weight:600;color:var(--destructive)">−Rp 8.000</div><span class="muted small">potongan jajan</span></div>
-      <div><div class="num" style="font-size:20px;font-weight:600">26 Nov 2026</div><span class="muted small">tanggal</span></div>
-      <div><div class="num" style="font-size:20px;font-weight:600">06.52 <span class="muted small">WITA</span></div><span class="muted small">jam</span></div>
-    </div>
-  </div>
-
-  <div class="spec"><div class="meta"><h3>StudentPicker</h3><p>Cari nama atau NIS; tampil foto kecil + rombel.</p></div>
-    <div class="menu picker" role="listbox" aria-label="Pilih siswa">
-      <div class="srch" style="max-width:none;margin-bottom:4px"><svg class="i"><use href="#search"/></svg><input class="inp" placeholder="Cari nama atau NIS" aria-label="Cari siswa"></div>
-      <div class="opt on" role="option" aria-selected="true"><div class="av" style="border-radius:6px">F</div><div><b>[Nama siswa]</b><div class="muted small">NIS [nomor] · [Rombel]</div></div></div>
-      <div class="opt" role="option" aria-selected="false"><div class="av" style="border-radius:6px">F</div><div><b>[Nama siswa]</b><div class="muted small">NIS [nomor] · [Rombel]</div></div></div>
-    </div>
-  </div>
-
-  <div class="spec"><div class="meta"><h3>OfflineBanner</h3><p>Muncul di area wali saat koneksi putus.</p></div>
-    <div class="offline" role="status"><svg class="i"><use href="#wifioff"/></svg><span>Tidak ada koneksi. Data yang tampil dari kunjungan terakhir.</span><button class="btn btn-outline btn-sm">Coba lagi</button></div>
-  </div>
-</section>
-
-<section class="blk" id="layar">
-  <header><h2>Layar</h2><code>staff · guardian · kiosk · auth layout</code></header>
-  <div class="screens">
-
-  <div>
-    <div class="cap"><span>Staf · Beranda bendahara · 1280 px</span><span>disusun dari keputusan, bukan kartu statistik</span></div>
-    <div class="frame">
-      <div class="stf-top">
-        <div class="logo"><i>MT</i><div>Madrasah Terpadu<small>Unit MI</small></div></div>
-        <nav class="stf-nav" aria-label="Menu utama"><a href="#layar">Data Induk<svg class="i"><use href="#chev"/></svg></a><a href="#layar">Presensi<svg class="i"><use href="#chev"/></svg></a><a href="#layar" aria-current="page">Keuangan<svg class="i"><use href="#chev"/></svg></a><a href="#layar">Kesiswaan<svg class="i"><use href="#chev"/></svg></a><a href="#layar">Ibadah<svg class="i"><use href="#chev"/></svg></a><a href="#layar">Laporan<svg class="i"><use href="#chev"/></svg></a></nav>
-        <select class="inp" style="width:150px" aria-label="Tahun ajaran"><option>[Tahun ajaran]</option></select>
-        <div class="av">NP</div>
-      </div>
-      <div class="stf-body">
-        <nav class="crumb" aria-label="Breadcrumb"><b aria-current="page">Beranda</b></nav>
-        <div class="home-grid">
-          <div class="card">
-            <div class="card-h" style="display:flex;justify-content:space-between;align-items:baseline"><h4>Tagihan jatuh tempo minggu ini</h4><a class="btn btn-link btn-sm" href="#aplikasi">Lihat semua</a></div>
-            <ul class="list" style="margin-top:12px">
-              <li><div><b>[Nama siswa]</b><div class="muted small">SPP · [Rombel]</div></div><span class="num">Rp 1.250.000</span><span class="badge b-attn">Jatuh tempo</span></li>
-              <li><div><b>[Nama siswa]</b><div class="muted small">Kegiatan · [Rombel]</div></div><span class="num">Rp 50.000</span><span class="badge b-attn">Jatuh tempo</span></li>
-            </ul>
-          </div>
-          <div class="card">
-            <div class="card-h"><h4>Pembayaran online belum terekonsiliasi</h4></div>
-            <div class="state" style="padding:28px 16px"><svg class="i"><use href="#check"/></svg><b>Semua sudah cocok</b><p>Tidak ada pembayaran Midtrans yang menunggu pencocokan.</p></div>
-          </div>
+        <div class="top">
+            <div class="top-in">
+                <div class="logo">
+                    <i>MT</i>
+                    <div>
+                        Madrasah Terpadu<small
+                            >Katalog komponen &amp; mockup</small
+                        >
+                    </div>
+                </div>
+                <nav aria-label="Bagian katalog">
+                    <a href="#token">Token</a><a href="#primitif">Primitif</a
+                    ><a href="#aplikasi">Komponen aplikasi</a
+                    ><a href="#layar">Layar</a>
+                </nav>
+                <div class="tg" role="group" aria-label="Tema" id="themeTg">
+                    <button aria-pressed="true" data-t="light">
+                        <svg class="i"><use href="#sun" /></svg>Terang
+                    </button>
+                    <button aria-pressed="false" data-t="dark">
+                        <svg class="i"><use href="#moon" /></svg>Gelap
+                    </button>
+                </div>
+            </div>
         </div>
-      </div>
-    </div>
-  </div>
 
-  <div>
-    <div class="cap"><span>Wali · Beranda per anak dan kotak masuk · 360 px</span><span>urutan kartu = urgensi</span></div>
-    <div class="phones">
-      <div class="phone">
-        <div class="g-head"><div class="av">A</div><div class="who"><span class="muted small">MI Darul Istiqamah</span><b>[Nama anak] <svg class="i"><use href="#chev"/></svg></b></div><button class="btn btn-ghost btn-icon" style="width:44px;height:44px" aria-label="Kotak masuk"><svg class="i i20"><use href="#bell"/></svg></button></div>
-        <div class="g-body">
-          <div class="g-card"><h4>Hari ini · 26 Nov 2026</h4><div class="att"><div><span class="muted small">Masuk</span><b class="num">06.52</b><span class="badge b-success">Tepat waktu</span></div><div><span class="muted small">Pulang</span><b class="muted">—</b><span class="muted small">belum tap</span></div></div></div>
-          <div class="g-card attn"><h4>Perlu tindakan</h4><div style="display:flex;justify-content:space-between;align-items:baseline"><span>SPP [bulan]</span><b class="num">Rp 1.250.000</b></div><p class="muted small">Jatuh tempo 26 Nov 2026</p><button class="btn btn-default g-btn">Bayar tagihan</button></div>
-          <div class="g-card"><h4>Saldo kantin</h4><div class="bal num">Rp 42.000</div><p class="muted" style="font-size:14px">Jajan hari ini <span class="num">Rp 8.000</span></p><button class="btn btn-outline g-btn">Isi saldo</button></div>
-          <div class="g-card"><h4>Perilaku</h4><p style="font-size:14px">Belum ada catatan perilaku semester ini.</p></div>
-        </div>
-        <nav class="bnav" aria-label="Navigasi wali"><a href="#layar" aria-current="page"><svg class="i i20"><use href="#home"/></svg>Beranda</a><a href="#layar"><svg class="i i20"><use href="#receipt"/></svg>Tagihan</a><a href="#layar"><svg class="i i20"><use href="#clock"/></svg>Riwayat</a><a href="#layar"><svg class="i i20"><use href="#user"/></svg>Akun</a></nav>
-      </div>
-      <div class="phone" style="height:auto">
-        <div class="g-head"><button class="btn btn-ghost btn-icon" style="width:44px;height:44px" aria-label="Kembali"><svg class="i i20"><use href="#chevl"/></svg></button><div class="who"><b>Kotak masuk</b></div></div>
-        <ul class="list" style="font-size:15px;background:var(--card)">
-          <li style="border-top:0"><div><b>[Nama anak] tiba di sekolah · 06.52</b><div class="muted small">Presensi · hari ini</div></div></li>
-          <li><div><b>Jajan Rp8.000 · sisa saldo Rp42.000</b><div class="muted small">Kantin · hari ini</div></div></li>
-          <li><div><b>Tagihan SPP terbit</b><div class="muted small">Keuangan · 26 Nov 2026</div></div></li>
-        </ul>
-        <div style="padding:16px"><div class="offline small"><svg class="i"><use href="#wifioff"/></svg><span>Tidak ada koneksi. Data dari kunjungan terakhir.</span></div></div>
-      </div>
-    </div>
-  </div>
+        <main>
+            <div class="intro">
+                <div>
+                    <h1>Komponen Madrasah Terpadu</h1>
+                    <p class="muted">
+                        Semua komponen di
+                        <code>resources/js/components/ui</code>, komponen
+                        aplikasi yang direncanakan di <code>DESIGN.md §4</code>,
+                        dan empat area layar (staf, wali, kiosk, masuk). Warna
+                        mengikuti token <code>DESIGN.md §2</code>, bukan nilai
+                        bawaan starter yang masih ada di <code>app.css</code>.
+                    </p>
+                </div>
+                <dl class="legend">
+                    <dt>Data di mockup</dt>
+                    <dd>
+                        Teks dalam kurung siku, mis. <b>[Nama siswa]</b>, adalah
+                        tempat data nyata. Nominal dan jam diambil dari contoh
+                        di DESIGN.md dan PRD.
+                    </dd>
+                    <dt>Status</dt>
+                    <dd>
+                        Bagian bertanda
+                        <span class="badge b-neutral">rencana</span> belum ada
+                        di kode; primitif sudah terpasang dari shadcn.
+                    </dd>
+                </dl>
+            </div>
 
-  <div>
-    <div class="cap"><span>Kiosk · Gerbang</span><span>input fokus permanen, status warna + teks</span></div>
-    <div class="frame kiosk">
-      <div class="k-main">
-        <div style="display:flex;justify-content:space-between;align-items:center"><span class="muted">Petugas: [nama petugas]</span><button class="btn btn-ghost btn-sm"><svg class="i"><use href="#logout"/></svg>Keluar</button></div>
-        <input class="inp" style="height:48px;font-size:16px" placeholder="Arahkan kartu QR ke pemindai" aria-label="Kode kartu">
-        <div class="scan"><div class="photo">Foto<br>siswa</div><div><span class="badge b-success" style="font-size:14px">Hadir tepat waktu</span><h3 style="margin-top:8px">[Nama siswa]</h3><p class="muted" style="font-size:16px">[Rombel] · masuk <span class="num">06.52</span></p></div></div>
-      </div>
-      <aside class="k-side"><h4>10 scan terakhir</h4><ul class="list">
-        <li><span>[Nama siswa]</span><span class="badge b-success">Hadir</span></li>
-        <li><span>[Nama siswa]</span><span class="badge b-warning">Terlambat</span></li>
-        <li><span>[Kode kartu]</span><span class="badge b-danger">Kartu tidak dikenal</span></li>
-      </ul></aside>
-    </div>
-  </div>
+            <section class="blk" id="token">
+                <header>
+                    <h2>Token</h2>
+                    <code>resources/css/app.css · @theme</code>
+                </header>
+                <div class="spec">
+                    <div class="meta">
+                        <h3>Warna</h3>
+                        <p>
+                            Netral hangat seperti kertas, primary hijau tua
+                            kebiruan. Satu warna status per layar.
+                        </p>
+                    </div>
+                    <div class="sw">
+                        <div>
+                            <i style="background: var(--background)"></i
+                            ><b>background</b><span>latar halaman</span>
+                        </div>
+                        <div>
+                            <i style="background: var(--card)"></i><b>card</b
+                            ><span>kartu, tabel</span>
+                        </div>
+                        <div>
+                            <i style="background: var(--muted)"></i><b>muted</b
+                            ><span>latar sekunder</span>
+                        </div>
+                        <div>
+                            <i style="background: var(--muted-foreground)"></i
+                            ><b>muted-foreground</b><span>teks sekunder</span>
+                        </div>
+                        <div>
+                            <i style="background: var(--foreground)"></i
+                            ><b>foreground</b><span>teks utama</span>
+                        </div>
+                        <div>
+                            <i style="background: var(--border)"></i
+                            ><b>border / input</b><span>garis</span>
+                        </div>
+                        <div>
+                            <i style="background: var(--primary)"></i
+                            ><b>primary</b
+                            ><span>aksi utama, menu aktif, ring</span>
+                        </div>
+                        <div>
+                            <i style="background: var(--accent-attention)"></i
+                            ><b>accent-attention</b
+                            ><span>hanya "perlu tindakan"</span>
+                        </div>
+                        <div>
+                            <i style="background: var(--success)"></i
+                            ><b>success</b><span>lunas, hadir tepat waktu</span>
+                        </div>
+                        <div>
+                            <i style="background: var(--warning)"></i
+                            ><b>warning</b><span>terlambat, saldo menipis</span>
+                        </div>
+                        <div>
+                            <i style="background: var(--destructive)"></i
+                            ><b>destructive</b
+                            ><span>hapus, alpa, pelanggaran</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="spec">
+                    <div class="meta">
+                        <h3>Tipografi</h3>
+                        <p>
+                            Plus Jakarta Sans, self-hosted. Angka uang pakai
+                            <code>tabular-nums</code>, rata kanan.
+                        </p>
+                    </div>
+                    <div>
+                        <div class="type-row">
+                            <span class="muted small">30 / 600</span
+                            ><span style="font-size: 30px; font-weight: 600"
+                                >Tagihan jatuh tempo</span
+                            ><span class="muted small">judul layar besar</span>
+                        </div>
+                        <div class="type-row">
+                            <span class="muted small">24 / 600</span
+                            ><span style="font-size: 24px; font-weight: 600"
+                                >Saldo kantin</span
+                            ><span class="muted small">judul bagian</span>
+                        </div>
+                        <div class="type-row">
+                            <span class="muted small">20 / 600</span
+                            ><span style="font-size: 20px; font-weight: 600"
+                                >Catatan perilaku</span
+                            ><span class="muted small">PageHeader</span>
+                        </div>
+                        <div class="type-row">
+                            <span class="muted small">16 / 400</span
+                            ><span style="font-size: 16px"
+                                >Ananda tiba di sekolah pukul 06.52.</span
+                            ><span class="muted small">teks dasar wali</span>
+                        </div>
+                        <div class="type-row">
+                            <span class="muted small">14 / 400</span
+                            ><span>Pilih rombel untuk menerbitkan tagihan.</span
+                            ><span class="muted small">teks dasar staf</span>
+                        </div>
+                        <div class="type-row">
+                            <span class="muted small">12 / 500</span
+                            ><span class="small" style="font-weight: 500"
+                                >NIS · Rombel · WITA</span
+                            ><span class="muted small">label, keterangan</span>
+                        </div>
+                        <div class="type-row">
+                            <span class="muted small">angka</span
+                            ><span
+                                class="num"
+                                style="font-size: 20px; font-weight: 600"
+                                >Rp 1.250.000</span
+                            ><span class="muted small">tabular-nums</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="spec">
+                    <div class="meta">
+                        <h3>Radius, bayangan, gerak</h3>
+                        <p>
+                            Kartu datar dengan border. Bayangan hanya untuk
+                            elemen melayang.
+                        </p>
+                    </div>
+                    <div class="stage">
+                        <div class="card card-b" style="width: 160px">
+                            <b>8 px</b>
+                            <p class="muted small">kartu, dialog</p>
+                        </div>
+                        <div
+                            class="card card-b"
+                            style="width: 160px; border-radius: 6px"
+                        >
+                            <b>6 px</b>
+                            <p class="muted small">tombol, input</p>
+                        </div>
+                        <div
+                            class="card card-b"
+                            style="width: 160px; box-shadow: var(--shadow)"
+                        >
+                            <b>Melayang</b>
+                            <p class="muted small">
+                                dialog, dropdown, sheet, toast
+                            </p>
+                        </div>
+                        <div class="card card-b" style="width: 200px">
+                            <b>150 / 200 ms</b>
+                            <p class="muted small">
+                                hover-fokus / sheet-dialog, ease-out
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </section>
 
-  <div>
-    <div class="cap"><span>Kiosk · Kantin (POS)</span><span>voucher dipotong dulu, lalu saldo</span></div>
-    <div class="frame k-main pos">
-      <div class="card card-b col">
-        <div style="display:flex;gap:12px;align-items:center"><div class="photo" style="width:56px;height:70px">Foto</div><div><b style="font-size:18px">[Nama siswa]</b><p class="muted">[Rombel]</p></div></div>
-        <ul class="list" style="margin:0 -16px">
-          <li><span>Saldo</span><b class="num">Rp 42.000</b></li>
-          <li><span>Voucher reward</span><b class="num">[nilai voucher]</b></li>
-          <li><span>Sisa limit hari ini</span><b class="num">[sisa limit]</b></li>
-        </ul>
-      </div>
-      <div class="col">
-        <div class="amount num" aria-live="polite">Rp 8.000</div>
-        <div class="keypad"><button>1</button><button>2</button><button>3</button><button>4</button><button>5</button><button>6</button><button>7</button><button>8</button><button>9</button><button>000</button><button>0</button><button aria-label="Hapus angka"><svg class="i i20"><use href="#x"/></svg></button></div>
-        <button class="btn btn-default btn-lg" style="height:56px;font-size:18px">Bayar</button>
-      </div>
-    </div>
-  </div>
+            <section class="blk" id="primitif">
+                <header>
+                    <h2>Primitif</h2>
+                    <code>resources/js/components/ui · shadcn</code>
+                </header>
 
-  <div>
-    <div class="cap"><span>Auth · Masuk</span><span>form terpusat, pesan galat generik</span></div>
-    <div class="frame login">
-      <form class="card col" onsubmit="return false">
-        <div class="logo"><i>MT</i><div>Madrasah Terpadu<small>Yayasan Amal Jaya Berkah</small></div></div>
-        <div class="field"><label for="l1">Nama pengguna, NIS, atau no. HP</label><input id="l1" class="inp" autocomplete="username"></div>
-        <div class="field"><label for="l2">Kata sandi</label><div class="pw"><input id="l2" class="inp" type="password" autocomplete="current-password"><button class="btn btn-ghost" type="button" aria-label="Tampilkan kata sandi" data-pw><svg class="i"><use href="#eye"/></svg></button></div></div>
-        <label class="chk"><input type="checkbox">Ingat saya</label>
-        <button class="btn btn-default btn-lg">Masuk</button>
-        <p class="muted small" style="text-align:center">Lupa kata sandi? Hubungi admin sekolah.</p>
-      </form>
-    </div>
-  </div>
+                <div class="spec">
+                    <div class="meta">
+                        <h3>Button</h3>
+                        <p>Label kata kerja. Ikon hanya bila menambah makna.</p>
+                        <code>button.tsx</code>
+                    </div>
+                    <div class="col">
+                        <div class="stage">
+                            <button class="btn btn-default">
+                                Terbitkan tagihan
+                            </button>
+                            <button class="btn btn-secondary">
+                                Simpan draf
+                            </button>
+                            <button class="btn btn-outline">Batal</button>
+                            <button class="btn btn-ghost">Lewati</button>
+                            <button class="btn btn-destructive">
+                                Hapus catatan
+                            </button>
+                            <a class="btn btn-link" href="#primitif"
+                                >Lihat kuitansi</a
+                            >
+                        </div>
+                        <div class="stage">
+                            <button class="btn btn-default btn-sm">
+                                Kecil
+                            </button>
+                            <button class="btn btn-default">Bawaan</button>
+                            <button class="btn btn-default btn-lg">
+                                Besar 44 px
+                            </button>
+                            <button
+                                class="btn btn-outline btn-icon"
+                                aria-label="Tambah"
+                            >
+                                <svg class="i"><use href="#plus" /></svg>
+                            </button>
+                            <button class="btn btn-default" disabled>
+                                <span class="spin" aria-hidden="true"></span
+                                >Menyimpan
+                            </button>
+                            <button class="btn btn-outline" disabled>
+                                Nonaktif
+                            </button>
+                        </div>
+                    </div>
+                </div>
 
-  </div>
-</section>
-</main>
+                <div class="spec">
+                    <div class="meta">
+                        <h3>Input, Label, InputError, PasswordInput</h3>
+                        <p>Label selalu ada. Galat inline di bawah field.</p>
+                        <code
+                            >input · label · input-error · password-input</code
+                        >
+                    </div>
+                    <div class="stage" style="align-items: flex-start">
+                        <div class="field">
+                            <label for="f1">Nama lengkap</label
+                            ><input
+                                id="f1"
+                                class="inp"
+                                placeholder="Nama sesuai akta"
+                            />
+                        </div>
+                        <div class="field">
+                            <label for="f2">NIS</label
+                            ><input
+                                id="f2"
+                                class="inp err"
+                                value="12"
+                                aria-invalid="true"
+                                aria-describedby="f2e"
+                            /><span id="f2e" class="ferr"
+                                >NIS terdiri dari 10 angka.</span
+                            >
+                        </div>
+                        <div class="field">
+                            <label for="f3">Kata sandi</label>
+                            <div class="pw">
+                                <input
+                                    id="f3"
+                                    class="inp"
+                                    type="password"
+                                    value="katasandi"
+                                /><button
+                                    class="btn btn-ghost"
+                                    type="button"
+                                    aria-label="Tampilkan kata sandi"
+                                    data-pw
+                                >
+                                    <svg class="i"><use href="#eye" /></svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
-<dialog id="dConfirm" aria-labelledby="cT">
-  <div class="dlg">
-    <div class="dlg-h"><div><h3 id="cT" style="font-size:18px">Hapus tagihan ini?</h3><p>Tagihan SPP [Nama siswa] sebesar <span class="num">Rp 1.250.000</span> dibatalkan dan tercatat di jejak audit. Pembayaran yang sudah masuk tidak ikut terhapus.</p></div></div>
-    <div class="dlg-f"><button class="btn btn-outline" data-close autofocus>Batal</button><button class="btn btn-destructive" data-close>Hapus tagihan</button></div>
-  </div>
-</dialog>
-<dialog id="dForm" aria-labelledby="fT">
-  <form class="dlg" onsubmit="return false">
-    <div class="dlg-h"><div><h3 id="fT" style="font-size:18px">Tambah jenis tagihan</h3><p>Nominal default bisa diubah saat penerbitan.</p></div><button type="button" class="btn btn-ghost btn-icon btn-sm" aria-label="Tutup" data-close><svg class="i"><use href="#x"/></svg></button></div>
-    <div class="dlg-b">
-      <div class="field"><label for="d1">Nama</label><input id="d1" class="inp" placeholder="mis. SPP"></div>
-      <div class="field"><label for="d2">Sifat</label><select id="d2" class="inp"><option>Bulanan</option><option>Sekali</option></select></div>
-      <div class="field"><label for="d3">Nominal default</label><input id="d3" class="inp num err" inputmode="numeric" placeholder="Rp" aria-describedby="d3e" aria-invalid="true"><span id="d3e" class="ferr">Nominal wajib diisi.</span></div>
-    </div>
-    <div class="dlg-f"><button type="button" class="btn btn-outline" data-close>Batal</button><button class="btn btn-default" id="saveBtn">Simpan</button></div>
-  </form>
-</dialog>
-<div id="toasts" aria-live="polite"></div>
+                <div class="spec">
+                    <div class="meta">
+                        <h3>Select, Checkbox</h3>
+                        <code>select.tsx · checkbox.tsx</code>
+                    </div>
+                    <div class="stage">
+                        <div class="field">
+                            <label for="f4">Unit</label
+                            ><select id="f4" class="inp">
+                                <option>MI</option>
+                                <option>RA</option>
+                                <option>TPQ</option>
+                            </select>
+                        </div>
+                        <label class="chk"
+                            ><input type="checkbox" checked />Kirim notifikasi
+                            ke wali</label
+                        >
+                        <label class="chk"
+                            ><input type="checkbox" />Cicilan diizinkan</label
+                        >
+                    </div>
+                </div>
 
-<script>
-const $=(s,r=document)=>r.querySelector(s),$$=(s,r=document)=>[...r.querySelectorAll(s)];
-$$('.tg').forEach(g=>$$('button',g).forEach(b=>b.addEventListener('click',()=>{
-  $$('button',g).forEach(x=>x.setAttribute('aria-pressed',x===b));
-  if(g.id==='themeTg')document.documentElement.dataset.theme=b.dataset.t;
-})));
-$$('[data-pw]').forEach(b=>b.onclick=()=>{const i=b.previousElementSibling,s=i.type==='password';i.type=s?'text':'password';b.setAttribute('aria-label',s?'Sembunyikan kata sandi':'Tampilkan kata sandi');$('use',b).setAttribute('href',s?'#eyeoff':'#eye')});
-let opener;
-$$('[data-open]').forEach(b=>b.onclick=()=>{opener=b;$('#'+b.dataset.open).showModal()});
-$$('dialog').forEach(d=>{d.addEventListener('close',()=>opener&&opener.focus());$$('[data-close]',d).forEach(b=>b.onclick=()=>d.close())});
-$('#saveBtn').onclick=e=>{const b=e.currentTarget;b.disabled=true;b.innerHTML='<span class="spin" aria-hidden="true"></span>Menyimpan';setTimeout(()=>{b.disabled=false;b.textContent='Simpan';$('#dForm').close();toast('Jenis tagihan tersimpan.')},900)};
-function toast(t){const el=document.createElement('div');el.className='toast';el.innerHTML='<svg class="i"><use href="#check"/></svg><div><b></b></div>';el.querySelector('b').textContent=t;$('#toasts').append(el);setTimeout(()=>el.remove(),3500)}
-$('[data-toast]').onclick=()=>toast('Pembayaran tercatat · 06.52');
-$$('[data-st]').forEach(t=>t.onclick=()=>{$$('[data-st]').forEach(x=>x.setAttribute('aria-selected',x===t));$$('#tbl [data-v]').forEach(v=>v.hidden=v.dataset.v!==t.dataset.st)});
-</script>
-</body>
+                <div class="spec">
+                    <div class="meta">
+                        <h3>Toggle group</h3>
+                        <p>Dipakai untuk tampilan tema di pengaturan.</p>
+                        <code>toggle · toggle-group · appearance-tabs</code>
+                    </div>
+                    <div class="tg" role="group" aria-label="Pilihan tampilan">
+                        <button aria-pressed="true">
+                            <svg class="i"><use href="#sun" /></svg>Terang
+                        </button>
+                        <button aria-pressed="false">
+                            <svg class="i"><use href="#moon" /></svg>Gelap
+                        </button>
+                        <button aria-pressed="false">
+                            <svg class="i"><use href="#monitor" /></svg>Ikuti
+                            sistem
+                        </button>
+                    </div>
+                </div>
+
+                <div class="spec">
+                    <div class="meta">
+                        <h3>StatusBadge</h3>
+                        <p>
+                            Hanya status nyata: teks + warna token, tanpa titik.
+                        </p>
+                        <code>badge.tsx → app/StatusBadge</code>
+                    </div>
+                    <div class="stage">
+                        <span class="badge b-success">Lunas</span
+                        ><span class="badge b-success">Hadir</span>
+                        <span class="badge b-warning">Terlambat</span
+                        ><span class="badge b-warning">Sebagian</span>
+                        <span class="badge b-danger">Alpa</span
+                        ><span class="badge b-danger">Gagal</span>
+                        <span class="badge b-attn">Jatuh tempo</span
+                        ><span class="badge b-attn">Izin menunggu</span>
+                        <span class="badge b-neutral">Kedaluwarsa</span
+                        ><span class="badge b-neutral">Draf</span>
+                    </div>
+                </div>
+
+                <div class="spec">
+                    <div class="meta">
+                        <h3>Alert, AlertError</h3>
+                        <code>alert.tsx · alert-error.tsx</code>
+                    </div>
+                    <div class="stage" style="align-items: flex-start">
+                        <div class="alert" role="status">
+                            <svg class="i"><use href="#alert" /></svg>
+                            <div>
+                                <b>Tahun ajaran belum aktif</b>
+                                <p>
+                                    Aktifkan tahun ajaran di Pengaturan sebelum
+                                    mendaftarkan rombel.
+                                </p>
+                            </div>
+                        </div>
+                        <div class="alert danger" role="alert">
+                            <svg class="i"><use href="#alert" /></svg>
+                            <div>
+                                <b>Gagal masuk</b>
+                                <p>
+                                    Nama pengguna atau kata sandi tidak cocok.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="spec">
+                    <div class="meta">
+                        <h3>Avatar, Card, Separator</h3>
+                        <code>avatar · card · separator · user-info</code>
+                    </div>
+                    <div class="card" style="width: 300px">
+                        <div class="card-h">
+                            <h4>Profil</h4>
+                            <p class="muted small">
+                                Data akun yang tampil di menu pengguna.
+                            </p>
+                        </div>
+                        <div
+                            class="card-b"
+                            style="
+                                display: flex;
+                                gap: 12px;
+                                align-items: center;
+                            "
+                        >
+                            <div class="av">NP</div>
+                            <div>
+                                <b>[Nama pengguna]</b>
+                                <p class="muted small">
+                                    [email@sekolah.sch.id]
+                                </p>
+                            </div>
+                        </div>
+                        <hr
+                            style="
+                                border: 0;
+                                border-top: 1px solid var(--border);
+                                margin: 0;
+                            "
+                        />
+                        <div
+                            class="card-b"
+                            style="display: flex; justify-content: flex-end"
+                        >
+                            <button class="btn btn-outline btn-sm">
+                                Ubah profil
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="spec">
+                    <div class="meta">
+                        <h3>Skeleton, Spinner</h3>
+                        <p>
+                            Skeleton mengikuti bentuk data. Spinner hanya saat
+                            menunggu aksi.
+                        </p>
+                        <code>skeleton · spinner</code>
+                    </div>
+                    <div class="stage">
+                        <div
+                            class="card card-b col"
+                            style="width: 280px; gap: 10px"
+                        >
+                            <div class="sk" style="width: 60%"></div>
+                            <div class="sk"></div>
+                            <div class="sk" style="width: 80%"></div>
+                        </div>
+                        <span
+                            class="spin"
+                            role="status"
+                            aria-label="Memuat"
+                        ></span>
+                    </div>
+                </div>
+
+                <div class="spec">
+                    <div class="meta">
+                        <h3>Tooltip, Breadcrumb</h3>
+                        <code>tooltip · breadcrumb · breadcrumbs</code>
+                    </div>
+                    <div class="col">
+                        <div class="stage">
+                            <span class="tip"
+                                ><button
+                                    class="btn btn-outline btn-icon btn-sm"
+                                    aria-label="Ubah"
+                                >
+                                    <svg class="i">
+                                        <use href="#pencil" />
+                                    </svg></button
+                                ><span role="tooltip">Ubah</span></span
+                            ><span class="muted small"
+                                >arahkan kursor atau fokus untuk melihat
+                                tooltip</span
+                            >
+                        </div>
+                        <nav class="crumb" aria-label="Breadcrumb">
+                            <a href="#primitif">Keuangan</a
+                            ><svg class="i"><use href="#chevr" /></svg
+                            ><a href="#primitif">Tagihan</a
+                            ><svg class="i"><use href="#chevr" /></svg
+                            ><b aria-current="page">Terbitkan tagihan</b>
+                        </nav>
+                    </div>
+                </div>
+
+                <div class="spec">
+                    <div class="meta">
+                        <h3>Dropdown menu, Sheet</h3>
+                        <p>Sheet menggantikan menu topbar di bawah 1024 px.</p>
+                        <code
+                            >dropdown-menu · navigation-menu · sheet ·
+                            user-menu-content</code
+                        >
+                    </div>
+                    <div class="stage" style="align-items: flex-start">
+                        <div class="menu" role="menu">
+                            <div class="lbl">[Nama pengguna]</div>
+                            <a href="#primitif" role="menuitem"
+                                ><svg class="i"><use href="#user" /></svg
+                                >Pengaturan akun</a
+                            >
+                            <hr />
+                            <a href="#primitif" role="menuitem"
+                                ><svg class="i"><use href="#logout" /></svg
+                                >Keluar</a
+                            >
+                        </div>
+                        <div class="sheet" aria-label="Menu staf">
+                            <div
+                                style="
+                                    display: flex;
+                                    justify-content: space-between;
+                                "
+                            >
+                                <b>Menu</b
+                                ><svg class="i"><use href="#x" /></svg>
+                            </div>
+                            <h4>Keuangan</h4>
+                            <a href="#primitif" aria-current="page">Tagihan</a
+                            ><a href="#primitif">Pembayaran</a
+                            ><a href="#primitif">Kasir</a>
+                            <h4>Kesiswaan</h4>
+                            <a href="#primitif">Catatan perilaku</a
+                            ><a href="#primitif">Reward</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="spec">
+                    <div class="meta">
+                        <h3>Input OTP</h3>
+                        <p>Verifikasi dua langkah untuk admin dan bendahara.</p>
+                        <code>input-otp · manage-two-factor</code>
+                    </div>
+                    <div class="otp" role="group" aria-label="Kode 6 digit">
+                        <span>4</span><span>8</span><span class="on"></span
+                        ><span></span><span></span><span></span>
+                    </div>
+                </div>
+
+                <div class="spec">
+                    <div class="meta">
+                        <h3>Dialog, Toast</h3>
+                        <p>Escape menutup, fokus kembali ke pemicu.</p>
+                        <code>dialog · sonner</code>
+                    </div>
+                    <div class="stage">
+                        <button class="btn btn-outline" data-open="dConfirm">
+                            Buka ConfirmDialog
+                        </button>
+                        <button class="btn btn-outline" data-open="dForm">
+                            Buka FormDialog
+                        </button>
+                        <button class="btn btn-outline" data-toast>
+                            Tampilkan toast
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <section class="blk" id="aplikasi">
+                <header>
+                    <h2>Komponen aplikasi</h2>
+                    <code>resources/js/components/app</code
+                    ><span class="badge b-neutral">rencana</span>
+                </header>
+
+                <div class="spec">
+                    <div class="meta">
+                        <h3>PageHeader + ExportButtons</h3>
+                        <p>
+                            Satu aksi utama di kanan, ekspor icon-only berwarna
+                            format.
+                        </p>
+                    </div>
+                    <div class="ph">
+                        <div>
+                            <h3>Jenis tagihan</h3>
+                            <p>
+                                Atur nominal default per unit sebelum
+                                menerbitkan tagihan.
+                            </p>
+                        </div>
+                        <div class="act">
+                            <span class="tip"
+                                ><button
+                                    class="btn btn-outline btn-icon exp-pdf"
+                                    aria-label="Ekspor PDF"
+                                >
+                                    <svg class="i">
+                                        <use href="#file" />
+                                    </svg></button
+                                ><span role="tooltip">Ekspor PDF</span></span
+                            >
+                            <span class="tip"
+                                ><button
+                                    class="btn btn-outline btn-icon exp-xls"
+                                    aria-label="Ekspor Excel"
+                                >
+                                    <svg class="i">
+                                        <use href="#grid" />
+                                    </svg></button
+                                ><span role="tooltip">Ekspor Excel</span></span
+                            >
+                            <button class="btn btn-default">
+                                <svg class="i"><use href="#plus" /></svg>Tambah
+                                jenis
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="spec">
+                    <div class="meta">
+                        <h3>DataTable + RowActions</h3>
+                        <p>
+                            Header rata tengah; teks kiri, angka kanan, status
+                            &amp; aksi tengah. Pilih tab untuk melihat keadaan
+                            lain.
+                        </p>
+                    </div>
+                    <div class="col" style="width: 100%; min-width: 0">
+                        <div class="filters">
+                            <div class="srch">
+                                <svg class="i"><use href="#search" /></svg
+                                ><input
+                                    class="inp"
+                                    placeholder="Cari nama atau NIS"
+                                    aria-label="Cari"
+                                />
+                            </div>
+                            <select
+                                class="inp"
+                                aria-label="Rombel"
+                                style="width: 160px"
+                            >
+                                <option>Semua rombel</option>
+                            </select>
+                            <select
+                                class="inp"
+                                aria-label="Status"
+                                style="width: 160px"
+                            >
+                                <option>Semua status</option>
+                            </select>
+                        </div>
+                        <div
+                            class="tabs"
+                            role="tablist"
+                            aria-label="Keadaan tabel"
+                        >
+                            <button
+                                role="tab"
+                                aria-selected="true"
+                                data-st="ok"
+                            >
+                                Berisi
+                            </button>
+                            <button
+                                role="tab"
+                                aria-selected="false"
+                                data-st="load"
+                            >
+                                Memuat
+                            </button>
+                            <button
+                                role="tab"
+                                aria-selected="false"
+                                data-st="empty"
+                            >
+                                Kosong
+                            </button>
+                            <button
+                                role="tab"
+                                aria-selected="false"
+                                data-st="err"
+                            >
+                                Galat
+                            </button>
+                            <button
+                                role="tab"
+                                aria-selected="false"
+                                data-st="lock"
+                            >
+                                Tanpa izin
+                            </button>
+                        </div>
+                        <div class="tblw" id="tbl">
+                            <table class="tbl" data-v="ok">
+                                <thead>
+                                    <tr>
+                                        <th>
+                                            <button>
+                                                Siswa
+                                                <svg class="i">
+                                                    <use href="#sort" />
+                                                </svg>
+                                            </button>
+                                        </th>
+                                        <th>Rombel</th>
+                                        <th>Tagihan</th>
+                                        <th>
+                                            <button>
+                                                Nominal
+                                                <svg class="i">
+                                                    <use href="#sort" />
+                                                </svg>
+                                            </button>
+                                        </th>
+                                        <th>Jatuh tempo</th>
+                                        <th>Status</th>
+                                        <th>Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td class="t">
+                                            <b>[Nama siswa]</b>
+                                            <div class="muted small">
+                                                NIS [nomor]
+                                            </div>
+                                        </td>
+                                        <td class="t">[Rombel]</td>
+                                        <td class="t">SPP</td>
+                                        <td class="n num">Rp 1.250.000</td>
+                                        <td class="c num">26 Nov 2026</td>
+                                        <td class="c">
+                                            <span class="badge b-attn"
+                                                >Jatuh tempo</span
+                                            >
+                                        </td>
+                                        <td class="c">
+                                            <span class="ra"
+                                                ><button
+                                                    class="btn btn-ghost btn-icon btn-sm"
+                                                    aria-label="Lihat"
+                                                >
+                                                    <svg class="i">
+                                                        <use href="#eye" />
+                                                    </svg></button
+                                                ><button
+                                                    class="btn btn-ghost btn-icon btn-sm"
+                                                    aria-label="Ubah"
+                                                >
+                                                    <svg class="i">
+                                                        <use href="#pencil" />
+                                                    </svg></button
+                                                ><button
+                                                    class="btn btn-ghost btn-icon btn-sm del"
+                                                    aria-label="Hapus"
+                                                    data-open="dConfirm"
+                                                >
+                                                    <svg class="i">
+                                                        <use href="#trash" />
+                                                    </svg></button
+                                            ></span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="t">
+                                            <b>[Nama siswa]</b>
+                                            <div class="muted small">
+                                                NIS [nomor]
+                                            </div>
+                                        </td>
+                                        <td class="t">[Rombel]</td>
+                                        <td class="t">Uang Pangkal</td>
+                                        <td class="n num">Rp 1.250.000</td>
+                                        <td class="c num">26 Nov 2026</td>
+                                        <td class="c">
+                                            <span class="badge b-warning"
+                                                >Sebagian</span
+                                            >
+                                        </td>
+                                        <td class="c">
+                                            <span class="ra"
+                                                ><button
+                                                    class="btn btn-ghost btn-icon btn-sm"
+                                                    aria-label="Lihat"
+                                                >
+                                                    <svg class="i">
+                                                        <use href="#eye" />
+                                                    </svg></button
+                                                ><button
+                                                    class="btn btn-ghost btn-icon btn-sm"
+                                                    aria-label="Ubah"
+                                                >
+                                                    <svg class="i">
+                                                        <use href="#pencil" />
+                                                    </svg></button
+                                                ><button
+                                                    class="btn btn-ghost btn-icon btn-sm del"
+                                                    aria-label="Hapus"
+                                                    data-open="dConfirm"
+                                                >
+                                                    <svg class="i">
+                                                        <use href="#trash" />
+                                                    </svg></button
+                                            ></span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="t">
+                                            <b>[Nama siswa]</b>
+                                            <div class="muted small">
+                                                NIS [nomor]
+                                            </div>
+                                        </td>
+                                        <td class="t">[Rombel]</td>
+                                        <td class="t">Kegiatan</td>
+                                        <td class="n num">Rp 50.000</td>
+                                        <td class="c num">26 Nov 2026</td>
+                                        <td class="c">
+                                            <span class="badge b-success"
+                                                >Lunas</span
+                                            >
+                                        </td>
+                                        <td class="c">
+                                            <span class="ra"
+                                                ><button
+                                                    class="btn btn-ghost btn-icon btn-sm"
+                                                    aria-label="Lihat"
+                                                >
+                                                    <svg class="i">
+                                                        <use href="#eye" />
+                                                    </svg></button
+                                                ><button
+                                                    class="btn btn-ghost btn-icon btn-sm"
+                                                    aria-label="Ubah"
+                                                >
+                                                    <svg class="i">
+                                                        <use href="#pencil" />
+                                                    </svg></button
+                                                ><button
+                                                    class="btn btn-ghost btn-icon btn-sm del"
+                                                    aria-label="Hapus"
+                                                    data-open="dConfirm"
+                                                >
+                                                    <svg class="i">
+                                                        <use href="#trash" />
+                                                    </svg></button
+                                            ></span>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <table class="tbl" data-v="load" hidden>
+                                <thead>
+                                    <tr>
+                                        <th>Siswa</th>
+                                        <th>Rombel</th>
+                                        <th>Tagihan</th>
+                                        <th>Nominal</th>
+                                        <th>Jatuh tempo</th>
+                                        <th>Status</th>
+                                        <th>Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody aria-busy="true">
+                                    <tr>
+                                        <td>
+                                            <div
+                                                class="sk"
+                                                style="width: 140px"
+                                            ></div>
+                                        </td>
+                                        <td><div class="sk"></div></td>
+                                        <td><div class="sk"></div></td>
+                                        <td>
+                                            <div
+                                                class="sk"
+                                                style="
+                                                    margin-left: auto;
+                                                    width: 80px;
+                                                "
+                                            ></div>
+                                        </td>
+                                        <td><div class="sk"></div></td>
+                                        <td>
+                                            <div
+                                                class="sk"
+                                                style="
+                                                    width: 60px;
+                                                    margin: auto;
+                                                "
+                                            ></div>
+                                        </td>
+                                        <td>
+                                            <div
+                                                class="sk"
+                                                style="
+                                                    width: 72px;
+                                                    margin: auto;
+                                                "
+                                            ></div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <div
+                                                class="sk"
+                                                style="width: 120px"
+                                            ></div>
+                                        </td>
+                                        <td><div class="sk"></div></td>
+                                        <td><div class="sk"></div></td>
+                                        <td>
+                                            <div
+                                                class="sk"
+                                                style="
+                                                    margin-left: auto;
+                                                    width: 80px;
+                                                "
+                                            ></div>
+                                        </td>
+                                        <td><div class="sk"></div></td>
+                                        <td>
+                                            <div
+                                                class="sk"
+                                                style="
+                                                    width: 60px;
+                                                    margin: auto;
+                                                "
+                                            ></div>
+                                        </td>
+                                        <td>
+                                            <div
+                                                class="sk"
+                                                style="
+                                                    width: 72px;
+                                                    margin: auto;
+                                                "
+                                            ></div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <div class="state" data-v="empty" hidden>
+                                <svg class="i"><use href="#receipt" /></svg
+                                ><b>Belum ada jenis tagihan</b>
+                                <p>
+                                    Tambahkan SPP untuk mulai menerbitkan
+                                    tagihan.
+                                </p>
+                                <button class="btn btn-default">
+                                    <svg class="i"><use href="#plus" /></svg
+                                    >Tambah jenis tagihan
+                                </button>
+                            </div>
+                            <div class="state" data-v="err" hidden>
+                                <svg class="i"><use href="#alert" /></svg
+                                ><b>Daftar tagihan gagal dimuat</b>
+                                <p>
+                                    Server tidak menjawab. Periksa koneksi lalu
+                                    muat ulang.
+                                </p>
+                                <button class="btn btn-outline">
+                                    Coba lagi
+                                </button>
+                            </div>
+                            <div class="state" data-v="lock" hidden>
+                                <svg class="i"><use href="#lock" /></svg
+                                ><b>Halaman ini khusus bendahara</b>
+                                <p>
+                                    Minta admin menambahkan peran bendahara ke
+                                    akun Anda.
+                                </p>
+                                <a class="btn btn-outline" href="#aplikasi"
+                                    >Kembali ke beranda</a
+                                >
+                            </div>
+                        </div>
+                        <div class="pg">
+                            <span>Menampilkan 1–3 dari [total]</span>
+                            <div class="stage">
+                                <button
+                                    class="btn btn-outline btn-icon btn-sm"
+                                    aria-label="Sebelumnya"
+                                    disabled
+                                >
+                                    <svg class="i">
+                                        <use href="#chevl" />
+                                    </svg></button
+                                ><button
+                                    class="btn btn-default btn-sm"
+                                    aria-current="page"
+                                >
+                                    1</button
+                                ><button class="btn btn-ghost btn-sm">2</button
+                                ><button
+                                    class="btn btn-outline btn-icon btn-sm"
+                                    aria-label="Berikutnya"
+                                >
+                                    <svg class="i"><use href="#chevr" /></svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="spec">
+                    <div class="meta">
+                        <h3>MoneyText, DateText</h3>
+                        <p>
+                            Rupiah integer, tanda minus untuk negatif. Tanggal
+                            dan jam WITA.
+                        </p>
+                    </div>
+                    <div class="stage" style="gap: 32px">
+                        <div>
+                            <div
+                                class="num"
+                                style="font-size: 20px; font-weight: 600"
+                            >
+                                Rp 1.250.000
+                            </div>
+                            <span class="muted small">positif</span>
+                        </div>
+                        <div>
+                            <div
+                                class="num"
+                                style="
+                                    font-size: 20px;
+                                    font-weight: 600;
+                                    color: var(--destructive);
+                                "
+                            >
+                                −Rp 8.000
+                            </div>
+                            <span class="muted small">potongan jajan</span>
+                        </div>
+                        <div>
+                            <div
+                                class="num"
+                                style="font-size: 20px; font-weight: 600"
+                            >
+                                26 Nov 2026
+                            </div>
+                            <span class="muted small">tanggal</span>
+                        </div>
+                        <div>
+                            <div
+                                class="num"
+                                style="font-size: 20px; font-weight: 600"
+                            >
+                                06.52 <span class="muted small">WITA</span>
+                            </div>
+                            <span class="muted small">jam</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="spec">
+                    <div class="meta">
+                        <h3>StudentPicker</h3>
+                        <p>Cari nama atau NIS; tampil foto kecil + rombel.</p>
+                    </div>
+                    <div
+                        class="menu picker"
+                        role="listbox"
+                        aria-label="Pilih siswa"
+                    >
+                        <div
+                            class="srch"
+                            style="max-width: none; margin-bottom: 4px"
+                        >
+                            <svg class="i"><use href="#search" /></svg
+                            ><input
+                                class="inp"
+                                placeholder="Cari nama atau NIS"
+                                aria-label="Cari siswa"
+                            />
+                        </div>
+                        <div class="opt on" role="option" aria-selected="true">
+                            <div class="av" style="border-radius: 6px">F</div>
+                            <div>
+                                <b>[Nama siswa]</b>
+                                <div class="muted small">
+                                    NIS [nomor] · [Rombel]
+                                </div>
+                            </div>
+                        </div>
+                        <div class="opt" role="option" aria-selected="false">
+                            <div class="av" style="border-radius: 6px">F</div>
+                            <div>
+                                <b>[Nama siswa]</b>
+                                <div class="muted small">
+                                    NIS [nomor] · [Rombel]
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="spec">
+                    <div class="meta">
+                        <h3>OfflineBanner</h3>
+                        <p>Muncul di area wali saat koneksi putus.</p>
+                    </div>
+                    <div class="offline" role="status">
+                        <svg class="i"><use href="#wifioff" /></svg
+                        ><span
+                            >Tidak ada koneksi. Data yang tampil dari kunjungan
+                            terakhir.</span
+                        ><button class="btn btn-outline btn-sm">
+                            Coba lagi
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <section class="blk" id="layar">
+                <header>
+                    <h2>Layar</h2>
+                    <code>staff · guardian · kiosk · auth layout</code>
+                </header>
+                <div class="screens">
+                    <div>
+                        <div class="cap">
+                            <span>Staf · Beranda bendahara · 1280 px</span
+                            ><span
+                                >disusun dari keputusan, bukan kartu
+                                statistik</span
+                            >
+                        </div>
+                        <div class="frame">
+                            <div class="stf-top">
+                                <div class="logo">
+                                    <i>MT</i>
+                                    <div>
+                                        Madrasah Terpadu<small>Unit MI</small>
+                                    </div>
+                                </div>
+                                <nav class="stf-nav" aria-label="Menu utama">
+                                    <a href="#layar"
+                                        >Data Induk<svg class="i">
+                                            <use href="#chev" /></svg></a
+                                    ><a href="#layar"
+                                        >Presensi<svg class="i">
+                                            <use href="#chev" /></svg></a
+                                    ><a href="#layar" aria-current="page"
+                                        >Keuangan<svg class="i">
+                                            <use href="#chev" /></svg></a
+                                    ><a href="#layar"
+                                        >Kesiswaan<svg class="i">
+                                            <use href="#chev" /></svg></a
+                                    ><a href="#layar"
+                                        >Ibadah<svg class="i">
+                                            <use href="#chev" /></svg></a
+                                    ><a href="#layar"
+                                        >Laporan<svg class="i">
+                                            <use href="#chev" /></svg
+                                    ></a>
+                                </nav>
+                                <select
+                                    class="inp"
+                                    style="width: 150px"
+                                    aria-label="Tahun ajaran"
+                                >
+                                    <option>[Tahun ajaran]</option>
+                                </select>
+                                <div class="av">NP</div>
+                            </div>
+                            <div class="stf-body">
+                                <nav class="crumb" aria-label="Breadcrumb">
+                                    <b aria-current="page">Beranda</b>
+                                </nav>
+                                <div class="home-grid">
+                                    <div class="card">
+                                        <div
+                                            class="card-h"
+                                            style="
+                                                display: flex;
+                                                justify-content: space-between;
+                                                align-items: baseline;
+                                            "
+                                        >
+                                            <h4>
+                                                Tagihan jatuh tempo minggu ini
+                                            </h4>
+                                            <a
+                                                class="btn btn-link btn-sm"
+                                                href="#aplikasi"
+                                                >Lihat semua</a
+                                            >
+                                        </div>
+                                        <ul
+                                            class="list"
+                                            style="margin-top: 12px"
+                                        >
+                                            <li>
+                                                <div>
+                                                    <b>[Nama siswa]</b>
+                                                    <div class="muted small">
+                                                        SPP · [Rombel]
+                                                    </div>
+                                                </div>
+                                                <span class="num"
+                                                    >Rp 1.250.000</span
+                                                ><span class="badge b-attn"
+                                                    >Jatuh tempo</span
+                                                >
+                                            </li>
+                                            <li>
+                                                <div>
+                                                    <b>[Nama siswa]</b>
+                                                    <div class="muted small">
+                                                        Kegiatan · [Rombel]
+                                                    </div>
+                                                </div>
+                                                <span class="num"
+                                                    >Rp 50.000</span
+                                                ><span class="badge b-attn"
+                                                    >Jatuh tempo</span
+                                                >
+                                            </li>
+                                        </ul>
+                                    </div>
+                                    <div class="card">
+                                        <div class="card-h">
+                                            <h4>
+                                                Pembayaran online belum
+                                                terekonsiliasi
+                                            </h4>
+                                        </div>
+                                        <div
+                                            class="state"
+                                            style="padding: 28px 16px"
+                                        >
+                                            <svg class="i">
+                                                <use href="#check" /></svg
+                                            ><b>Semua sudah cocok</b>
+                                            <p>
+                                                Tidak ada pembayaran Midtrans
+                                                yang menunggu pencocokan.
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="cap">
+                            <span
+                                >Wali · Beranda per anak dan kotak masuk · 360
+                                px</span
+                            ><span>urutan kartu = urgensi</span>
+                        </div>
+                        <div class="phones">
+                            <div class="phone">
+                                <div class="g-head">
+                                    <div class="av">A</div>
+                                    <div class="who">
+                                        <span class="muted small"
+                                            >MI Darul Istiqamah</span
+                                        ><b
+                                            >[Nama anak]
+                                            <svg class="i">
+                                                <use href="#chev" /></svg
+                                        ></b>
+                                    </div>
+                                    <button
+                                        class="btn btn-ghost btn-icon"
+                                        style="width: 44px; height: 44px"
+                                        aria-label="Kotak masuk"
+                                    >
+                                        <svg class="i i20">
+                                            <use href="#bell" />
+                                        </svg>
+                                    </button>
+                                </div>
+                                <div class="g-body">
+                                    <div class="g-card">
+                                        <h4>Hari ini · 26 Nov 2026</h4>
+                                        <div class="att">
+                                            <div>
+                                                <span class="muted small"
+                                                    >Masuk</span
+                                                ><b class="num">06.52</b
+                                                ><span class="badge b-success"
+                                                    >Tepat waktu</span
+                                                >
+                                            </div>
+                                            <div>
+                                                <span class="muted small"
+                                                    >Pulang</span
+                                                ><b class="muted">—</b
+                                                ><span class="muted small"
+                                                    >belum tap</span
+                                                >
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="g-card attn">
+                                        <h4>Perlu tindakan</h4>
+                                        <div
+                                            style="
+                                                display: flex;
+                                                justify-content: space-between;
+                                                align-items: baseline;
+                                            "
+                                        >
+                                            <span>SPP [bulan]</span
+                                            ><b class="num">Rp 1.250.000</b>
+                                        </div>
+                                        <p class="muted small">
+                                            Jatuh tempo 26 Nov 2026
+                                        </p>
+                                        <button class="btn btn-default g-btn">
+                                            Bayar tagihan
+                                        </button>
+                                    </div>
+                                    <div class="g-card">
+                                        <h4>Saldo kantin</h4>
+                                        <div class="bal num">Rp 42.000</div>
+                                        <p
+                                            class="muted"
+                                            style="font-size: 14px"
+                                        >
+                                            Jajan hari ini
+                                            <span class="num">Rp 8.000</span>
+                                        </p>
+                                        <button class="btn btn-outline g-btn">
+                                            Isi saldo
+                                        </button>
+                                    </div>
+                                    <div class="g-card">
+                                        <h4>Perilaku</h4>
+                                        <p style="font-size: 14px">
+                                            Belum ada catatan perilaku semester
+                                            ini.
+                                        </p>
+                                    </div>
+                                </div>
+                                <nav class="bnav" aria-label="Navigasi wali">
+                                    <a href="#layar" aria-current="page"
+                                        ><svg class="i i20">
+                                            <use href="#home" /></svg
+                                        >Beranda</a
+                                    ><a href="#layar"
+                                        ><svg class="i i20">
+                                            <use href="#receipt" /></svg
+                                        >Tagihan</a
+                                    ><a href="#layar"
+                                        ><svg class="i i20">
+                                            <use href="#clock" /></svg
+                                        >Riwayat</a
+                                    ><a href="#layar"
+                                        ><svg class="i i20">
+                                            <use href="#user" /></svg
+                                        >Akun</a
+                                    >
+                                </nav>
+                            </div>
+                            <div class="phone" style="height: auto">
+                                <div class="g-head">
+                                    <button
+                                        class="btn btn-ghost btn-icon"
+                                        style="width: 44px; height: 44px"
+                                        aria-label="Kembali"
+                                    >
+                                        <svg class="i i20">
+                                            <use href="#chevl" />
+                                        </svg>
+                                    </button>
+                                    <div class="who"><b>Kotak masuk</b></div>
+                                </div>
+                                <ul
+                                    class="list"
+                                    style="
+                                        font-size: 15px;
+                                        background: var(--card);
+                                    "
+                                >
+                                    <li style="border-top: 0">
+                                        <div>
+                                            <b
+                                                >[Nama anak] tiba di sekolah ·
+                                                06.52</b
+                                            >
+                                            <div class="muted small">
+                                                Presensi · hari ini
+                                            </div>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div>
+                                            <b
+                                                >Jajan Rp8.000 · sisa saldo
+                                                Rp42.000</b
+                                            >
+                                            <div class="muted small">
+                                                Kantin · hari ini
+                                            </div>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div>
+                                            <b>Tagihan SPP terbit</b>
+                                            <div class="muted small">
+                                                Keuangan · 26 Nov 2026
+                                            </div>
+                                        </div>
+                                    </li>
+                                </ul>
+                                <div style="padding: 16px">
+                                    <div class="offline small">
+                                        <svg class="i">
+                                            <use href="#wifioff" /></svg
+                                        ><span
+                                            >Tidak ada koneksi. Data dari
+                                            kunjungan terakhir.</span
+                                        >
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="cap">
+                            <span>Kiosk · Gerbang</span
+                            ><span
+                                >input fokus permanen, status warna + teks</span
+                            >
+                        </div>
+                        <div class="frame kiosk">
+                            <div class="k-main">
+                                <div
+                                    style="
+                                        display: flex;
+                                        justify-content: space-between;
+                                        align-items: center;
+                                    "
+                                >
+                                    <span class="muted"
+                                        >Petugas: [nama petugas]</span
+                                    ><button class="btn btn-ghost btn-sm">
+                                        <svg class="i">
+                                            <use href="#logout" /></svg
+                                        >Keluar
+                                    </button>
+                                </div>
+                                <input
+                                    class="inp"
+                                    style="height: 48px; font-size: 16px"
+                                    placeholder="Arahkan kartu QR ke pemindai"
+                                    aria-label="Kode kartu"
+                                />
+                                <div class="scan">
+                                    <div class="photo">Foto<br />siswa</div>
+                                    <div>
+                                        <span
+                                            class="badge b-success"
+                                            style="font-size: 14px"
+                                            >Hadir tepat waktu</span
+                                        >
+                                        <h3 style="margin-top: 8px">
+                                            [Nama siswa]
+                                        </h3>
+                                        <p
+                                            class="muted"
+                                            style="font-size: 16px"
+                                        >
+                                            [Rombel] · masuk
+                                            <span class="num">06.52</span>
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                            <aside class="k-side">
+                                <h4>10 scan terakhir</h4>
+                                <ul class="list">
+                                    <li>
+                                        <span>[Nama siswa]</span
+                                        ><span class="badge b-success"
+                                            >Hadir</span
+                                        >
+                                    </li>
+                                    <li>
+                                        <span>[Nama siswa]</span
+                                        ><span class="badge b-warning"
+                                            >Terlambat</span
+                                        >
+                                    </li>
+                                    <li>
+                                        <span>[Kode kartu]</span
+                                        ><span class="badge b-danger"
+                                            >Kartu tidak dikenal</span
+                                        >
+                                    </li>
+                                </ul>
+                            </aside>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="cap">
+                            <span>Kiosk · Kantin (POS)</span
+                            ><span>voucher dipotong dulu, lalu saldo</span>
+                        </div>
+                        <div class="frame k-main pos">
+                            <div class="card card-b col">
+                                <div
+                                    style="
+                                        display: flex;
+                                        gap: 12px;
+                                        align-items: center;
+                                    "
+                                >
+                                    <div
+                                        class="photo"
+                                        style="width: 56px; height: 70px"
+                                    >
+                                        Foto
+                                    </div>
+                                    <div>
+                                        <b style="font-size: 18px"
+                                            >[Nama siswa]</b
+                                        >
+                                        <p class="muted">[Rombel]</p>
+                                    </div>
+                                </div>
+                                <ul class="list" style="margin: 0 -16px">
+                                    <li>
+                                        <span>Saldo</span
+                                        ><b class="num">Rp 42.000</b>
+                                    </li>
+                                    <li>
+                                        <span>Voucher reward</span
+                                        ><b class="num">[nilai voucher]</b>
+                                    </li>
+                                    <li>
+                                        <span>Sisa limit hari ini</span
+                                        ><b class="num">[sisa limit]</b>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="col">
+                                <div class="amount num" aria-live="polite">
+                                    Rp 8.000
+                                </div>
+                                <div class="keypad">
+                                    <button>1</button><button>2</button
+                                    ><button>3</button><button>4</button
+                                    ><button>5</button><button>6</button
+                                    ><button>7</button><button>8</button
+                                    ><button>9</button><button>000</button
+                                    ><button>0</button
+                                    ><button aria-label="Hapus angka">
+                                        <svg class="i i20">
+                                            <use href="#x" />
+                                        </svg>
+                                    </button>
+                                </div>
+                                <button
+                                    class="btn btn-default btn-lg"
+                                    style="height: 56px; font-size: 18px"
+                                >
+                                    Bayar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="cap">
+                            <span>Auth · Masuk</span
+                            ><span>form terpusat, pesan galat generik</span>
+                        </div>
+                        <div class="frame login">
+                            <form class="card col" onsubmit="return false;">
+                                <div class="logo">
+                                    <i>MT</i>
+                                    <div>
+                                        Madrasah Terpadu<small
+                                            >Yayasan Amal Jaya Berkah</small
+                                        >
+                                    </div>
+                                </div>
+                                <div class="field">
+                                    <label for="l1"
+                                        >Nama pengguna, NIS, atau no. HP</label
+                                    ><input
+                                        id="l1"
+                                        class="inp"
+                                        autocomplete="username"
+                                    />
+                                </div>
+                                <div class="field">
+                                    <label for="l2">Kata sandi</label>
+                                    <div class="pw">
+                                        <input
+                                            id="l2"
+                                            class="inp"
+                                            type="password"
+                                            autocomplete="current-password"
+                                        /><button
+                                            class="btn btn-ghost"
+                                            type="button"
+                                            aria-label="Tampilkan kata sandi"
+                                            data-pw
+                                        >
+                                            <svg class="i">
+                                                <use href="#eye" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </div>
+                                <label class="chk"
+                                    ><input type="checkbox" />Ingat saya</label
+                                >
+                                <button class="btn btn-default btn-lg">
+                                    Masuk
+                                </button>
+                                <p
+                                    class="muted small"
+                                    style="text-align: center"
+                                >
+                                    Lupa kata sandi? Hubungi admin sekolah.
+                                </p>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <dialog id="dConfirm" aria-labelledby="cT">
+            <div class="dlg">
+                <div class="dlg-h">
+                    <div>
+                        <h3 id="cT" style="font-size: 18px">
+                            Hapus tagihan ini?
+                        </h3>
+                        <p>
+                            Tagihan SPP [Nama siswa] sebesar
+                            <span class="num">Rp 1.250.000</span> dibatalkan dan
+                            tercatat di jejak audit. Pembayaran yang sudah masuk
+                            tidak ikut terhapus.
+                        </p>
+                    </div>
+                </div>
+                <div class="dlg-f">
+                    <button class="btn btn-outline" data-close autofocus>
+                        Batal</button
+                    ><button class="btn btn-destructive" data-close>
+                        Hapus tagihan
+                    </button>
+                </div>
+            </div>
+        </dialog>
+        <dialog id="dForm" aria-labelledby="fT">
+            <form class="dlg" onsubmit="return false;">
+                <div class="dlg-h">
+                    <div>
+                        <h3 id="fT" style="font-size: 18px">
+                            Tambah jenis tagihan
+                        </h3>
+                        <p>Nominal default bisa diubah saat penerbitan.</p>
+                    </div>
+                    <button
+                        type="button"
+                        class="btn btn-ghost btn-icon btn-sm"
+                        aria-label="Tutup"
+                        data-close
+                    >
+                        <svg class="i"><use href="#x" /></svg>
+                    </button>
+                </div>
+                <div class="dlg-b">
+                    <div class="field">
+                        <label for="d1">Nama</label
+                        ><input id="d1" class="inp" placeholder="mis. SPP" />
+                    </div>
+                    <div class="field">
+                        <label for="d2">Sifat</label
+                        ><select id="d2" class="inp">
+                            <option>Bulanan</option>
+                            <option>Sekali</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label for="d3">Nominal default</label
+                        ><input
+                            id="d3"
+                            class="inp num err"
+                            inputmode="numeric"
+                            placeholder="Rp"
+                            aria-describedby="d3e"
+                            aria-invalid="true"
+                        /><span id="d3e" class="ferr"
+                            >Nominal wajib diisi.</span
+                        >
+                    </div>
+                </div>
+                <div class="dlg-f">
+                    <button type="button" class="btn btn-outline" data-close>
+                        Batal</button
+                    ><button class="btn btn-default" id="saveBtn">
+                        Simpan
+                    </button>
+                </div>
+            </form>
+        </dialog>
+        <div id="toasts" aria-live="polite"></div>
+
+        <script>
+            const $ = (s, r = document) => r.querySelector(s),
+                $$ = (s, r = document) => [...r.querySelectorAll(s)];
+            $$('.tg').forEach((g) =>
+                $$('button', g).forEach((b) =>
+                    b.addEventListener('click', () => {
+                        $$('button', g).forEach((x) =>
+                            x.setAttribute('aria-pressed', x === b),
+                        );
+                        if (g.id === 'themeTg')
+                            document.documentElement.dataset.theme =
+                                b.dataset.t;
+                    }),
+                ),
+            );
+            $$('[data-pw]').forEach(
+                (b) =>
+                    (b.onclick = () => {
+                        const i = b.previousElementSibling,
+                            s = i.type === 'password';
+                        i.type = s ? 'text' : 'password';
+                        b.setAttribute(
+                            'aria-label',
+                            s
+                                ? 'Sembunyikan kata sandi'
+                                : 'Tampilkan kata sandi',
+                        );
+                        $('use', b).setAttribute(
+                            'href',
+                            s ? '#eyeoff' : '#eye',
+                        );
+                    }),
+            );
+            let opener;
+            $$('[data-open]').forEach(
+                (b) =>
+                    (b.onclick = () => {
+                        opener = b;
+                        $('#' + b.dataset.open).showModal();
+                    }),
+            );
+            $$('dialog').forEach((d) => {
+                d.addEventListener('close', () => opener && opener.focus());
+                $$('[data-close]', d).forEach(
+                    (b) => (b.onclick = () => d.close()),
+                );
+            });
+            $('#saveBtn').onclick = (e) => {
+                const b = e.currentTarget;
+                b.disabled = true;
+                b.innerHTML =
+                    '<span class="spin" aria-hidden="true"></span>Menyimpan';
+                setTimeout(() => {
+                    b.disabled = false;
+                    b.textContent = 'Simpan';
+                    $('#dForm').close();
+                    toast('Jenis tagihan tersimpan.');
+                }, 900);
+            };
+            function toast(t) {
+                const el = document.createElement('div');
+                el.className = 'toast';
+                el.innerHTML =
+                    '<svg class="i"><use href="#check"/></svg><div><b></b></div>';
+                el.querySelector('b').textContent = t;
+                $('#toasts').append(el);
+                setTimeout(() => el.remove(), 3500);
+            }
+            $('[data-toast]').onclick = () =>
+                toast('Pembayaran tercatat · 06.52');
+            $$('[data-st]').forEach(
+                (t) =>
+                    (t.onclick = () => {
+                        $$('[data-st]').forEach((x) =>
+                            x.setAttribute('aria-selected', x === t),
+                        );
+                        $$('#tbl [data-v]').forEach(
+                            (v) => (v.hidden = v.dataset.v !== t.dataset.st),
+                        );
+                    }),
+            );
+        </script>
+    </body>
 </html>

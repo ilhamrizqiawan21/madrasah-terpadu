@@ -40,20 +40,20 @@ test('admin tanpa 2FA tetap dapat membuka halaman pengaturan keamanan tanpa redi
         ->assertOk();
 });
 
-test('admin dengan 2FA aktif dapat mengakses dashboard', function (): void {
+test('admin dengan 2FA aktif dapat mengakses area staf', function (): void {
     $admin = User::factory()->withTwoFactor()->create();
     $admin->assignRole(RoleEnum::Admin->value);
 
     $this->actingAs($admin)
-        ->get(route('dashboard'))
+        ->get(route('admin.dashboard'))
         ->assertOk();
 });
 
-test('peran non-istimewa tanpa 2FA tetap dapat mengakses dashboard', function (): void {
+test('peran non-istimewa tanpa 2FA tetap dapat mengakses area staf', function (): void {
     $teacher = User::factory()->create();
     $teacher->assignRole(RoleEnum::Teacher->value);
 
     $this->actingAs($teacher)
-        ->get(route('dashboard'))
+        ->get(route('admin.dashboard'))
         ->assertOk();
 });

@@ -347,3 +347,38 @@ Unik (`student_id`,`academic_year_id`,`aspect`).
 ### `exam_results` (T-1506)
 
 `exam_session_id` unik, `auto_points`, `essay_points null`, `max_points`, `score tinyint null`, `status` (`awaiting_essay|final`), `computed_at`.
+
+## L. Modul kerangka (ADR-022) — field minimal, isi menyusul
+
+### `feature_flags` (T-211)
+
+`key string unique` (mis. `billing`, `midtrans`, `wallet`, `cbt`, `staff_attendance`), `enabled bool`, `updated_by → users`, timestamps. Dibaca lewat `FeatureFlags::enabled()` (cache, diinvalidasi saat diubah); menu dan middleware `feature:<key>` memakai nilai ini.
+
+### `student_cards` — perluasan RFID (T-501, ADR-022)
+
+Tambah `kind string` (`qr|rfid`). Untuk `rfid`, `token_hash` = SHA-256 dari UID yang dinormalisasi (huruf besar, tanpa pemisah). Pembaca RFID USB bekerja seperti keyboard sehingga memakai input gerbang yang sama.
+
+### `staff_attendances`, `staff_leave_requests` (T-1601)
+
+`staff_attendances`: `user_id`, `work_date date`, `check_in_at null`, `check_out_at null`, `status` (`present|late|leave|sick|absent`), `source` (`gate|manual`), `note null`. Unik (`user_id`,`work_date`).
+`staff_leave_requests`: `user_id`, `type` (`leave|sick|duty`), `starts_on`, `ends_on`, `reason`, `status` (`pending|approved|rejected`), `decided_by null`, `decided_at null`.
+
+### `lesson_periods`, `lesson_schedules` (T-1602)
+
+`lesson_periods`: `unit_id`, `sort_order`, `starts_at time`, `ends_at time`. `lesson_schedules`: `classroom_id`, `academic_year_id`, `weekday tinyint` (1–7), `lesson_period_id`, `subject_id`, `teacher_id → users`. Unik (`classroom_id`,`weekday`,`lesson_period_id`).
+
+### `assignments` (T-1603)
+
+`subject_id`, `classroom_id`, `teacher_id → users`, `title`, `description text null`, `due_at`, `attachment_path null`. Tanpa pengumpulan jawaban di kerangka.
+
+### `report_cards` (T-1604)
+
+`student_id`, `academic_year_id`, `semester` (`odd|even`), `file_path` (PDF, disk privat), `published_at null`, `uploaded_by → users`. Unik (`student_id`,`academic_year_id`,`semester`).
+
+### `cash_categories`, `cash_entries` (T-1605) — append-only
+
+`cash_categories`: `unit_id null`, `code`, `name`, `direction` (`in|out`), `is_active`. `cash_entries`: `unit_id`, `entry_date`, `cash_category_id`, `amount bigint` (positif), `description`, `reference null`, `recorded_by`, `reverses_entry_id null` (koreksi = entri pembalik).
+
+### `dorm_rooms`, `dorm_placements` (T-1606)
+
+`dorm_rooms`: `unit_id null`, `name`, `gender` (`male|female`), `capacity smallint`, `is_active`. `dorm_placements`: `student_id`, `dorm_room_id`, `starts_on`, `ends_on null`. Satu penempatan aktif per siswa.

@@ -22,7 +22,7 @@ Repo rujukan (hanya-baca): `~/Projects/sipesan`, `~/Projects/pib-laravel`, `~/Pr
 6. `docs/PAYMENTS.md` — wajib untuk Fase 7–8
 7. `docs/DECISIONS.md` — ADR (jangan dibalik) + usulan terbuka (jangan dikerjakan sebelum diputuskan)
 8. `docs/REUSE_MAP.md` — kode yang di-port
-9. `docs/TODO.md` — **ambil satu tugas**
+9. `docs/TODO.md` — **ambil satu paket** (bagian "Rencana rilis & paket")
 
 ## Yang sudah ada (jangan ditulis ulang)
 
@@ -42,15 +42,19 @@ php artisan migrate:fresh --seed   # HANYA DB lokal/testing
 npx shadcn@latest add <komponen>   # satu-satunya cara menambah komponen UI dasar
 ```
 
-## Alur kerja satu tugas
+## Alur kerja per paket
 
-`pilih 1 tugas TODO` → `tes dulu (merah)` → `implementasi minimal (hijau)` → `composer check` → `cek UI di browser + antislop-ui` → `update dokumen` → `centang TODO + bukti` → `git commit per tugas` → `laporan`.
+Satu putaran = satu paket dari `TODO.md`. Untuk **setiap tugas** di dalamnya, berurutan:
 
-**Push, branch, dan PR urusan pemilik**: agen boleh `git commit` per tugas dengan Conventional Commits setelah tes & TODO selesai, tetapi dilarang `push`, membuat branch, merge, rebase, atau PR. Pemilik melakukan `git push` setelah satu fase selesai.
+`ambil tugas berikutnya di paket` → `tes dulu (merah)` → `implementasi minimal (hijau)` → `composer check` → `cek UI di browser + antislop-ui` → `update dokumen` → `centang TODO + bukti` → `git commit per tugas` → tugas berikutnya. Laporan sekali di akhir paket.
+
+Berhenti di tengah paket bila: check merah dua kali pada tugas yang sama, aturan ambigu, tugas [TERBUKA], butuh dependensi baru, atau perlu mengubah migration/ADR (AI_RULES §2).
+
+**Push, branch, dan PR urusan pemilik**: agen boleh `git commit` per tugas dengan Conventional Commits setelah tes & TODO selesai, tetapi dilarang `push`, membuat branch, merge, rebase, atau PR. Jalur paralel memakai worktree + branch yang dibuat pemilik; pemilik yang merge dan push.
 
 ## 14 aturan emas (rincian di AI_RULES)
 
-1. Satu tugas per kali, urut fase. Tugas bertanda [TERBUKA] tidak dikerjakan sebelum diputuskan.
+1. Satu paket per putaran; di dalamnya satu tugas per commit, berurutan. Tugas bertanda [TERBUKA] tidak dikerjakan sebelum diputuskan.
 2. Data domain hanya ditulis lewat `app/Services`, dalam transaksi, dengan `AuditLogger`.
 3. Uang & poin = ledger append-only; saldo hanya berubah lewat `WalletService`/`PointLedgerService`. Rupiah = integer.
 4. Status pembayaran hanya berubah dari webhook Midtrans yang lolos signature + Get Status + cocok nominal (`PAYMENTS.md`).
@@ -65,16 +69,16 @@ npx shadcn@latest add <komponen>   # satu-satunya cara menambah komponen UI dasa
 13. Tanpa `dd()`, `dump()`, `console.log`, `@phpstan-ignore`, `any`, URL string di TSX (pakai Wayfinder).
 14. Jujur: gagal/dilewati dikatakan. Ambigu → **berhenti dan tanya**.
 
-## Format laporan akhir tiap tugas
+## Format laporan akhir tiap paket
 
 ```
-Tugas: T-xxx <judul>
-Perubahan: <berkas penting>
-Bukti: composer check ✔ (Pest N tes, Larastan 0) · <tes kunci> · <verifikasi UI>
-Antislop: <lolos / temuan diperbaiki>
+Paket: P-xx <judul> · Jalur: <A/B/...> · Status: selesai / berhenti di T-xxx (alasan)
+Per tugas:
+  T-xxx <judul> — commit <hash> · tes kunci · verifikasi UI · antislop
+Bukti akhir: composer check ✔ (Pest N tes, Larastan 0)
+Berkas bersama yang disentuh: <daftar atau "tidak ada">
 Dokumen diperbarui: <daftar>
-Keputusan/asumsi · Risiko/Catatan
-Usulan commit: <type(scope): ringkasan (T-xxx)> — untuk di-commit oleh pemilik
+Perlu keputusan pemilik/arsitek: <daftar atau "tidak ada">
 ```
 
 ## Jangan

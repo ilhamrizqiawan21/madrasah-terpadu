@@ -1,7 +1,15 @@
+export type Branding = {
+    appName: string;
+    foundationName: string;
+    logoUrl: string | null;
+};
+
 export type User = {
     id: number;
     name: string;
-    email: string;
+    username?: string | null;
+    phone?: string | null;
+    email: string | null;
     avatar?: string;
     email_verified_at: string | null;
     two_factor_enabled?: boolean;

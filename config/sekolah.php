@@ -10,6 +10,8 @@ declare(strict_types=1);
 
 return [
 
+    'foundation_name' => 'Yayasan Amal Jaya Berkah',
+
     'attendance' => [
         // Default gate times per unit, overridable in Pengaturan > Presensi.
         'defaults' => [

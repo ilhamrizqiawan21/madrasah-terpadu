@@ -12,3 +12,23 @@ export type NavItem = {
     icon?: LucideIcon | null;
     isActive?: boolean;
 };
+
+export type StaffNavItem = {
+    label: string;
+    route: string;
+    href: string;
+    permission: string;
+};
+
+export type StaffNavGroup = {
+    key: string;
+    label: string;
+    items: StaffNavItem[];
+};
+
+export type SchoolContext = {
+    unit: string;
+    academicYear: string;
+    units: string[];
+    academicYears: string[];
+};
