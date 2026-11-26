@@ -118,19 +118,6 @@ test('login dibatasi maksimal 5 percobaan per menit per identitas dan IP', funct
 });
 
 test('percobaan login gagal dicatat di audit_logs tanpa password', function (): void {
-    Schema::create('audit_logs', function (Blueprint $table): void {
-        $table->id();
-        $table->foreignId('user_id')->nullable();
-        $table->string('action', 32);
-        $table->string('subject_type');
-        $table->unsignedBigInteger('subject_id')->nullable();
-        $table->json('before')->nullable();
-        $table->json('after')->nullable();
-        $table->string('ip', 45)->nullable();
-        $table->string('user_agent', 255)->nullable();
-        $table->timestamp('created_at')->nullable();
-    });
-
     $user = User::factory()->create(['username' => 'guru.ani']);
 
     $this->post(route('login.store'), [
@@ -141,7 +128,7 @@ test('percobaan login gagal dicatat di audit_logs tanpa password', function (): 
     $log = DB::table('audit_logs')->where('action', 'login_failed')->first();
 
     expect($log)->not->toBeNull()
-        ->and($log->subject_id)->toBe($user->id)
+        ->and($log->user_id)->toBe($user->id)
         ->and($log->after)->toContain('guru.ani')
         ->and($log->after)->not->toContain('rahasia-salah');
 });

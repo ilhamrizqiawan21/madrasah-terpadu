@@ -7,6 +7,7 @@ namespace App\Providers;
 use App\Actions\Fortify\CreateNewUser;
 use App\Actions\Fortify\ResetUserPassword;
 use App\Models\User;
+use App\Services\Audit\AuditLogger;
 use App\Support\PhoneNumber;
 use Illuminate\Auth\Events\Login;
 use Illuminate\Cache\RateLimiting\Limit;
@@ -135,21 +136,12 @@ class FortifyServiceProvider extends ServiceProvider
 
     private function recordFailedLogin(Request $request, ?User $user, string $identity): void
     {
-        if (! Schema::hasTable('audit_logs')) {
-            return;
-        }
-
-        DB::table('audit_logs')->insert([
-            'user_id' => $user?->id,
-            'action' => 'login_failed',
-            'subject_type' => User::class,
-            'subject_id' => $user?->id,
-            'before' => null,
-            'after' => json_encode(['identity' => $identity], JSON_THROW_ON_ERROR),
-            'ip' => $request->ip(),
-            'user_agent' => Str::limit((string) $request->userAgent(), 255, ''),
-            'created_at' => now(),
-        ]);
+        app(AuditLogger::class)->record(
+            action: 'login_failed',
+            subject: User::class,
+            after: ['identity' => $identity],
+            userId: $user?->id,
+        );
     }
 
     /**
