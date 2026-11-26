@@ -104,6 +104,11 @@
             "npm run types:check",
             "npm run check"
         ],
+        "check:mysql": [
+            "Composer\\Config::disableProcessTimeout",
+            "@php artisan config:clear --ansi",
+            "pest -c phpunit.mysql.xml --group=mysql"
+        ],
         "fix": [
             "pint",
             "npm run check:fix"
