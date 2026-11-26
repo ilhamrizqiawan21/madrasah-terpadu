@@ -37,6 +37,7 @@ app/
 │   ├── Ledger/             # BalanceCalculator
 │   ├── Payments/           # MidtransSignature ✅, MidtransStatusMapper
 │   ├── Points/             # ThresholdEvaluator, AttitudeScoreCalculator
+│   ├── Exam/               # ExamScorer, ExamEligibilityResolver, ShuffleOrder, SessionClock
 │   └── Quran/              # AyahRange, RubricScorer, PibScore
 ├── Enums/                  # Role ✅, AttendanceStatus, InvoiceStatus, WalletEntryType, PointAccount, ...
 ├── Models/                 # Relasi, cast, scope. Tanpa logika bisnis
@@ -92,6 +93,7 @@ public/manifest.webmanifest
 | Kantin  | `/kantin`             | `kiosk-layout`                                                            | `kasir_kantin`, `bendahara`, `admin`                  |
 | Webhook | `/webhooks/midtrans`  | —                                                                         | publik, signature wajib, `throttle:120,1`, tanpa CSRF |
 | Push    | `/push/subscriptions` | —                                                                         | pengguna login                                        |
+| Ujian   | `/ujian/...`          | `exam-layout`: layar penuh, tanpa menu, satu soal per layar               | guard `student` (NIS + PIN), hanya sesi ujiannya      |
 
 `/dashboard` mengarahkan sesuai peran: wali → `/wali`, petugas gerbang → `/gerbang`, kasir → `/kantin`, lainnya → `/admin`.
 Menu dibangun **di server** dari izin pengguna (`HandleInertiaRequests` membagikan `navigation`): menu tidak pernah menampilkan rute yang akan ditolak.
@@ -134,6 +136,15 @@ Rincian, status, dan skenario uji: `PAYMENTS.md`. Ringkasnya:
 3. Respons JSON singkat (nama, foto kecil, rombel, hasil). Target ≤ 300 ms di server.
 4. Mode offline tidak didukung fase ini; layar menampilkan status koneksi.
 
+## 8b. Alur kritis: sesi ujian CBT (ADR-020)
+
+1. Siswa masuk (guard `student`, NIS + PIN, rate limit per NIS) → pilih ujian yang terbuka untuk rombelnya.
+2. `ExamSessionService::start()` dalam transaksi + lock: cek jendela waktu, token, mode perangkat, **kelayakan ADR-016** (`ExamEligibilityResolver`), buat/lanjutkan sesi. Sesi yang ada → ambil alih: `device_token` baru, perangkat lama ditolak (409), dicatat sebagai `takeover`.
+3. Paket soal dikirim sekali tanpa `answer_key`; urutan dari `shuffle_seed`.
+4. Jawaban dikirim batch (`client_ts`), upsert idempoten; diterima bila `client_ts ≤ deadline` dan diterima ≤ 120 detik setelah deadline.
+5. Selesai oleh siswa, admin, atau job `CloseExpiredExamSessions` (tiap menit) → `ScoreExamSession` di antrean → `exam_results`.
+6. Monitor admin: polling 5 detik, satu kueri agregat per ujian. WebSocket hanya lewat ADR baru.
+
 ## 9. Keamanan
 
 - **Autentikasi**: Fortify; login dengan username / no. HP / NIS; rate limit 5/menit per identitas+IP; sesi diregenerasi; `EnsureActiveUser`; 2FA wajib untuk `admin` dan `bendahara` (T-104).
@@ -144,7 +155,8 @@ Rincian, status, dan skenario uji: `PAYMENTS.md`. Ringkasnya:
 - **Berkas**: disk privat; akses lewat rute ber-policy atau `temporarySignedRoute` 5 menit; MIME/ekstensi/ukuran ≤ 2 MB divalidasi; gambar dikompres.
 - **Token kartu QR**: 32 byte acak, disimpan sebagai hash SHA-256; dapat dicabut.
 - **Secret** hanya di `.env`. `APP_DEBUG=false` di produksi. Log tanpa token, password, payload pembayaran lengkap, nomor HP utuh.
-- **Audit**: `audit_logs` untuk data induk, keuangan, poin, nilai, peran, pengaturan.
+- **Audit**: `audit_logs` untuk data induk, keuangan, poin, nilai, peran, pengaturan, dispensasi ujian, koreksi kunci soal.
+- **Ujian**: guard `student` terpisah dari `web`; sesi siswa hanya berlaku di `/ujian`; kunci jawaban tidak pernah ada di props Inertia siswa (dites); ekspor Excel menetralkan awalan `= + - @`.
 
 ## 10. Performa
 
@@ -162,4 +174,5 @@ Rincian, status, dan skenario uji: `PAYMENTS.md`. Ringkasnya:
 | Feature     | Pest `tests/Feature/<Modul>`     | Setiap rute: auth, otorisasi, validasi, efek data, audit, notifikasi (`Notification::fake`) |
 | Konkurensi  | Pest + MariaDB (`--group=mysql`) | Pembelian ganda, webhook ganda, top-up bersamaan                                            |
 | Frontend    | `tsc`, `vp check`                | Semua TSX                                                                                   |
-| Browser     | Playwright (Fase 14)             | Wali bayar, scan gerbang, POS                                                               |
+| Browser     | Playwright (Fase 14)             | Wali bayar, scan gerbang, POS, ujian CBT putus-sambung                                      |
+| Beban       | k6/skrip PHP (T-1406)            | Gerbang, POS, **CBT 250 siswa serentak** (ADR-020)                                          |

@@ -57,7 +57,7 @@ Palet aktif per layar maksimal: netral + primary + satu warna status yang releva
 
 ### Staf (`staff-layout`)
 
-- Topbar: logo + nama unit aktif (kiri), **menu utama rata tengah** berupa grup dropdown (Data Induk, Presensi, Keuangan, Kesiswaan, Ibadah, Laporan, Pengaturan), pemilih unit/tahun ajaran, akun (kanan). Sesuai standar 02.
+- Topbar: logo + nama unit aktif (kiri), **menu utama rata tengah** berupa grup dropdown (Data Induk, Presensi, Keuangan, Kesiswaan, Ibadah, Ujian, Laporan, Pengaturan), pemilih unit/tahun ajaran, akun (kanan). Sesuai standar 02.
 - Di bawah 1024 px: menu pindah ke sheet kiri dengan tombol hamburger (`aria-expanded`, Escape menutup, fokus kembali ke tombol).
 - Breadcrumb di setiap halaman di bawah topbar.
 - Halaman indeks: `PageHeader` (judul, satu aksi utama di kanan, ekspor icon-only) → filter satu baris → tabel → paginasi.
@@ -82,6 +82,13 @@ Palet aktif per layar maksimal: netral + primary + satu warna status yang releva
 - Gerbang: input fokus permanen, hasil scan besar (nama, foto, rombel, status berwarna + teks), 10 scan terakhir di sisi kanan. Bunyi pendek berbeda untuk sukses/terlambat/gagal.
 - Kantin: kolom kiri identitas siswa + saldo + voucher + sisa limit; kanan papan angka nominal + tombol "Bayar". Konfirmasi dua langkah hanya bila nominal > Rp50.000.
 
+### Ujian (`exam-layout`) — ADR-020
+
+- Layar penuh, tanpa menu. Header: nama siswa, mapel, sisa waktu (teks tenang; warna `--warning` hanya 5 menit terakhir), tombol daftar soal.
+- Satu soal per layar; pilihan berupa kartu ≥ 48 px; tanda "ragu-ragu"; navigasi Sebelumnya/Berikutnya di bawah; daftar nomor soal (terjawab, ragu, kosong dibedakan bentuk + teks, bukan warna saja).
+- Status sinkron selalu terlihat ("Tersimpan" / "Menyimpan di perangkat, akan dikirim"). Tidak ada hitung mundur besar atau animasi yang menegangkan anak.
+- Mode `lab` menampilkan layar "Masuk layar penuh untuk mulai".
+
 ### Auth
 
 - Form login terpusat (bukan dua panel, standar 04), logo + nama yayasan di atas form, show/hide password, pesan galat generik.
@@ -102,6 +109,8 @@ Palet aktif per layar maksimal: netral + primary + satu warna status yang releva
 | `EmptyState`                                   | sebab + satu aksi yang mengisi ("Belum ada jenis tagihan. Tambahkan SPP untuk mulai menerbitkan tagihan.")                            |
 | `ErrorState`, `NoAccessState`, `OfflineBanner` | sebab + langkah berikutnya                                                                                                            |
 | `DateText`                                     | tanggal WITA format `26 Nov 2026`, jam `06.52`                                                                                        |
+| `MistakeCounter` (ADR-018)                     | angka besar `tabular-nums`; tombol − / + ≥ 44 px; PageDown/PageUp pada kriteria aktif (ring primary + teks "aktif"); `aria-live`      |
+| `ArabicText` (ADR-020)                         | `dir="rtl"`, font Arab self-hosted, kontrol ukuran teks (A− / A+) yang diingat per perangkat                                          |
 
 ## 5. Empat keadaan (wajib setiap layar data)
 

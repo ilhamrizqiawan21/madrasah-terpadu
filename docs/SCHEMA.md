@@ -134,6 +134,8 @@ Unik (`student_id`,`school_date`). Indeks (`school_date`,`status`).
 
 ## D. Keuangan sekolah (Fase 6)
 
+_Syarat ujian (ADR-016): lihat `exam_periods`, `exam_period_requirements`, `exam_eligibility_overrides` di akhir bagian D._
+
 ### `fee_types` (T-601)
 
 `unit_id null`, `name`, `category string(30)` (SPP, Uang Pangkal, Kegiatan, ...), `recurrence string` (`monthly|once`), `default_amount bigint`, `is_active`, timestamps.
@@ -162,6 +164,18 @@ Indeks (`status`,`due_date`), (`student_id`,`status`). Sisa = `amount - adjustme
 ### `payment_allocations` (T-605)
 
 `payment_id`, `invoice_id`, `amount bigint`. Unik (`payment_id`,`invoice_id`).
+
+### `exam_periods` (T-611, ADR-016)
+
+`unit_id`, `name`, `delivery string` (`cbt|paper`), `starts_on date`, `ends_on date`, `status string` (`draft|active|closed`), `created_by → users`, timestamps.
+
+### `exam_period_requirements` (T-611)
+
+`exam_period_id`, `fee_type_id`, `period_until date null` (untuk tagihan bulanan: wajib lunas s.d. bulan ini), `invoice_scope string` (`up_to_period|all_open`). Kelayakan **tidak disimpan**; dihitung `ExamEligibilityResolver` dari `invoices` + overrides.
+
+### `exam_eligibility_overrides` (T-612)
+
+`exam_period_id`, `student_id`, `reason text`, `granted_by → users` (hanya admin), `granted_at`, `revoked_by null`, `revoked_at null`. Unik aktif per (`exam_period_id`,`student_id`). Diaudit.
 
 ## E. Pembayaran online (Fase 7)
 
@@ -245,7 +259,8 @@ Unik (`student_id`,`academic_year_id`,`discipline_threshold_id`) — satu ambang
 
 ### `habit_items` (T-1001)
 
-`unit_id null`, `name`, `aspect string` (`spiritual|social`), `sort_order smallint`, `is_active`, timestamps.
+`unit_id null`, `name`, `aspect string` (`spiritual|social`), `sort_order smallint`, `is_active`, `is_locked bool default false`, timestamps.
+Seeder: lima item terkunci (Sholat Subuh, Dzuhur, Ashar, Maghrib, Isya; `spiritual`, `unit_id null`). Item terkunci tidak dapat dihapus, dinonaktifkan, atau diubah nama/aspeknya (Service + Policy, ADR-019).
 
 ### `habit_logs` (T-1002)
 
@@ -258,9 +273,13 @@ Unik (`student_id`,`habit_item_id`,`log_date`). Indeks (`log_date`,`verification
 
 `number tinyint unique` (1–114), `name_latin`, `name_arabic`, `ayah_count smallint`, `juz_start tinyint`.
 
+### `memorization_materials` (T-1107, ADR-017) — master hadits & doa
+
+`unit_id null`, `kind string` (`hadith|prayer`), `title`, `arabic_text text null`, `translation text null`, `source string null`, `sort_order`, `is_active`, timestamps. Materi yang punya setoran hanya dinonaktifkan.
+
 ### `memorization_targets` (T-1102)
 
-`unit_id`, `grade string(10)`, `academic_year_id`, `title`, `ranges json` (daftar {surah, ayah_from, ayah_to}), `is_active`.
+`unit_id`, `grade string(10)`, `academic_year_id`, `kind string` (`quran|hadith|prayer`), `title`, `ranges json null` (Qur'an: daftar {surah, ayah_from, ayah_to}), `material_ids json null` (hadits/doa), `is_active`.
 
 ### `rubrics`, `rubric_versions`, `rubric_criteria` (T-1103, port penilaian-tahfidz)
 
@@ -268,7 +287,7 @@ Unik (`student_id`,`habit_item_id`,`log_date`). Indeks (`log_date`,`verification
 
 ### `memorization_records` (T-1104)
 
-`student_id`, `teacher_id → users`, `rubric_version_id`, `type string` (`ziyadah|murajaah`), `surah_from`, `ayah_from`, `surah_to`, `ayah_to`, `scores json` (per kriteria),
+`student_id`, `teacher_id → users`, `rubric_version_id`, `kind string` (`quran|hadith|prayer`), `type string null` (`ziyadah|murajaah`, wajib hanya untuk `quran`), `memorization_material_id null` (wajib untuk hadits/doa), `surah_from null`, `ayah_from null`, `surah_to null`, `ayah_to null` (wajib untuk `quran`), `scores json` (per kriteria),
 `final_score decimal(5,2)`, `predicate string(2)`, `passed bool`, `note null`, `recorded_on date`, timestamps. Indeks (`student_id`,`recorded_on`).
 
 ### `memorized_ayahs` (T-1105) — turunan untuk progres
@@ -286,3 +305,45 @@ Unik (`student_id`,`habit_item_id`,`log_date`). Indeks (`log_date`,`verification
 `student_id`, `academic_year_id`, `aspect string` (`spiritual|social`), `computed_score decimal(5,2)`, `computed_predicate string(1)`, `final_predicate string(1) null`,
 `description text null`, `inputs json` (angka sumber perhitungan, untuk jejak), `status string` (`draft|locked|approved`), `locked_by null`, `locked_at null`, `approved_by null`, `approved_at null`, timestamps.
 Unik (`student_id`,`academic_year_id`,`aspect`).
+
+## K. Ujian CBT (Fase 15, ADR-020)
+
+### `subjects` (T-1501)
+
+`unit_id`, `name`, `code string(20)`, `is_active`. Unik (`unit_id`,`code`).
+
+### `teaching_assignments` (T-1501)
+
+`user_id` (guru), `subject_id`, `classroom_id`, `academic_year_id`. Unik keempatnya.
+
+### `student_exam_pins` (T-1502)
+
+`student_id` unik, `pin_hash`, `reset_by → users`, `reset_at`. PIN tidak pernah ditampilkan ulang setelah dibuat.
+
+### `exams` (T-1503)
+
+`exam_period_id null`, `subject_id`, `title`, `grade string(10) null`, `classroom_ids json`, `opens_at`, `closes_at`, `duration_minutes`, `shuffle_questions bool`, `shuffle_options bool`, `weights json` (default {mcq:2, matching:2, essay_paper:4}), `access_token string null`, `violation_limit tinyint default 3`, `device_modes json` (`lab|tablet|phone`), `show_result_to_guardian bool default false`, `status` (`draft|scheduled|running|finished`), `locked_at null`, `created_by`, timestamps.
+
+### `exam_questions`, `exam_question_options` (T-1504)
+
+`exam_questions`: `exam_id`, `type` (`mcq|matching|essay_paper`), `body text`, `is_rtl bool`, `image_path null`, `sort_order`, `answer_key json` (tidak pernah dikirim ke klien). `exam_question_options`: `exam_question_id`, `label`, `body text`, `sort_order`.
+
+### `exam_sessions` (T-1505)
+
+`exam_id`, `student_id`, `started_at`, `deadline_at`, `extra_minutes smallint default 0`, `status` (`in_progress|locked|submitted|auto_closed|force_closed`), `device_type` (`lab|tablet|phone`), `device_token string(64)`, `shuffle_seed int`, `last_seen_at`, `takeover_count`. Unik (`exam_id`,`student_id`).
+
+### `exam_answers` (T-1505)
+
+`exam_session_id`, `exam_question_id`, `answer json null`, `is_flagged bool`, `client_ts timestamp`, `received_at`. Unik (`exam_session_id`,`exam_question_id`); upsert idempoten.
+
+### `exam_violations` (T-1508) — append-only
+
+`exam_session_id`, `kind` (`tab_hidden|fullscreen_exit|copy_paste|takeover`), `occurred_at`, `counted bool` (false untuk mode `phone`).
+
+### `exam_essay_scores` (T-1507)
+
+`exam_session_id`, `exam_question_id`, `score tinyint`, `scored_by → users`, timestamps. Unik (`exam_session_id`,`exam_question_id`).
+
+### `exam_results` (T-1506)
+
+`exam_session_id` unik, `auto_points`, `essay_points null`, `max_points`, `score tinyint null`, `status` (`awaiting_essay|final`), `computed_at`.

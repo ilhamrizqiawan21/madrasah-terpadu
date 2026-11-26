@@ -70,6 +70,134 @@ Akun wali dibuat lewat impor/data induk dengan password awal acak. Tidak ada hal
 **Akibat:** kolom `must_change_password` tidak dibuat; tidak ada middleware atau redirect paksa. Bila diaktifkan kembali nanti: migration baru + ADR baru.
 **Agen:** jangan menambahkan kolom, middleware, atau alur paksa ganti password.
 
+## ADR-016 — Syarat ujian: tagihan wajib lunas (Diterima, 2026-11-26; semula U-07)
+
+**Jawaban klien:**
+
+1. Ujian memakai **CBT**. Bila ujian kertas, cukup **peringatan** (bukan blokir sistem).
+2. Tagihan yang wajib lunas **ditentukan bendahara/admin** per periode ujian: SPP sampai bulan tertentu, dan boleh ditambah tagihan lain sesuai kebijakan sekolah.
+3. Siswa yang belum lunas dapat diberi **dispensasi oleh admin** (hak prerogatif sekolah).
+4. Berlaku untuk **MI dulu**; unit lain menyusul tanpa ubah desain.
+
+**Desain:**
+
+- **Periode ujian** (`exam_periods`): unit, nama (mis. "PAS Ganjil"), jenis pelaksanaan `cbt` | `kertas`, tanggal mulai–selesai, status draf/aktif/selesai. Dibuat bendahara/admin.
+- **Syarat tagihan** (`exam_period_requirements`): daftar aturan per periode: jenis tagihan + batas periode tagihan (mis. SPP s.d. Nov 2026), atau tagihan sekali tertentu (mis. Kegiatan). Siswa **layak** bila semua tagihan yang cocok dengan syarat berstatus lunas (sisa 0). Cicilan sebagian = belum layak.
+- **Dispensasi** (`exam_eligibility_overrides`): hanya **admin**; alasan wajib, berlaku untuk satu periode, dapat dicabut; tercatat lewat `AuditLogger`. Tidak mengubah tagihan atau saldo.
+- **Kelayakan dihitung saat dibaca** dari tagihan + dispensasi (tidak disimpan sebagai kolom), sehingga pembayaran Midtrans yang masuk langsung membuat siswa layak tanpa sinkronisasi.
+- **CBT:** ujian CBT (ADR-020) terhubung ke periode ujian; gerbang kelayakan dijalankan di Service saat siswa memulai sesi, bukan di browser.
+- **Kertas:** tidak ada blokir. Panitia/pengawas mendapat daftar siswa belum layak per rombel (cetak), dan layar daftar menampilkan peringatan; keputusan di ruang ujian tetap pada sekolah.
+- **Wali:** kartu "Perlu tindakan" di beranda saat periode aktif dan anak belum layak, berisi tagihan yang harus dilunasi + tombol bayar. Notifikasi `billing` H-7 dan H-1 sebelum tanggal mulai (maks satu per hari).
+- **Hak akses:** bendahara & admin membuat periode dan syarat; hanya admin memberi/mencabut dispensasi; wali kelas melihat daftar rombelnya (baca saja).
+
+**Jawaban lanjutan (2026-11-26):** CBT dibangun **native** di aplikasi ini (ADR-020). Karena itu endpoint API dan ekspor untuk CBT luar **tidak dibuat**; kelayakan diperiksa langsung saat siswa masuk ujian CBT (siswa tidak layak melihat pesan netral "Hubungi admin sekolah" tanpa menyebut nominal). Ekspor daftar tetap ada untuk ujian kertas.
+
+**Risiko:** menahan hak ujian karena biaya bisa berbenturan dengan kebijakan Kemenag/dinas setempat dan sering dikeluhkan wali. Yayasan perlu memastikan aturan ini sesuai ketentuan dan tertulis di tata tertib/perjanjian pembayaran. Dispensasi admin menjadi katup pengaman.
+
+**Akibat:** PRD §4.4 + FR-FIN ditambah aturan kelayakan ujian; SCHEMA §D ditambah tiga tabel di atas; TODO Fase 6 ditambah tugas: periode & syarat, perhitungan kelayakan + dispensasi, ekspor/endpoint CBT, kartu & notifikasi wali, daftar peringatan ujian kertas; mockup ditambah layar "Kelayakan ujian" dan kartu beranda wali.
+
+## ADR-017 — Hafalan Qur'an, Hadits, dan Do'a (Diterima, 2026-11-26; semula U-08)
+
+**Permintaan klien:** setoran hafalan punya tiga jenis: Qur'an, Hadits, Do'a. Materi hadits dan doa diinput oleh admin.
+
+**Desain:**
+
+- Qur'an tetap seperti sekarang (rentang surah:ayat, `surahs`, `memorized_ayahs`, ziyadah/murajaah).
+- Tabel baru `memorization_materials` (master, dikelola **admin**): `unit_id null`, `kind` (`hadith|prayer`), `title` (mis. "Doa sebelum makan"), `arabic_text text null`, `translation text null`, `source string null` (perawi/kitab untuk hadits), `sort_order`, `is_active`. Pola CRUD biasa; materi yang sudah punya setoran hanya dinonaktifkan, tidak dihapus.
+- `memorization_records` ditambah `kind` (`quran|hadith|prayer`) dan `memorization_material_id null`; kolom surah/ayat hanya wajib bila `kind = quran`. Validasi di Domain, bukan di browser.
+- `memorization_targets` ditambah `kind`; target hadits/doa berupa daftar materi (`material_ids json`), bukan rentang ayat. Progres = jumlah materi lulus / jumlah materi target.
+- Rubrik berversi dipakai untuk ketiga jenis; tiap jenis boleh punya rubrik sendiri (mis. Qur'an: kelancaran, tajwid, makhraj; doa: kelancaran, makhraj).
+- Wali melihat progres per jenis (tab Qur'an / Hadits / Do'a di Riwayat > Hafalan).
+
+**Jawaban klien (2026-11-26):** hadits dan doa **tanpa** ziyadah/murajaah; murajaah hanya untuk Qur'an. Jadi `memorization_records.type` hanya wajib bila `kind = quran` dan bernilai null untuk hadits/doa.
+**Akibat:** PRD §4.10, SCHEMA (§ setoran), TODO Fase 11 (T-1102, T-1104, T-1105 diperluas + tugas baru master hadits/doa), REUSE_MAP §3 catatan, mockup 09 dan 14 diperbarui.
+
+## ADR-018 — Penghitung kesalahan dengan PageDown/PageUp dan tombol ± (Diterima, 2026-11-26; semula U-09)
+
+**Permintaan klien:** menghitung kesalahan saat setoran/penilaian bisa dengan tombol Page Up/Page Down di laptop, dan tombol tambah/kurang di HP.
+
+**Desain** (komponen `MistakeCounter` di `components/app`, dipakai untuk kriteria rubrik mode `deduction` dan nilai PIB):
+
+- Satu kriteria **aktif** pada satu waktu (ditandai ring `--primary` + teks "aktif"); pindah kriteria dengan Tab/klik atau tombol panah kiri/kanan.
+- Di halaman penilaian, **PageDown = tambah 1, PageUp = kurang 1** pada kriteria aktif, tanpa perlu fokus di input. Alasan: tombol "next" pada presenter/clicker nirkabel mengirim PageDown, sehingga guru bisa menambah kesalahan sambil menyimak tanpa melihat layar. Tombol ini tidak berlaku saat fokus di kolom teks (catatan).
+- Di HP: tombol − dan + minimal 44 px di kiri-kanan angka; angka besar `tabular-nums`. Tahan untuk ulang tidak dipakai (rawan salah hitung).
+- Nilai tidak bisa kurang dari 0 atau melebihi batas kriteria; perubahan diumumkan lewat `aria-live` ("Tajwid: 3 kesalahan") dan getaran pendek di HP bila didukung.
+- Nilai akhir dihitung ulang langsung di layar sebagai pratinjau; nilai resmi dihitung ulang di server (`RubricScorer`/`PibScore`).
+
+**Jawaban klien (2026-11-26):** arah tombol disetujui (PageDown = tambah, PageUp = kurang).
+**Akibat:** DESIGN.md §4 ditambah `MistakeCounter`; T-1104 dan T-1106 KP ditambah perilaku keyboard + tes; mockup 09 diperbarui.
+
+## ADR-019 — Sholat 5 waktu sebagai item pembiasaan tetap (Diterima, 2026-11-26; semula U-10)
+
+**Permintaan klien:** admin boleh menambah atau mengurangi kegiatan pembiasaan, tetapi sholat 5 waktu harus selalu ada.
+**Sudah tercakup:** item pembiasaan sudah berupa master yang dikelola admin (T-1001, `habit_items`). "Mengurangi" = menonaktifkan; item yang sudah punya catatan tidak dihapus agar riwayat dan nilai sikap tetap utuh.
+**Tambahan:**
+
+- `habit_items` ditambah `is_locked bool` (default false). Seeder membuat lima item terkunci untuk semua unit: Sholat Subuh, Dzuhur, Ashar, Maghrib, Isya (aspek `spiritual`).
+- Item terkunci **tidak bisa dihapus, dinonaktifkan, atau diganti nama/aspeknya**; admin hanya boleh mengubah urutan. Dijaga di Service + Policy (bukan hanya disembunyikan di UI) dan dites.
+- Di UI daftar item, item terkunci ditandai ikon gembok + tooltip "Item wajib sekolah"; tombol hapus/nonaktif tidak ditampilkan.
+  **Jawaban klien (2026-11-26):** cukup nama waktunya: Subuh, Dzuhur, Ashar, Maghrib, Isya.
+  **Akibat:** SCHEMA `habit_items` + kolom `is_locked`; KP T-1001 ditambah aturan item terkunci + tes; mockup 15 (centang wali) menampilkan lima waktu sholat.
+
+## ADR-020 — CBT native di Madrasah Terpadu (Diterima, 2026-11-26; semula U-11)
+
+**Keputusan pemilik:** CBT dibangun di dalam aplikasi ini (bukan aplikasi terpisah), merujuk repo `ilhamrizqiawan21/CBT-Sekolah` (Express + EJS + MySQL, untuk MTs Al-Ihsan) dengan penyempurnaan. **Mengubah PRD §2**: "CBT/ujian online" keluar dari daftar bukan-tujuan; unit pertama **MI**.
+
+**Yang di-port dari CBT-Sekolah (aturan dan pelajarannya, bukan kodenya):**
+
+| CBT-Sekolah                                                                                                      | Di sini                                                     | Catatan                                                                                          |
+| ---------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| Tipe soal PG, menjodohkan (all-or-nothing), essay tampil-saja dinilai guru dari kertas (D-003, D-006)            | `exam_questions.type` `mcq                                  | matching                                                                                         | essay_paper` | Bobot per tipe **dapat diatur per ujian** (aturan MTs 2/2/4 menjadi bawaan, bukan hardcode) |
+| Nilai = total poin / poin maks × 100, dibulatkan (D-005); status `menunggu_essay`                                | `App\Domain\Exam\ExamScorer` (murni, dites)                 | Nilai final setelah essay dinilai                                                                |
+| Timer di server (D-007), take-over perangkat dengan `device_token` (D-008)                                       | `ExamSessionService`                                        | Sisa waktu = `deadline − now()` di server; login ulang melanjutkan                               |
+| Sinkron jawaban batch idempoten + grace 120 detik (D-009)                                                        | `POST .../answers` batch, unik (`session_id`,`question_id`) | Jawaban disimpan lokal di perangkat lalu dikirim ulang                                           |
+| Acak soal/pilihan dengan seed tersimpan (FR-06)                                                                  | `exam_sessions.shuffle_seed`                                | Urutan sama setiap sambung ulang                                                                 |
+| Teks Arab RTL + font Arab lokal + kontrol ukuran (FR-07, D-014)                                                  | Komponen `ArabicText`                                       | Font self-hosted (tanpa CDN, sesuai AI_RULES)                                                    |
+| Monitor admin: online/selesai/terkunci, progres, pelanggaran; buka kunci, tambah waktu, paksa selesai (FR-11–12) | Halaman monitor                                             | Polling 5 detik dulu; WebSocket (Laravel Reverb) hanya lewat ADR terpisah karena dependensi baru |
+| Log pelanggaran (pindah tab, keluar layar penuh, salin-tempel), token ujian opsional (FR-13–14)                  | `exam_violations`, `exams.access_token`                     | Tetap disebut "best-effort"; pengawasan fisik wajib                                              |
+| Kunci jawaban tidak pernah dikirim ke klien (NFR-04)                                                             | Resource Inertia khusus siswa                               | Dites                                                                                            |
+
+**Penyempurnaan (dari AUDIT_KESIAPAN §B CBT-Sekolah dan kebutuhan baru):**
+
+1. Sesi `keluar_paksa`/terputus yang tidak ditindaklanjuti **otomatis dinilai** saat jendela ujian berakhir (job terjadwal), tidak hilang dari hasil.
+2. Soal **terkunci** setelah ujian dimulai; perubahan setelahnya hanya lewat "koreksi kunci" oleh admin dengan alasan + nilai dihitung ulang + audit.
+3. Ekspor Excel menetralkan awalan `= + - @` (formula injection); logout lewat POST; tanpa skrip inline (Inertia/React).
+4. Gerbang kelayakan **ADR-016** saat memulai sesi; dispensasi admin langsung berlaku.
+5. Data siswa, rombel, mapel guru memakai data induk yang sudah ada (tidak ada impor siswa terpisah).
+6. Hasil ujian dapat dilihat wali setelah guru menyelesaikan penilaian (pengaturan per ujian; default tidak tampil, sesuai D-017 CBT-Sekolah).
+7. Siswa MI masih kecil: satu soal per layar, tombol pilihan ≥ 48 px, navigasi nomor soal besar, tanda "ragu-ragu", tanpa hitung mundur yang menegangkan (sisa waktu tampil tenang, peringatan hanya 5 menit terakhir).
+
+**Data baru (ringkas):** `subjects` (mapel per unit), `teaching_assignments` (guru × mapel × rombel), `exams` (periode ujian ADR-016 opsional, mapel, rombel/tingkat, jendela waktu, durasi, acak, bobot, token, batas pelanggaran, tampil-ke-wali), `exam_questions` (+ `exam_question_options`), `exam_sessions` (siswa, ujian, mulai, deadline, tambahan waktu, status, `device_token`, `shuffle_seed`), `exam_answers`, `exam_essay_scores`, `exam_results`, `exam_violations`.
+
+**Login siswa (bagian yang butuh keputusan):** aplikasi ini belum punya akun siswa (PRD §3). Usulan: guard terpisah `student` khusus halaman ujian, masuk dengan **NIS + PIN ujian** (PIN di-hash, dibagikan wali kelas, bisa di-reset), sesi hanya berlaku selama jendela ujian; tidak memberi akses ke menu lain. Alternatif: scan **kartu QR presensi** (T-501) + PIN singkat. Rate limit per NIS (D-018 CBT-Sekolah).
+
+**Jawaban pemilik (2026-11-26):**
+
+1. **Ketiga perangkat** (lab komputer, tablet sekolah, HP orang tua) harus didukung lewat pengaturan, tanpa perubahan kode saat cara pelaksanaan berubah.
+2. Login siswa: **NIS + PIN**.
+3. CBT berjalan di **server yang sama** dengan aplikasi utama.
+4. Kapasitas rancangan: **250 siswa serentak**.
+
+**Skenario perangkat** (dipilih admin per ujian lewat `exams.device_mode`; satu ujian boleh mengizinkan lebih dari satu mode, mode sesi tercatat di `exam_sessions.device_type`):
+
+| Mode                                                                                                                                         | Perangkat           | Aturan anti-curang                                                                                                                  | Catatan                                                                |
+| -------------------------------------------------------------------------------------------------------------------------------------------- | ------------------- | ----------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
+| `lab`                                                                                                                                        | Komputer/laptop lab | Layar penuh wajib; keluar layar penuh/pindah tab dihitung pelanggaran; terkunci setelah batas pelanggaran (default 3), dibuka admin | Bisa dipadukan Safe Exam Browser (opsional, tanpa ketergantungan)      |
+| `tablet`                                                                                                                                     | Tablet sekolah      | Layar penuh bila didukung; pindah aplikasi dicatat dan dihitung pelanggaran                                                         | Disarankan mode kios/Guided Access di perangkat; panduan di DEPLOYMENT |
+| `phone`                                                                                                                                      | HP orang tua        | Pelanggaran **dicatat saja, tidak mengunci** (notifikasi/telepon masuk sering memicu keluar aplikasi); opsional wajib lewat Exambro | Hemat kuota: paket soal diunduh sekali, jawaban dikirim batch          |
+| Semua mode memakai tampilan yang sama (responsif 360 px–1280 px); yang berbeda hanya kebijakan. Pengawas melihat mode tiap siswa di monitor. |
+
+**Skenario 250 siswa serentak** (kriteria terima, masuk T-1406 Uji beban):
+
+- Gelombang masuk: 250 login NIS+PIN dalam 2 menit tanpa galat; rate limit per NIS, bukan per IP (banyak siswa berbagi IP Wi-Fi sekolah).
+- Paket soal: satu permintaan per siswa saat mulai (tanpa kunci jawaban, ukuran kecil, aset font di-cache).
+- Sinkron jawaban: batch setiap perubahan, paling sering tiap 10 detik per siswa (≈ 25 permintaan/detik); p95 ≤ 500 ms di server target.
+- Monitor admin: polling 5 detik, satu kueri agregat (tanpa N+1).
+- Penutupan: 250 sesi berakhir bersamaan dinilai lewat antrean dalam ≤ 2 menit.
+- Ketahanan: Wi-Fi diputus 60 detik di tengah ujian lalu disambung → tidak ada jawaban hilang; restart server/worker → siswa tidak keluar dan sisa waktu tetap.
+
+**Akibat:** PRD §2, §3 (peran/konteks siswa ujian), §4 bagian baru "Ujian CBT", §5 FR-CBT; SCHEMA bagian baru; ARCHITECTURE (guard `student`, job penutupan sesi); REUSE_MAP §5 (CBT-Sekolah); TODO **Fase 15 — CBT** (setelah Fase 6 karena bergantung pada kelayakan U-07); DESIGN area baru `exam-layout`; mockup: bank soal, buat ujian, monitor, layar siswa ujian, input nilai essay, kelayakan ujian.
+
 ---
 
 ## Usulan terbuka (menunggu klien, lihat PRD §8)

@@ -33,7 +33,7 @@ Aplikasi ini dibangun **dari nol** (tidak ada akses ke source code aplikasi lama
 
 ## 2. Bukan tujuan (fase ini)
 
-PPDB online, presensi biometrik/sidik jari, CBT/ujian online, e-learning (tugas, materi), perpustakaan, asrama dan perizinan asrama, transportasi,
+PPDB online, presensi biometrik/sidik jari, e-learning (tugas, materi), perpustakaan, asrama dan perizinan asrama, transportasi,
 helpdesk tiket, WhatsApp API (disiapkan sebagai channel tambahan, tidak diaktifkan), multi-yayasan/multi-tenant, aplikasi native Android/iOS, website profil sekolah/CMS.
 Semua ini boleh menjadi fase lanjutan dengan kesepakatan terpisah. **Agen tidak boleh membangun modul di luar daftar ini.**
 
@@ -52,6 +52,8 @@ Semua ini boleh menjadi fase lanjutan dengan kesepakatan terpisah. **Agen tidak 
 
 Satu pengguna boleh memiliki lebih dari satu peran (mis. guru sekaligus wali kelas). "Wali kelas" bukan peran, melainkan penugasan guru ke rombel.
 Data dibatasi per **unit** (MI/RA/TPQ) kecuali untuk `admin` dan `bendahara` yayasan.
+
+**Siswa** bukan pengguna aplikasi umum. Siswa hanya masuk ke **halaman ujian CBT** (§4.14) dengan NIS + PIN ujian, lewat guard terpisah, tanpa akses ke menu lain (ADR-020).
 
 ## 4. Konsep domain dan aturan bisnis
 
@@ -90,6 +92,7 @@ Data dibatasi per **unit** (MI/RA/TPQ) kecuali untuk `admin` dan `bendahara` yay
 - Status tagihan: `belum_bayar`, `sebagian`, `lunas`, `dibatalkan`. Lewat jatuh tempo dan belum lunas = tampil "menunggak" (turunan, bukan status tersimpan).
 - Pembatalan pembayaran manual hanya oleh bendahara dengan alasan, menghasilkan entri pembalik (tidak menghapus).
 - Kuitansi digital (PDF) untuk setiap pembayaran.
+- **Syarat ujian** (ADR-016): bendahara/admin membuat **periode ujian** (unit, nama, `cbt` atau `kertas`, tanggal) dan memilih tagihan yang wajib lunas (mis. SPP s.d. bulan tertentu + tagihan lain sesuai kebijakan). Siswa **layak** bila semua tagihan yang cocok lunas; cicilan sebagian belum layak. **Dispensasi** hanya oleh admin, beralasan, per periode, diaudit. Kelayakan dihitung saat dibaca, sehingga pembayaran yang masuk langsung berlaku. CBT: siswa tidak layak tidak bisa memulai ujian (pesan netral "Hubungi admin sekolah"). Kertas: tanpa blokir, panitia menerima daftar peringatan per rombel. Wali mendapat kartu "Perlu tindakan" + notifikasi H-7 dan H-1. Berlaku untuk MI lebih dulu.
 
 ### 4.5 Pembayaran online (Midtrans)
 
@@ -131,17 +134,20 @@ Data dibatasi per **unit** (MI/RA/TPQ) kecuali untuk `admin` dan `bendahara` yay
 
 ### 4.9 Pembiasaan baik (mutabaah)
 
-- **Item pembiasaan** (master): nama (mis. Sholat Subuh berjamaah, Tilawah, Membantu orang tua), aspek (`spiritual` atau `sosial`), frekuensi harian, unit, urutan, aktif.
+- **Item pembiasaan** (master, dikelola admin): nama (mis. Tilawah, Membantu orang tua), aspek (`spiritual` atau `sosial`), frekuensi harian, unit, urutan, aktif.
+- **Sholat 5 waktu** (Subuh, Dzuhur, Ashar, Maghrib, Isya) adalah item **terkunci** bawaan: tidak dapat dihapus, dinonaktifkan, atau diganti nama; admin hanya mengatur urutan (ADR-019). Item lain bebas ditambah atau dinonaktifkan (item yang punya catatan tidak dihapus).
 - Wali mencentang item untuk anaknya per hari (maks. 3 hari ke belakang); guru/wali kelas **memverifikasi** atau menolak dengan catatan. Hanya data terverifikasi yang dipakai untuk nilai sikap.
 - Konsistensi (mis. 7 hari berturut-turut item tertentu) dapat menghasilkan poin kebaikan otomatis bila aturan streak diaktifkan **[TERBUKA]** (default: nonaktif).
 
 ### 4.10 Setoran hafalan (tahfidz) dan praktik ibadah
 
+- **Tiga jenis hafalan** (ADR-017): **Qur'an**, **Hadits**, **Do'a**. Materi hadits dan doa (judul, teks Arab, terjemahan, sumber/perawi) diinput **admin**. Setoran hadits/doa memilih satu materi; **ziyadah/murajaah hanya untuk Qur'an**. Target hadits/doa per tingkat berupa daftar materi; progres = materi lulus / materi target. Wali melihat progres per jenis.
 - **Tahfidz**: guru mencatat setoran `ziyadah` (hafalan baru) atau `murajaah` (ulangan): rentang surah:ayat awal–akhir, nilai per kriteria rubrik (kelancaran, tajwid, makhraj), nilai akhir, predikat, catatan. Rubrik berversi; versi terbit tidak dapat diubah (port dari `penilaian-tahfidz`).
 - Target hafalan per tingkat (mis. Juz 30 untuk MI). Progres = ayat unik yang sudah lulus ziyadah dibanding target.
 - Data mushaf hanya **daftar surah + jumlah ayat** (data publik). Tidak ada tampilan teks mushaf di fase ini.
 - **Praktik ibadah (PIB)**: materi berjenjang (bab → subbab → materi) dengan bobot; guru memasukkan jumlah kesalahan; **nilai = 90 − kesalahan** (port aturan dari `pib-laravel`).
 - Wali melihat progres hafalan dan riwayat setoran, dan mendapat notifikasi tiap setoran.
+- **Penghitung kesalahan** (ADR-018) untuk kriteria rubrik mode pengurangan dan nilai PIB: di laptop **PageDown = tambah 1, PageUp = kurang 1** pada kriteria aktif (cocok dengan clicker presenter); di HP tombol − / + ≥ 44 px. Tidak bisa di bawah 0 atau melewati batas; nilai dihitung ulang di server.
 
 ### 4.11 Nilai sikap sosial dan spiritual
 
@@ -167,6 +173,18 @@ Layar pertama wali menjawab satu pertanyaan: **"Bagaimana anak saya hari ini, da
 Nama aplikasi, nama yayasan dan unit, logo, favicon, warna utama (dengan turunan otomatis dan pemeriksaan kontras), alamat, kontak, jam presensi per unit,
 kalender libur, konfigurasi Midtrans (mode sandbox/production dibaca dari `.env`, ditampilkan read-only), konfigurasi notifikasi.
 
+### 4.14 Ujian CBT (ADR-020)
+
+- Dibangun di aplikasi ini, merujuk `CBT-Sekolah` (REUSE_MAP §5). Unit pertama **MI**. Server sama dengan aplikasi utama.
+- **Data**: mapel per unit, penugasan guru × mapel × rombel (memakai data induk), bank soal per ujian: **pilihan ganda**, **menjodohkan** (benar semua = poin penuh, selain itu 0), **essay** (dikerjakan di kertas, dinilai guru per soal). Bobot per tipe diatur per ujian (bawaan 2/2/4).
+- **Nilai** = total poin / poin maksimal × 100, dibulatkan. Status `menunggu_essay` sampai essay dinilai. Hasil tampil ke wali bila diizinkan per ujian (bawaan: tidak).
+- **Ujian**: mapel, rombel/tingkat, jendela waktu, durasi, acak soal/pilihan, token opsional, batas pelanggaran, periode ujian (§4.4) opsional, **mode perangkat** yang diizinkan.
+- **Mode perangkat** (dipilih admin per ujian, tanpa ubah kode): `lab` (layar penuh wajib, pelanggaran mengunci setelah batas), `tablet` (layar penuh bila didukung, pindah aplikasi dihitung), `phone` HP orang tua (pelanggaran dicatat saja, Exambro opsional).
+- **Siswa** masuk dengan **NIS + PIN ujian** (di-hash, dibagikan wali kelas, bisa di-reset); rate limit per NIS. Satu soal per layar, tombol besar, tanda ragu-ragu, teks Arab RTL dengan kontrol ukuran.
+- **Ketahanan**: timer dihitung server; login ulang melanjutkan sesi dan mengambil alih perangkat lama; jawaban disimpan lokal lalu disinkron batch idempoten (grace 120 detik); sesi yang terputus atau melewati waktu dinilai otomatis saat jendela berakhir.
+- **Pengawasan**: monitor admin (status, progres, pelanggaran, mode perangkat), buka kunci, tambah waktu, paksa selesai. Soal terkunci setelah ujian dimulai; koreksi kunci hanya oleh admin dengan alasan + hitung ulang + audit.
+- **Kapasitas**: 250 siswa serentak (kriteria uji di ADR-020 dan T-1406).
+
 ## 5. Persyaratan fungsional (ringkas, ID dipakai di TODO)
 
 - **FR-AUTH**: login dengan username/NIS/no. HP + password, rate limit, reset password oleh admin, ganti password, 2FA opsional untuk admin/bendahara.
@@ -180,10 +198,12 @@ kalender libur, konfigurasi Midtrans (mode sandbox/production dibaca dari `.env`
 - **FR-BK**: aturan poin, catatan perilaku, akun poin, ambang & tindak lanjut.
 - **FR-REWARD**: penawaran, pengajuan, persetujuan, voucher.
 - **FR-HABIT**: item pembiasaan, centang wali, verifikasi guru.
-- **FR-QURAN**: rubrik, setoran, target, progres; PIB.
+- **FR-QURAN**: rubrik, setoran Qur'an/Hadits/Do'a, materi hadits & doa, target, progres, penghitung kesalahan; PIB.
 - **FR-ATTITUDE**: hitung, koreksi, kunci, cetak.
 - **FR-REPORT**: laporan & ekspor (PDF/Excel) per modul.
 - **FR-AUDIT**: jejak audit semua perubahan data penting.
+- **FR-EXAMELIG**: periode ujian, syarat tagihan, kelayakan, dispensasi admin, daftar peringatan ujian kertas, notifikasi wali.
+- **FR-CBT**: mapel & penugasan, bank soal, ujian, login siswa NIS+PIN, sesi tahan putus, penilaian + essay, monitor, mode perangkat, ekspor hasil.
 
 ## 6. Persyaratan non-fungsional
 
@@ -213,3 +233,5 @@ uji beban scan pagi (300 scan dalam 15 menit) lulus · backup & restore teruji �
 8. Logo resmi dan warna identitas yayasan.
 9. Apakah nama pencatat catatan perilaku boleh dilihat wali.
 10. Data awal: daftar siswa + wali + no. HP dalam Excel; tagihan berjalan yang harus dimigrasikan dari aplikasi lama (saldo awal).
+11. ~~Syarat lunas untuk ikut ujian~~ — diputuskan, ADR-016.
+12. ~~CBT native~~ — diputuskan, ADR-020.
