@@ -25,7 +25,7 @@ Selesai oleh arsitek (Claude), 2026-11-26:
 
 Sisa Fase 0 (eksekutor):
 
-- [x] **T-001 Commit awal & remote** (P0) — **Dikerjakan pemilik, bukan agen.** Usulan pesan: `chore: scaffold project foundation`. Periksa dulu `git status` tidak memuat `.env`, sqlite, atau build; remote GitHub privat; branch `main` terlindungi bila memungkinkan. Bukti: commit `cc95d94` di `origin/main` (2026-11-26).
+- [x] **T-001 Commit awal & remote** (P0) — **Dikerjakan pemilik, bukan agen.** Usulan pesan: `chore: scaffold project foundation`. Periksa dulu `git status` tidak memuat `.env`, sqlite, atau build; remote GitHub privat; branch `main` terlindungi bila memungkinkan.
 - [x] **T-002 `lang/id`** (P0) — Berkas: `lang/id/{validation,auth,passwords,pagination}.php` (`php artisan lang:publish` lalu terjemahkan). KP: pesan validasi & auth Fortify tampil Bahasa Indonesia; atribut umum (`name`→`nama`, `phone`→`nomor HP`, ...). Tes: login salah → pesan Indonesia. Bukti: `tests/Feature/LocaleTest.php` + `composer check` ✔ (71 tes, 2026-11-26).
 - [x] **T-003 Tes starter kit ke Pest** (P1) — Berkas: `tests/Feature/{Auth,Settings}`. KP: tes PHPUnit kelas bawaan diubah ke sintaks Pest tanpa mengubah perilaku yang dites; jumlah tes tidak berkurang. Tes: suite hijau. Bukti: `composer check` (Pint, Larastan 0, Pest 71 tes/191 asersi, tsc ✔; `vp check` gagal hanya pada berkas tak terlacak `docs/mockup/komponen.html`, 2026-11-26).
 - [x] **T-004 Pengecekan arsitektur** (P1) — Berkas: `tests/Unit/ArchTest.php`. KP: Pest arch: tidak ada `dd/dump/ray`; `App\Domain` tidak bergantung pada `Illuminate\Http` atau `Illuminate\Support\Facades\DB`; Controller tidak memakai `DB::`; Model tidak bergantung pada `App\Services`; strict types di `app/`. Bukti: `tests/Unit/ArchTest.php` (5 tes) + Pint/Larastan/Pest (76 tes)/tsc ✔ (2026-11-26).
@@ -37,8 +37,8 @@ Sisa Fase 0 (eksekutor):
 
 ## Fase 1 — Cangkang aplikasi, autentikasi, hak akses
 
-- [ ] **T-101 Matikan registrasi publik & verifikasi email wajib** (P0, ADR-014) — Ref: PRD §3, FR-AUTH. Berkas: `config/fortify.php`, `routes/`, tes `RegistrationTest`/`EmailVerificationTest`.
-      KP: `Features::registration()` dan `emailVerification()` dinonaktifkan; rute `/register` 404; middleware `verified` dihapus dari grup rute aplikasi; tes registrasi/verifikasi dihapus **dengan** alasan dicatat di laporan tugas dan usulan pesan commit (ADR-014). Tes: `/register` → 404.
+- [x] **T-101 Matikan registrasi publik & verifikasi email wajib** (P0, ADR-014) — Ref: PRD §3, FR-AUTH. Berkas: `config/fortify.php`, `routes/`, tes `RegistrationTest`/`EmailVerificationTest`.
+      KP: `Features::registration()` dan `emailVerification()` dinonaktifkan; rute `/register` 404; middleware `verified` dihapus dari grup rute aplikasi; tes registrasi/verifikasi dihapus **dengan** alasan dicatat di laporan tugas dan usulan pesan commit (ADR-014). Tes: `/register` → 404. Bukti: `tests/Feature/Auth/PublicRegistrationDisabledTest.php` + Pint/Larastan/Pest (69 tes)/tsc/`npm run build` ✔ (2026-11-26).
 - [ ] **T-102 Kolom pengguna** (P0) — Ref: SCHEMA §A `users`. Berkas: migration baru, `User` model, factory.
       KP: `username`, `phone`, `is_active`, `last_login_at`, softDeletes, `email` nullable (tanpa `must_change_password`, ADR-015); trait `HasRoles`; normalisasi nomor HP ke format `08…`/`62…` konsisten (satu helper `PhoneNumber::normalize`). Tes: factory valid; HP dinormalisasi; unik.
 - [ ] **T-103 Login dengan username / nomor HP / NIS** (P0, FR-AUTH) — Ref: ARCHITECTURE §9. Berkas: `FortifyServiceProvider` (`Fortify::authenticateUsing`), halaman `auth/login.tsx`.
