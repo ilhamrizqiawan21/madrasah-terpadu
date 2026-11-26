@@ -6,7 +6,7 @@ Prioritas: **P0** wajib rilis 1.0 · **P1** sebaiknya ada di 1.0 · **P2** setel
 Tugas yang bergantung pada keputusan **[TERBUKA]** (`DECISIONS.md` U-xx) tidak boleh dimulai sebelum keputusan dicatat.
 
 Ringkasan fase: 0 Fondasi · 1 Cangkang & keamanan · 2 Data induk · 3 Portal wali & PWA · 4 Notifikasi · 5 Presensi · 6 Keuangan · 7 Midtrans · 8 Dompet kantin ·
-9 Buku Saku BK & reward · 10 Pembiasaan · 11 Hafalan & PIB · 12 Nilai sikap · 13 Laporan · 14 Mutu, deploy, serah terima.
+9 Buku Saku BK & reward · 10 Pembiasaan · 11 Hafalan & PIB · 12 Nilai sikap · 13 Laporan · 14 Mutu, deploy, serah terima · 15 Ujian CBT.
 
 ---
 
@@ -43,7 +43,7 @@ Sisa Fase 0 (eksekutor):
       KP: `username`, `phone`, `is_active`, `last_login_at`, softDeletes, `email` nullable (tanpa `must_change_password`, ADR-015); trait `HasRoles`; normalisasi nomor HP ke format `08…`/`62…` konsisten (satu helper `PhoneNumber::normalize`). Tes: factory valid; HP dinormalisasi; unik. Bukti: `tests/Unit/Support/PhoneNumberTest.php` + `tests/Feature/Auth/UserColumnsTest.php` + Pint/Larastan/Pest (81 tes)/tsc ✔ (2026-11-26).
 - [x] **T-103 Login dengan username / nomor HP / NIS** (P0, FR-AUTH) — Ref: ARCHITECTURE §9. Berkas: `FortifyServiceProvider` (`Fortify::authenticateUsing`), halaman `auth/login.tsx`.
       KP: satu field "Username, nomor HP, atau NIS"; NIS memetakan ke wali utama siswa itu; akun nonaktif ditolak dengan pesan generik; rate limit 5/menit per identitas+IP; sesi diregenerasi; `last_login_at` diperbarui; percobaan gagal masuk `audit_logs` (`login_failed`, tanpa password). Tes: tiap jenis identitas; nonaktif; rate limit; audit. Bukti: `tests/Feature/Auth/LoginIdentityTest.php` + Pint/Larastan/Pest (87 tes)/tsc ✔ (2026-11-26).
-- [ ] **T-104 2FA wajib untuk admin & bendahara** (P0) — Berkas: middleware `EnsureTwoFactorForPrivilegedRoles`. KP: admin/bendahara tanpa 2FA diarahkan ke pengaturan keamanan sampai 2FA aktif; peran lain opsional. Tes: admin tanpa 2FA → redirect; dengan 2FA → lolos.
+- [x] **T-104 2FA wajib untuk admin & bendahara** (P0) — Berkas: middleware `EnsureTwoFactorForPrivilegedRoles`. KP: admin/bendahara tanpa 2FA diarahkan ke pengaturan keamanan sampai 2FA aktif; peran lain opsional. Tes: admin tanpa 2FA → redirect; dengan 2FA → lolos. Bukti: `tests/Feature/Auth/PrivilegedTwoFactorTest.php` + Pint/Larastan/Pest (92 tes)/tsc ✔ (2026-11-26).
 - [ ] **T-105 AuditLogger + `audit_logs`** (P0, FR-AUDIT) — Ref: REUSE_MAP §2. Berkas: migration, `app/Services/Audit/AuditLogger.php`, `AuditLog` model.
       KP: `record(action, subject, before, after)` mengambil user/IP/UA dari request bila ada; menyaring kunci sensitif (`password`, `token*`, `two_factor*`, `remember_token`); dipanggil di dalam transaksi pemanggil. Tes: filter kunci sensitif; tercatat dengan user; tanpa request (job/console) tetap jalan.
 - [ ] **T-106 Token desain & font** (P0) [UI] — Ref: DESIGN §2. Berkas: `resources/css/app.css`, `package.json`.
@@ -123,6 +123,10 @@ Sisa Fase 0 (eksekutor):
 - [ ] **T-608 Tagihan di portal wali** (P0) [UI] — KP: daftar per anak (jatuh tempo terdekat di atas, menunggak ditandai `--accent-attention`), total keluarga, riwayat pembayaran + kuitansi; tombol bayar online (aktif setelah Fase 7). Tes: total keluarga = jumlah sisa semua anak.
 - [ ] **T-609 Pengingat jatuh tempo** (P1) — KP: scheduler harian 07.00 WITA: notifikasi H-3 dan H+1 jatuh tempo, maks satu notifikasi per tagihan per jenis. Tes: idempoten.
 - [ ] **T-610 Saldo awal migrasi** (P0) — Ref: PRD §8 no. 10. KP: impor Excel tunggakan dari aplikasi lama sebagai tagihan dengan jenis "Saldo Awal" dan deskripsi asli; pratinjau; audit. Tes: impor ulang idempoten.
+- [ ] **T-611 Periode ujian & syarat tagihan** (P0) [UI] — Ref: PRD §4.4, ADR-016, SCHEMA §D. KP: bendahara/admin membuat periode (unit MI dulu, `cbt|paper`, tanggal) dan memilih jenis tagihan + batas periode yang wajib lunas; `ExamEligibilityResolver` (Domain) menghitung layak/tidak dari tagihan (cicilan sebagian = belum layak). Tes: unit resolver (lunas, sebagian, tagihan di luar syarat diabaikan, dibatalkan diabaikan); pembayaran masuk → langsung layak.
+- [ ] **T-612 Dispensasi ujian** (P0) [UI] — Ref: ADR-016. KP: hanya admin memberi/mencabut dispensasi per siswa per periode, alasan wajib, `AuditLogger`; tidak mengubah tagihan. Tes: bendahara/guru → 403; dicabut → tidak layak lagi.
+- [ ] **T-613 Daftar kelayakan & peringatan ujian kertas** (P0) [UI] — KP: daftar per rombel (layak/tidak/dispensasi) dengan pola antrean (mockup menu 16); ekspor PDF/Excel untuk panitia; wali kelas baca saja. Tes: otorisasi; ekspor aman formula injection.
+- [ ] **T-614 Kartu & notifikasi wali untuk syarat ujian** (P0) [UI] — KP: kartu "Perlu tindakan" di beranda wali selama periode aktif bila anak belum layak (tagihan yang harus dilunasi + Bayar); notifikasi `billing` H-7 dan H-1 (maks satu per hari). Tes: anak layak/dispensasi → tidak ada kartu & notifikasi.
 
 ---
 
@@ -167,7 +171,7 @@ Baca `PAYMENTS.md` seluruhnya sebelum mulai.
 
 ## Fase 10 — Pembiasaan (mutabaah)
 
-- [ ] **T-1001 Item pembiasaan** (P0) [UI] — Ref: PRD §4.9. KP: CRUD per unit, aspek spiritual/sosial, urutan (naik/turun), aktif. Tes: urutan stabil.
+- [ ] **T-1001 Item pembiasaan** (P0) [UI] — Ref: PRD §4.9, ADR-019. KP: CRUD per unit oleh admin, aspek spiritual/sosial, urutan (naik/turun), aktif; seeder lima item sholat **terkunci** (tidak bisa dihapus/dinonaktifkan/diganti nama, hanya urutan; ikon gembok + tooltip "Item wajib sekolah"); item yang punya catatan hanya dinonaktifkan. Tes: urutan stabil; item terkunci ditolak di Service + Policy (bukan hanya UI).
 - [ ] **T-1002 Centang oleh wali** (P0) [UI] — KP: daftar item hari ini per anak, centang/batal centang sampai diverifikasi, maks 3 hari ke belakang, simpan cepat (optimistic UI + rollback bila gagal). Tes: tidak bisa mengubah log yang sudah diverifikasi; tanggal > 3 hari ditolak.
 - [ ] **T-1003 Verifikasi oleh wali kelas** (P0) [UI] — KP: tabel rombel × item untuk satu tanggal; verifikasi massal per siswa/per item; tolak dengan catatan; notifikasi ringkas ke wali bila ada penolakan. Tes: guru rombel lain 403.
 - [ ] **T-1004 Rekap pembiasaan** (P1) [UI] — KP: persentase per siswa per aspek per bulan/semester (hanya terverifikasi); dipakai Fase 12.
@@ -178,11 +182,13 @@ Baca `PAYMENTS.md` seluruhnya sebelum mulai.
 ## Fase 11 — Setoran hafalan & praktik ibadah
 
 - [ ] **T-1101 Data surah** (P0) — KP: seeder 114 surah (nomor, nama Latin, nama Arab, jumlah ayat, juz awal) dari sumber data publik; tes memastikan total ayat 6.236. Tidak ada teks mushaf.
-- [ ] **T-1102 Target hafalan** (P0) [UI] — KP: per unit + tingkat + tahun ajaran; rentang surah:ayat divalidasi `AyahRange`. Tes: rentang melewati jumlah ayat ditolak.
+- [ ] **T-1102 Target hafalan** (P0) [UI] — KP: per unit + tingkat + tahun ajaran; rentang surah:ayat divalidasi `AyahRange`. Tes: rentang melewati jumlah ayat ditolak. **Tambahan ADR-017:** `kind` quran/hadith/prayer; target hadits/doa berupa daftar materi.
 - [ ] **T-1103 Rubrik berversi** (P0) — Ref: REUSE_MAP §3. KP: port `RubricScorer` + aturan versi; versi terbit immutable; seeder rubrik default (Kelancaran, Tajwid, Makhraj) sebagai draf yang harus diterbitkan admin. Tes: port tes perhitungan dari penilaian-tahfidz (hasil identik).
-- [ ] **T-1104 Input setoran** (P0) [UI] — KP: guru memilih siswa (kelompoknya), jenis ziyadah/murajaah, rentang ayat, nilai per kriteria (keyboard-first: Tab antar-kriteria, Enter simpan & lanjut siswa berikut), nilai akhir & predikat dihitung server; notifikasi ke wali. Tes: guru bukan pengampu 403; nilai di luar rentang ditolak.
-- [ ] **T-1105 Progres hafalan** (P0) [UI] — KP: `memorized_ayahs` diperbarui dari ziyadah lulus; progres % terhadap target; tampilan wali (progres + riwayat setoran) dan guru (per kelompok). Tes: ayat yang sama tidak dihitung dua kali.
-- [ ] **T-1106 Praktik ibadah (PIB)** (P1) [UI] — Ref: REUSE_MAP §2. KP: port kurikulum bab/subbab/materi + `PibScore` (90 − kesalahan) + input nilai per rombel; rekap. Tes: port tes `ScoreCalculator` PIB.
+- [ ] **T-1104 Input setoran** (P0) [UI] — KP: guru memilih siswa (kelompoknya), jenis ziyadah/murajaah, rentang ayat, nilai per kriteria (keyboard-first: Tab antar-kriteria, Enter simpan & lanjut siswa berikut), nilai akhir & predikat dihitung server; notifikasi ke wali. Tes: guru bukan pengampu 403; nilai di luar rentang ditolak. **Tambahan ADR-017/018:** pilih jenis Qur'an/Hadits/Do'a (hadits/doa: pilih materi, tanpa ziyadah/murajaah); kriteria mode pengurangan memakai `MistakeCounter` (PageDown +1, PageUp −1 pada kriteria aktif, tidak aktif saat fokus di kolom teks; tombol ± di HP). Tes: validasi per jenis di Service; tombol keyboard mengubah kriteria aktif saja; batas 0..maks.
+- [ ] **T-1105 Progres hafalan** (P0) [UI] — KP: `memorized_ayahs` diperbarui dari ziyadah lulus; progres % terhadap target; tampilan wali (progres + riwayat setoran) dan guru (per kelompok). Tes: ayat yang sama tidak dihitung dua kali. **Tambahan ADR-017:** progres per jenis; hadits/doa = materi lulus / materi target; tab Qur'an/Hadits/Do'a di portal wali.
+- [ ] **T-1106 Praktik ibadah (PIB)** (P1) [UI] — Ref: REUSE_MAP §2. KP: port kurikulum bab/subbab/materi + `PibScore` (90 − kesalahan) + input nilai per rombel; rekap. Tes: port tes `ScoreCalculator` PIB. **Tambahan ADR-018:** input kesalahan memakai `MistakeCounter`.
+- [ ] **T-1107 Materi hadits & doa** (P0) [UI] — Ref: ADR-017, SCHEMA `memorization_materials`. KP: CRUD oleh admin (judul, teks Arab RTL, terjemahan, sumber/perawi, urutan, aktif); materi yang punya setoran hanya dinonaktifkan. Tes: hanya admin; teks Arab tersimpan utuh (UTF-8).
+- [ ] **T-1108 Komponen `MistakeCounter`** (P0) [UI] — Ref: ADR-018, DESIGN §4. KP: dipakai T-1104 & T-1106; satu kriteria aktif; PageDown/PageUp, panah kiri/kanan pindah kriteria; tombol ± ≥ 44 px; `aria-live`. Tes: komponen (tsc + uji perilaku bila ada alat), batas nilai.
 
 ---
 
@@ -217,7 +223,7 @@ Semua laporan: filter unit/rombel/periode, paginasi layar, ekspor PDF & Excel ic
 - [ ] **T-1403 Uji pemulihan** (P0) — KP: restore ke server staging/lokal dari arsip, aplikasi berjalan, data cocok; catat tanggal di DEPLOYMENT §6.
 - [ ] **T-1404 Kesiapan produksi** (P0) — KP: `payments:check-config` lulus; `APP_DEBUG=false`; cache konfigurasi; HTTPS; worker & cron aktif; `/up` terpantau.
 - [ ] **T-1405 `app:health`** (P1) — KP: deteksi antrean macet (> 10 menit), scheduler tidak jalan, backup gagal, order pending > 48 jam, selisih saldo; notifikasi admin.
-- [ ] **T-1406 Uji beban** (P0) — KP: 300 scan dalam 15 menit dan 50 transaksi POS beruntun di server target tanpa galat, p95 scan ≤ 300 ms (server); hasil dicatat.
+- [ ] **T-1406 Uji beban** (P0) — KP: 300 scan dalam 15 menit dan 50 transaksi POS beruntun di server target tanpa galat, p95 scan ≤ 300 ms (server); hasil dicatat. **Tambahan ADR-020:** skenario CBT 250 siswa: 250 login dalam 2 menit, sinkron jawaban p95 ≤ 500 ms (~25 req/detik), penutupan 250 sesi ≤ 2 menit, Wi-Fi putus 60 detik tanpa kehilangan jawaban, restart server/worker tanpa siswa keluar.
 - [ ] **T-1407 Uji browser end-to-end** (P1) — Dep: `@playwright/test`. KP: wali login → bayar tagihan (sandbox, webhook disimulasikan) → kuitansi; petugas scan → wali dapat notifikasi di kotak masuk; kasir POS → saldo berkurang.
 - [ ] **T-1408 Audit UI menyeluruh** (P0) [UI] — KP: setiap halaman lolos DESIGN §9 + antislop-ui; hasil per halaman dicatat; temuan diperbaiki.
 - [ ] **T-1409 Aksesibilitas** (P0) — KP: Lighthouse a11y ≥ 95 untuk halaman utama wali & staf; navigasi keyboard penuh; kontras light/dark AA.
@@ -226,3 +232,22 @@ Semua laporan: filter unit/rombel/periode, paginasi layar, ekspor PDF & Excel ic
 - [ ] **T-1412 UAT per peran** (P0) — KP: skrip UAT untuk admin, bendahara, guru, BK, wali kelas, petugas gerbang, kasir, wali; klien menandatangani hasil.
 - [ ] **T-1413 Dokumen serah terima** (P0) — KP: `docs/handover/` berisi panduan admin, panduan bendahara, panduan wali (singkat, bergambar tangkapan layar asli), catatan akses server (disimpan terpisah, **tidak** di repo), prosedur backup/restore.
 - [ ] **T-1414 Deploy produksi** (P0) — Ref: DEPLOYMENT. KP: semua langkah DEPLOYMENT §2–7; transaksi nyata nominal kecil bersama bendahara; rekonsiliasi lulus.
+
+---
+
+## Fase 15 — Ujian CBT (ADR-020)
+
+Bergantung pada Fase 2 (data induk) dan T-611–T-612 (kelayakan). Unit pertama MI. Rujukan: REUSE_MAP §5.
+
+- [ ] **T-1501 Mapel & penugasan guru** (P0) [UI] — KP: CRUD mapel per unit; penugasan guru × mapel × rombel × tahun ajaran (pola CRUD). Tes: guru hanya melihat mapel/rombel yang ditugaskan.
+- [ ] **T-1502 Login siswa NIS + PIN** (P0) — KP: guard `student` terpisah; PIN di-hash, dibuat/di-reset wali kelas/admin (ditampilkan sekali, bisa dicetak per rombel); rate limit per NIS; sesi diregenerasi; hanya rute `/ujian`. Tes: siswa tidak bisa membuka `/admin`/`/wali`; enumerasi NIS tidak bocor.
+- [ ] **T-1503 Ujian** (P0) [UI] — KP: buat ujian (mapel, rombel, jendela, durasi, acak, bobot per tipe, token opsional, batas pelanggaran, **mode perangkat** lab/tablet/phone, periode ujian opsional, tampil-ke-wali); validasi tanggal/durasi. Tes: otorisasi guru pengampu; validasi.
+- [ ] **T-1504 Bank soal** (P0) [UI] — KP: PG, menjodohkan, essay kertas; teks Arab RTL (`ArabicText`); gambar opsional ≤ 2 MB; impor Excel; soal **terkunci** setelah ujian mulai, koreksi kunci hanya admin + alasan + hitung ulang + audit. Tes: IDOR antar-guru (404); kunci jawaban tidak ada di respons siswa; XSS teks soal di-escape.
+- [ ] **T-1505 Sesi ujian siswa** (P0) [mysql] [UI] — Ref: ARCHITECTURE §8b. KP: mulai/lanjut sesi (cek jendela, token, mode perangkat, **kelayakan ADR-016**); timer server; take-over `device_token` (perangkat lama 409); paket soal sekali; jawaban disimpan lokal + batch idempoten + grace 120 detik; tanda ragu-ragu; satu soal per layar. Tes: sambung ulang mempertahankan urutan & sisa waktu; jawaban setelah grace ditolak; siswa tidak layak → pesan netral; dua permintaan mulai bersamaan → satu sesi.
+- [ ] **T-1506 Penilaian & penutupan otomatis** (P0) [mysql] — KP: `ExamScorer` (port aturan CBT-Sekolah, bobot dari ujian); job tiap menit menutup sesi lewat waktu/terputus/`force_closed` dan menilai lewat antrean. Tes: port kasus `penilaian_*.test.js`; sesi terputus tetap dinilai.
+- [ ] **T-1507 Input nilai essay** (P0) [UI] — KP: guru menilai per soal per siswa (form + impor Excel); status `awaiting_essay` → `final`. Tes: hanya guru pengampu; nilai di luar 0..maks ditolak.
+- [ ] **T-1508 Mode perangkat & pelanggaran** (P0) — KP: `lab` layar penuh wajib + kunci setelah batas; `tablet` layar penuh bila didukung; `phone` catat saja (`counted=false`); log append-only. Tes: per mode, hitungan & penguncian sesuai.
+- [ ] **T-1509 Monitor pengawas** (P0) [UI] — KP: status per siswa (belum mulai, mengerjakan, terkunci, selesai), progres, pelanggaran, mode perangkat, terakhir terlihat; aksi buka kunci, tambah waktu, paksa selesai (diaudit); polling 5 detik dengan satu kueri agregat. Tes: otorisasi; tanpa N+1; checklist keamanan REUSE_MAP §5.
+- [ ] **T-1510 Hasil & ekspor** (P0) [UI] — KP: rekap nilai per ujian/rombel, ekspor Excel (netral formula), hasil ke wali bila `show_result_to_guardian` dan status final. Tes: wali hanya anaknya; nilai non-final tidak tampil.
+- [ ] **T-1511 Panduan hari-H** (P1) — KP: `docs/handover/ujian-cbt.md`: persiapan per mode perangkat (lab/SEB, tablet mode kios, HP + Exambro), PIN, token, simulasi putus Wi-Fi, uji beban sebelum hari-H.
+
