@@ -20,14 +20,14 @@ Sebelum tugas apa pun, baca berurutan:
 ## 2. Alur kerja satu tugas (wajib)
 
 1. Ambil **satu** tugas dari `TODO.md`, urut per fase. Jangan loncat fase, jangan mengerjakan dua tugas sekaligus. Tugas yang bergantung pada keputusan **[TERBUKA]** dilewati sampai diputuskan.
-2. Bekerja di working tree yang ada. **Jangan** membuat branch, commit, atau push — semua operasi git dilakukan pemilik (§8).
+2. Bekerja di working tree yang ada. **Jangan** membuat branch atau push — lakukan `git commit` per tugas setelah semua KP lulus dan TODO dicentang; `git push` dilakukan pemilik setelah fase selesai (§8).
 3. Tulis **tes dulu** dari KP tugas (harus merah karena alasan yang benar).
 4. Implementasi minimal sampai hijau.
 5. `composer check` (Pint, Larastan 7, Pest, `tsc`, `vp check`) **harus hijau**. Untuk tugas bertanda `[mysql]`: juga `composer check:mysql`.
 6. Tugas UI: jalankan `composer dev`, periksa di browser pada 360/768/1280 px, light & dark, keyboard saja, dan empat keadaan. Jalankan skill **antislop-ui** + checklist `DESIGN.md` §9. Sebutkan apa yang diperiksa.
 7. Perbarui dokumen terdampak (SCHEMA, ARCHITECTURE, DESIGN, PRD bila perilaku dijelaskan ulang) **di perubahan yang sama**.
 8. Centang tugas di TODO.md **hanya** bila semua KP terbukti; tulis bukti singkat (tes, perintah, tanggal).
-9. Berhenti di status **siap commit**: sertakan di laporan akhir daftar berkas yang berubah dan usulan pesan Conventional Commits Bahasa Inggris (`feat(billing): issue invoices per classroom (T-602)`). Tunggu pemilik meng-commit sebelum mengambil tugas berikutnya.
+9. Lakukan `git commit` dengan pesan Conventional Commits Bahasa Inggris (`feat(billing): issue invoices per classroom (T-602)`), lalu sertakan daftar berkas dan ringkasan di laporan akhir. Pemilik melakukan `git push` setelah satu fase selesai.
 
 **Definition of Done**: perilaku sesuai PRD · tes baru ada dan lulus · `composer check` hijau · tanpa N+1 · otorisasi + validasi + audit sesuai §5 · UI lolos §7 · dokumen sinkron · tanpa `dd()`/`dump()`/`console.log`/kode mati/komentar TODO.
 
@@ -105,7 +105,7 @@ Jalankan skill **antislop-ui** sebelum menyatakan selesai. Jangan menambahkan te
 
 ## 8. Git
 
-- **Commit, push, branch, merge, dan PR dilakukan oleh pemilik.** Agen dilarang menjalankan `git commit`, `git push`, `git checkout -b`, `git merge`, `git rebase`, `git stash`, `git reset`, atau membuat PR. Perintah git yang boleh: `git status`, `git diff`, `git log` (hanya baca).
+- **Push, branch, merge, dan PR dilakukan oleh pemilik.** Agen boleh menjalankan `git commit` per tugas (setelah semua KP terbukti dan TODO dicentang), serta `git status`, `git diff`, `git log`. Agen tetap dilarang menjalankan `git push`, `git checkout -b`, `git merge`, `git rebase`, `git stash`, `git reset`, atau membuat PR.
 - Jaga perubahan per tugas tetap kecil (≤ ~400 baris diff bila memungkinkan) agar mudah ditinjau dan di-commit pemilik.
 - Pastikan berkas yang tidak boleh masuk repo tetap diabaikan: `.env`, `database/*.sqlite`, `storage/*`, `vendor`, `node_modules`, `public/build`, `resources/js/{actions,routes,wayfinder}` (hasil generate).
 

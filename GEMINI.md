@@ -44,9 +44,9 @@ npx shadcn@latest add <komponen>   # satu-satunya cara menambah komponen UI dasa
 
 ## Alur kerja satu tugas
 
-`pilih 1 tugas TODO` → `tes dulu (merah)` → `implementasi minimal (hijau)` → `composer check` → `cek UI di browser + antislop-ui` → `update dokumen` → `centang TODO + bukti` → `laporan + usulan pesan commit` → **berhenti**.
+`pilih 1 tugas TODO` → `tes dulu (merah)` → `implementasi minimal (hijau)` → `composer check` → `cek UI di browser + antislop-ui` → `update dokumen` → `centang TODO + bukti` → `git commit per tugas` → `laporan`.
 
-**Git sepenuhnya urusan pemilik**: jangan commit, push, membuat branch, atau PR. Perintah git yang boleh hanya `status`, `diff`, `log`. Tunggu pemilik meng-commit sebelum tugas berikutnya.
+**Push, branch, dan PR urusan pemilik**: agen boleh `git commit` per tugas dengan Conventional Commits setelah tes & TODO selesai, tetapi dilarang `push`, membuat branch, merge, rebase, atau PR. Pemilik melakukan `git push` setelah satu fase selesai.
 
 ## 14 aturan emas (rincian di AI_RULES)
 
