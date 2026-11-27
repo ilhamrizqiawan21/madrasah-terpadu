@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Enums\Feature;
 use App\Http\Controllers\Admin\StudentController;
 use App\Http\Controllers\Guardian\AccountController;
+use App\Http\Controllers\Guardian\AttendanceController;
 use App\Http\Controllers\Guardian\BillingController;
 use App\Http\Controllers\Guardian\ChildContextController;
 use App\Http\Controllers\Guardian\HistoryController;
@@ -43,6 +44,7 @@ Route::prefix('anak/{student}')
         Route::get('foto', [StudentController::class, 'photo'])->name('students.photo');
 
         Route::middleware('feature:'.Feature::Attendance->value)->group(function (): void {
+            Route::get('presensi', [AttendanceController::class, 'index'])->name('students.attendance.index');
             Route::get('izin', [LeaveRequestController::class, 'create'])->name('students.leave.create');
             Route::post('izin', [LeaveRequestController::class, 'store'])->name('students.leave.store');
             Route::get('izin/{leaveRequest}/lampiran', [LeaveRequestController::class, 'attachment'])

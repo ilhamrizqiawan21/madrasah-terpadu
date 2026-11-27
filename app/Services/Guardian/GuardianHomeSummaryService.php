@@ -4,8 +4,14 @@ declare(strict_types=1);
 
 namespace App\Services\Guardian;
 
+use App\Domain\Attendance\AttendanceClassifier;
+use App\Enums\AttendanceStatus;
+use App\Enums\Feature;
 use App\Models\AcademicYear;
+use App\Models\AttendanceDay;
 use App\Models\Student;
+use App\Services\Features\FeatureFlags;
+use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Cache;
 
 /**
@@ -55,6 +61,46 @@ final class GuardianHomeSummaryService
                 // 1) Hari ini (presensi), 2) Perlu tindakan (tagihan/mutabaah/reward),
                 // 3) Kantin, 4) Perilaku. Modul yang belum dibangun tidak ditampilkan.
                 $cards = [];
+
+                if (app(FeatureFlags::class)->enabled(Feature::Attendance)) {
+                    $tz = AttendanceClassifier::BUSINESS_TIMEZONE;
+                    $today = CarbonImmutable::now($tz)->toDateString();
+
+                    /** @var AttendanceDay|null $todayAttendance */
+                    $todayAttendance = AttendanceDay::query()
+                        ->where('student_id', $student->id)
+                        ->whereDate('school_date', $today)
+                        ->first();
+
+                    if ($todayAttendance !== null) {
+                        $inLabel = $todayAttendance->checked_in_at?->setTimezone($tz)->format('H.i');
+                        $outLabel = $todayAttendance->checked_out_at?->setTimezone($tz)->format('H.i');
+                        $parts = [$todayAttendance->status->label()];
+
+                        if ($inLabel !== null) {
+                            $parts[] = "Masuk {$inLabel}";
+                        }
+
+                        if ($outLabel !== null) {
+                            $parts[] = "Pulang {$outLabel}";
+                        }
+
+                        $tone = match ($todayAttendance->status) {
+                            AttendanceStatus::Present => 'success',
+                            AttendanceStatus::Late, AttendanceStatus::Excused, AttendanceStatus::Sick => 'warning',
+                            AttendanceStatus::Absent => 'danger',
+                        };
+
+                        $cards[] = [
+                            'key' => 'attendance_today',
+                            'priority' => 1,
+                            'title' => 'Presensi hari ini',
+                            'summary' => implode(' · ', $parts),
+                            'tone' => $tone,
+                            'href' => route('guardian.students.attendance.index', ['student' => $student->id]),
+                        ];
+                    }
+                }
 
                 return [
                     'student' => [
