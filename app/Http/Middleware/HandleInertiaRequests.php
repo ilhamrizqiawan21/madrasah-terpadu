@@ -7,6 +7,7 @@ namespace App\Http\Middleware;
 use App\Services\Settings\SettingsRepository;
 use App\Support\Branding;
 use App\Support\Navigation;
+use App\Support\SchoolContext;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -56,12 +57,7 @@ class HandleInertiaRequests extends Middleware
                 'user' => $request->user(),
             ],
             'navigation' => fn (): array => Navigation::forUser($request->user()),
-            'schoolContext' => fn (): array => [
-                'unit' => (string) $request->session()->get('active_unit', 'MI'),
-                'academicYear' => (string) $request->session()->get('active_academic_year', '2026/2027'),
-                'units' => ['MI', 'RA', 'TPQ'],
-                'academicYears' => ['2026/2027', '2025/2026'],
-            ],
+            'schoolContext' => fn (): array => SchoolContext::resolve($request->session()),
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
         ];
     }

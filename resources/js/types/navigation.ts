@@ -27,8 +27,9 @@ export type StaffNavGroup = {
 };
 
 export type SchoolContext = {
-    unit: string;
-    academicYear: string;
+    unit: string | null;
     units: string[];
-    academicYears: string[];
+    academicYear: string | null;
+    academicYearId: number | null;
+    academicYears: { id: number; label: string; isActive: boolean }[];
 };

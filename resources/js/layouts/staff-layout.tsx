@@ -57,9 +57,15 @@ export default function StaffLayout({
     const isGroupActive = (group: StaffNavGroup): boolean =>
         group.items.some((item) => isItemActive(item.href));
 
+    const unitLabel = schoolContext?.unit
+        ? `Unit ${schoolContext.unit}`
+        : 'Belum ada unit';
+    const yearLabel =
+        schoolContext?.academicYear ?? 'Belum ada tahun ajaran aktif';
+
     const updateContext = (payload: {
         unit?: string;
-        academic_year?: string;
+        academic_year_id?: number;
     }): void => {
         router.post(SchoolContextController.url(), payload, {
             preserveScroll: true,
@@ -91,8 +97,7 @@ export default function StaffLayout({
                                     <SheetTitle>{name}</SheetTitle>
                                     {schoolContext && (
                                         <p className="text-xs text-muted-foreground">
-                                            Unit {schoolContext.unit} ·{' '}
-                                            {schoolContext.academicYear}
+                                            {unitLabel} · {yearLabel}
                                         </p>
                                     )}
                                 </SheetHeader>
@@ -150,7 +155,7 @@ export default function StaffLayout({
                                 </span>
                                 {schoolContext && (
                                     <span className="block text-xs text-muted-foreground">
-                                        Unit {schoolContext.unit}
+                                        {unitLabel}
                                     </span>
                                 )}
                             </span>
@@ -218,8 +223,9 @@ export default function StaffLayout({
                                         className="gap-1.5 text-xs sm:text-sm"
                                     >
                                         <span>
-                                            {schoolContext.unit} ·{' '}
-                                            {schoolContext.academicYear}
+                                            {schoolContext.unit ?? 'Unit'} ·{' '}
+                                            {schoolContext.academicYear ??
+                                                'Tahun ajaran'}
                                         </span>
                                         <ChevronDown
                                             className="size-3.5 opacity-70"
@@ -229,6 +235,11 @@ export default function StaffLayout({
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="end">
                                     <DropdownMenuLabel>Unit</DropdownMenuLabel>
+                                    {schoolContext.units.length === 0 && (
+                                        <DropdownMenuItem disabled>
+                                            Belum ada unit aktif
+                                        </DropdownMenuItem>
+                                    )}
                                     {schoolContext.units.map((unit) => (
                                         <DropdownMenuItem
                                             key={unit}
@@ -247,20 +258,31 @@ export default function StaffLayout({
                                     <DropdownMenuLabel>
                                         Tahun ajaran
                                     </DropdownMenuLabel>
+                                    {schoolContext.academicYears.length ===
+                                        0 && (
+                                        <DropdownMenuItem disabled>
+                                            Belum ada tahun ajaran
+                                        </DropdownMenuItem>
+                                    )}
                                     {schoolContext.academicYears.map((year) => (
                                         <DropdownMenuItem
-                                            key={year}
+                                            key={year.id}
                                             onClick={() =>
                                                 updateContext({
-                                                    academic_year: year,
+                                                    academic_year_id: year.id,
                                                 })
                                             }
                                             className={cn(
-                                                schoolContext.academicYear ===
-                                                    year && 'font-semibold',
+                                                schoolContext.academicYearId ===
+                                                    year.id && 'font-semibold',
                                             )}
                                         >
-                                            {year}
+                                            {year.label}
+                                            {year.isActive && (
+                                                <span className="ml-auto pl-3 text-xs text-muted-foreground">
+                                                    aktif
+                                                </span>
+                                            )}
                                         </DropdownMenuItem>
                                     ))}
                                 </DropdownMenuContent>

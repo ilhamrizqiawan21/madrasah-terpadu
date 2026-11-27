@@ -3,6 +3,9 @@
 declare(strict_types=1);
 
 use App\Enums\Role as RoleEnum;
+use App\Enums\Semester;
+use App\Models\AcademicYear;
+use App\Models\Unit;
 use App\Models\User;
 use App\Support\Navigation;
 use Database\Seeders\RolesAndPermissionsSeeder;
@@ -57,11 +60,15 @@ test('rute modul staf menolak pengguna tanpa izin yang sesuai', function (): voi
 test('pemilih unit dan tahun ajaran menyimpan konteks ke dalam sesi', function (): void {
     $admin = User::factory()->withTwoFactor()->create();
     $admin->assignRole(RoleEnum::Admin->value);
+    Unit::factory()->create(['code' => 'MI']);
+    Unit::factory()->create(['code' => 'TPQ']);
+    AcademicYear::factory()->active()->create(['name' => '2026/2027', 'semester' => Semester::Ganjil]);
+    $previous = AcademicYear::factory()->create(['name' => '2025/2026', 'semester' => Semester::Genap]);
 
     $this->actingAs($admin)
         ->post(route('admin.context.update'), [
             'unit' => 'TPQ',
-            'academic_year' => '2025/2026',
+            'academic_year_id' => $previous->id,
         ])
         ->assertRedirect();
 
@@ -70,6 +77,50 @@ test('pemilih unit dan tahun ajaran menyimpan konteks ke dalam sesi', function (
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
             ->where('schoolContext.unit', 'TPQ')
-            ->where('schoolContext.academicYear', '2025/2026'),
+            ->where('schoolContext.academicYear', '2025/2026 Genap')
+            ->where('schoolContext.academicYearId', $previous->id),
         );
+});
+
+test('konteks bawaan memakai unit aktif pertama dan tahun ajaran yang sedang aktif', function (): void {
+    $admin = User::factory()->withTwoFactor()->create();
+    $admin->assignRole(RoleEnum::Admin->value);
+    Unit::factory()->create(['code' => 'RA']);
+    Unit::factory()->create(['code' => 'MI']);
+    Unit::factory()->create(['code' => 'TPQ', 'is_active' => false]);
+    AcademicYear::factory()->create(['name' => '2025/2026', 'semester' => Semester::Genap]);
+    AcademicYear::factory()->active()->create(['name' => '2026/2027', 'semester' => Semester::Ganjil]);
+
+    $this->actingAs($admin)
+        ->get(route('admin.dashboard'))
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('schoolContext.unit', 'MI')
+            ->where('schoolContext.units', ['MI', 'RA'])
+            ->where('schoolContext.academicYear', '2026/2027 Ganjil')
+            ->has('schoolContext.academicYears', 2),
+        );
+});
+
+test('tanpa unit dan tahun ajaran, konteks kosong tanpa nilai karangan', function (): void {
+    $admin = User::factory()->withTwoFactor()->create();
+    $admin->assignRole(RoleEnum::Admin->value);
+
+    $this->actingAs($admin)
+        ->get(route('admin.dashboard'))
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('schoolContext.unit', null)
+            ->where('schoolContext.units', [])
+            ->where('schoolContext.academicYear', null)
+            ->where('schoolContext.academicYears', []),
+        );
+});
+
+test('pemilih konteks menolak unit nonaktif dan tahun ajaran yang tidak ada', function (): void {
+    $admin = User::factory()->withTwoFactor()->create();
+    $admin->assignRole(RoleEnum::Admin->value);
+    Unit::factory()->create(['code' => 'TPQ', 'is_active' => false]);
+
+    $this->actingAs($admin)
+        ->post(route('admin.context.update'), ['unit' => 'TPQ', 'academic_year_id' => 999])
+        ->assertSessionHasErrors(['unit', 'academic_year_id']);
 });
