@@ -14,9 +14,11 @@ void createInertiaApp({
     title: (title) => (title ? `${title} - ${appName}` : appName),
     layout: (name) => {
         switch (true) {
-            // Halaman staf & wali merender layout sendiri.
+            // Halaman staf, wali, & kiosk merender layout sendiri.
             case name.startsWith('admin/'):
             case name.startsWith('guardian/'):
+            case name.startsWith('gate/'):
+            case name.startsWith('canteen/'):
                 return null;
             case name.startsWith('auth/'):
                 return AuthLayout;

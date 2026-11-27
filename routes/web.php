@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\SchoolContextController;
 use App\Http\Controllers\BrandingAssetController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\Gate\GateController;
 use App\Http\Controllers\PushSubscriptionController;
 use App\Http\Controllers\PwaController;
 use Illuminate\Http\RedirectResponse;
@@ -77,9 +78,16 @@ Route::middleware(['auth'])->group(function (): void {
 
     Route::prefix('gerbang')
         ->name('gate.')
-        ->middleware('role:'.implode('|', [Role::GateOfficer->value, Role::Admin->value]))
+        ->middleware([
+            'role:'.implode('|', [Role::GateOfficer->value, Role::Admin->value]),
+            'feature:'.Feature::Attendance->value,
+        ])
+        ->controller(GateController::class)
         ->group(function (): void {
-            Route::inertia('/', 'gate/index')->name('index');
+            Route::get('/', 'index')->name('index');
+            Route::post('scan', 'scan')
+                ->middleware('throttle:300,1')
+                ->name('scan');
         });
 
     Route::prefix('kantin')
