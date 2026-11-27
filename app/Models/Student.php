@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
 
@@ -100,5 +101,21 @@ class Student extends Model
     public function primaryGuardians(): BelongsToMany
     {
         return $this->guardians()->wherePivot('is_primary', true);
+    }
+
+    /**
+     * @return HasMany<StudentCard, $this>
+     */
+    public function cards(): HasMany
+    {
+        return $this->hasMany(StudentCard::class);
+    }
+
+    /**
+     * @return HasOne<StudentCard, $this>
+     */
+    public function activeCard(): HasOne
+    {
+        return $this->hasOne(StudentCard::class)->whereNull('revoked_at');
     }
 }

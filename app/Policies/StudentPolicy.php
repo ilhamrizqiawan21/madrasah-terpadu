@@ -22,4 +22,9 @@ class StudentPolicy
 
         return $user->guardian?->students()->whereKey($student->id)->exists() === true;
     }
+
+    public function update(User $user, Student $student): bool
+    {
+        return $user->can(Permission::StudentsManage->value);
+    }
 }

@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Enums\Permission;
+use App\Http\Controllers\Admin\StudentCardController;
 use App\Http\Controllers\Admin\StudentController;
 use App\Http\Controllers\Admin\StudentImportController;
 use App\Http\Controllers\Admin\StudentMutationController;
@@ -26,6 +27,16 @@ Route::prefix('siswa')
             Route::post('/', 'store')->name('store');
             Route::put('{student}', 'update')->whereNumber('student')->name('update');
             Route::patch('{student}/status', 'updateStatus')->whereNumber('student')->name('status.update');
+
+            Route::prefix('{student}/kartu')
+                ->whereNumber('student')
+                ->name('cards.')
+                ->controller(StudentCardController::class)
+                ->group(function (): void {
+                    Route::post('qr', 'issueQr')->name('qr.issue');
+                    Route::post('rfid', 'registerRfid')->name('rfid.register');
+                    Route::delete('/', 'revoke')->name('revoke');
+                });
         });
     });
 
