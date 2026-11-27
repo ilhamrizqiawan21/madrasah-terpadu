@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Enums\Feature;
 use App\Enums\Permission;
+use App\Http\Controllers\Admin\CbtEssayScoreController;
 use App\Http\Controllers\Admin\CbtExamController;
 use App\Http\Controllers\Admin\CbtQuestionController;
 use App\Http\Controllers\Admin\CbtStudentPinController;
@@ -40,6 +41,10 @@ Route::middleware('feature:'.Feature::Cbt->value)
             Route::delete('daftar/{exam}/soal/{question}', [CbtQuestionController::class, 'destroy'])->whereNumber(['exam', 'question'])->name('questions.destroy');
             Route::patch('daftar/{exam}/soal/{question}/koreksi-kunci', [CbtQuestionController::class, 'correctKey'])->whereNumber(['exam', 'question'])->name('questions.correct-key');
             Route::get('daftar/{exam}/soal/{question}/gambar', [CbtQuestionController::class, 'image'])->whereNumber(['exam', 'question'])->name('questions.image');
+
+            Route::get('daftar/{exam}/essay', [CbtEssayScoreController::class, 'index'])->whereNumber('exam')->name('essay.index');
+            Route::post('daftar/{exam}/essay', [CbtEssayScoreController::class, 'store'])->whereNumber('exam')->name('essay.store');
+            Route::post('daftar/{exam}/essay/impor', [CbtEssayScoreController::class, 'import'])->whereNumber('exam')->name('essay.import');
         });
 
         Route::middleware('permission:'.Permission::CbtManage->value)->group(function (): void {

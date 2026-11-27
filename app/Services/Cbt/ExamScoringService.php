@@ -24,10 +24,16 @@ final class ExamScoringService
     {
         return DB::transaction(function () use ($session, $essayScoresByQuestionId): ExamResult {
             $lockedSession = ExamSession::query()
-                ->with(['exam.questions', 'answers'])
+                ->with(['exam.questions', 'answers', 'essayScores'])
                 ->whereKey($session->id)
                 ->lockForUpdate()
                 ->firstOrFail();
+
+            if ($essayScoresByQuestionId === []) {
+                foreach ($lockedSession->essayScores as $essayScore) {
+                    $essayScoresByQuestionId[$essayScore->exam_question_id] = $essayScore->score;
+                }
+            }
 
             $questions = array_values($lockedSession->exam->questions->map(fn ($q): array => [
                 'id' => $q->id,

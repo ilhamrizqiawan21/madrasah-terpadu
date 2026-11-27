@@ -90,6 +90,14 @@ class ExamSession extends Model
     }
 
     /**
+     * @return HasMany<ExamEssayScore, $this>
+     */
+    public function essayScores(): HasMany
+    {
+        return $this->hasMany(ExamEssayScore::class);
+    }
+
+    /**
      * @return HasOne<ExamResult, $this>
      */
     public function result(): HasOne

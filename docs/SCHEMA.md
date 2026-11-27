@@ -355,9 +355,9 @@ Unik (`student_id`,`academic_year_id`,`aspect`).
 
 `exam_session_id`, `kind` (`tab_hidden|fullscreen_exit|copy_paste|takeover`), `occurred_at`, `counted bool` (false untuk mode `phone`).
 
-### `exam_essay_scores` (T-1507)
+### `exam_essay_scores` (T-1507 ✅)
 
-`exam_session_id`, `exam_question_id`, `score tinyint`, `scored_by → users`, timestamps. Unik (`exam_session_id`,`exam_question_id`).
+`exam_session_id → exam_sessions` (cascade), `exam_question_id → exam_questions` (restrict), `score unsignedTinyInteger`, `scored_by → users` (restrict), timestamps. Unik (`exam_session_id`,`exam_question_id`). Ditulis lewat `ExamEssayScoreService`.
 
 ### `exam_results` (T-1506 ✅)
 

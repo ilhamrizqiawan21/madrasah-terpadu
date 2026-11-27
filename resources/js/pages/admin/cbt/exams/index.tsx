@@ -1,7 +1,8 @@
-import { Head, router, useForm } from '@inertiajs/react';
-import { CalendarCheck, Plus } from 'lucide-react';
+import { Head, Link, router, useForm } from '@inertiajs/react';
+import { CalendarCheck, FileCheck2, Plus } from 'lucide-react';
 import type { FormEvent } from 'react';
 import { useEffect, useRef, useState } from 'react';
+import CbtEssayScoreController from '@/actions/App/Http/Controllers/Admin/CbtEssayScoreController';
 import CbtExamController from '@/actions/App/Http/Controllers/Admin/CbtExamController';
 import CbtQuestionController from '@/actions/App/Http/Controllers/Admin/CbtQuestionController';
 import AdminDashboardController from '@/actions/App/Http/Controllers/Admin/DashboardController';
@@ -361,6 +362,28 @@ export default function CbtExamsIndex({
                               viewHref={CbtQuestionController.index.url(row.id)}
                               onEdit={() => openEdit(row)}
                           >
+                              <Tooltip>
+                                  <TooltipTrigger asChild>
+                                      <Button
+                                          variant="ghost"
+                                          size="icon"
+                                          asChild
+                                          aria-label={`Nilai essay ${row.title}`}
+                                      >
+                                          <Link
+                                              href={CbtEssayScoreController.index.url(
+                                                  row.id,
+                                              )}
+                                          >
+                                              <FileCheck2
+                                                  className="size-4"
+                                                  strokeWidth={1.75}
+                                              />
+                                          </Link>
+                                      </Button>
+                                  </TooltipTrigger>
+                                  <TooltipContent>Nilai essay</TooltipContent>
+                              </Tooltip>
                               {(row.status === 'draft' ||
                                   row.status === 'scheduled') && (
                                   <Tooltip>
