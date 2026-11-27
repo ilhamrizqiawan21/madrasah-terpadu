@@ -5,12 +5,14 @@ import {
     Power,
     PowerOff,
     Trash2,
+    Upload,
     UserRound,
 } from 'lucide-react';
 import type { ChangeEvent, FormEvent, ReactNode } from 'react';
 import { useEffect, useRef, useState } from 'react';
 import ClassroomController from '@/actions/App/Http/Controllers/Admin/ClassroomController';
 import StudentController from '@/actions/App/Http/Controllers/Admin/StudentController';
+import StudentImportController from '@/actions/App/Http/Controllers/Admin/StudentImportController';
 import { ConfirmDialog } from '@/components/app/confirm-dialog';
 import type { DataTableColumn } from '@/components/app/data-table';
 import { DataTable } from '@/components/app/data-table';
@@ -90,6 +92,7 @@ type Props = {
     classroomOptions: Option[];
     enrollmentClassroomOptions: Option[];
     statusOptions: StatusOption[];
+    canImport: boolean;
 };
 
 type StudentForm = {
@@ -176,6 +179,7 @@ export default function StudentsIndex({
     classroomOptions,
     enrollmentClassroomOptions,
     statusOptions,
+    canImport,
 }: Props) {
     const [search, setSearch] = useState(filters.search);
     const [loading, setLoading] = useState(false);
@@ -370,6 +374,15 @@ export default function StudentsIndex({
         </Button>
     );
 
+    const importButton = canImport ? (
+        <Button variant="outline" asChild>
+            <Link href={StudentImportController.create()}>
+                <Upload className="size-4" strokeWidth={1.75} />
+                Impor Excel
+            </Link>
+        </Button>
+    ) : null;
+
     const emptyState = (): {
         title: string;
         description: string;
@@ -412,6 +425,7 @@ export default function StudentsIndex({
                             </Link>
                         </Button>
                     )}
+                    {importButton}
                     {addButton}
                 </div>
             ),
@@ -552,7 +566,12 @@ export default function StudentsIndex({
                             ? `Rombel ditampilkan untuk ${academicYearLabel}. Pindah rombel tercatat sebagai riwayat.`
                             : 'Pindah rombel tercatat sebagai riwayat.'
                     }
-                    actions={addButton}
+                    actions={
+                        <>
+                            {importButton}
+                            {addButton}
+                        </>
+                    }
                 />
 
                 <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">

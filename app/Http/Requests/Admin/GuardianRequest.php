@@ -16,6 +16,8 @@ class GuardianRequest extends FormRequest
 {
     public const MAX_CHILDREN = 10;
 
+    public const PHONE_MESSAGE = 'Nomor HP harus nomor seluler Indonesia, mis. 0812xxxxxxxx.';
+
     public function authorize(): bool
     {
         return $this->user()?->can(Permission::GuardiansManage->value) === true;
@@ -51,7 +53,8 @@ class GuardianRequest extends FormRequest
     {
         $guardian = $this->editedGuardian();
 
-        $phone = ['required', 'string', 'regex:/^08[0-9]{8,12}$/'];
+        $rules = self::contactRules();
+        $phone = $rules['phone'];
 
         // Saat menambah, nomor yang sudah dipakai akun lain tidak ditolak: GuardianService menautkannya.
         if ($guardian !== null) {
@@ -61,9 +64,8 @@ class GuardianRequest extends FormRequest
         }
 
         return [
-            'name' => ['required', 'string', 'max:100'],
+            ...$rules,
             'phone' => $phone,
-            'relation' => ['required', Rule::enum(GuardianRelation::class)],
             'address' => ['nullable', 'string', 'max:500'],
             'children' => ['required', 'array', 'min:1', 'max:'.self::MAX_CHILDREN],
             'children.*' => ['required', 'array:student_id,is_primary'],
@@ -72,6 +74,20 @@ class GuardianRequest extends FormRequest
                 Rule::exists('students', 'id')->whereNull('deleted_at'),
             ],
             'children.*.is_primary' => ['required', 'boolean'],
+        ];
+    }
+
+    /**
+     * Aturan nama, nomor HP (sudah dinormalisasi), dan hubungan wali; dipakai juga oleh impor Excel (T-207).
+     *
+     * @return array<string, list<mixed>>
+     */
+    public static function contactRules(): array
+    {
+        return [
+            'name' => ['required', 'string', 'max:100'],
+            'phone' => ['required', 'string', 'regex:/^08[0-9]{8,12}$/'],
+            'relation' => ['required', Rule::enum(GuardianRelation::class)],
         ];
     }
 
@@ -97,7 +113,7 @@ class GuardianRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'phone.regex' => 'Nomor HP harus nomor seluler Indonesia, mis. 0812xxxxxxxx.',
+            'phone.regex' => self::PHONE_MESSAGE,
             'phone.unique' => 'Nomor HP ini sudah dipakai akun lain.',
             'children.required' => 'Pilih minimal satu anak.',
             'children.min' => 'Pilih minimal satu anak.',

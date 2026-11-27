@@ -50,22 +50,13 @@ class StudentRequest extends FormRequest
         $student = $this->editedStudent();
         $unitId = $student !== null ? $student->unit_id : $this->integer('unit_id');
 
+        $rules = self::fieldRules();
+        // Unik terhadap semua baris, termasuk siswa yang diarsipkan, sesuai indeks unik tabel.
+        $rules['nis'][] = Rule::unique('students', 'nis')->ignore($student?->id);
+        $rules['nisn'][] = Rule::unique('students', 'nisn')->ignore($student?->id);
+
         $rules = [
-            // Unik terhadap semua baris, termasuk siswa yang diarsipkan, sesuai indeks unik tabel.
-            'nis' => [
-                'required', 'string', 'max:20', 'regex:/^[0-9A-Za-z.\-\/]+$/',
-                Rule::unique('students', 'nis')->ignore($student?->id),
-            ],
-            'nisn' => [
-                'nullable', 'string', 'digits:10',
-                Rule::unique('students', 'nisn')->ignore($student?->id),
-            ],
-            'name' => ['required', 'string', 'max:100'],
-            'nickname' => ['nullable', 'string', 'max:30'],
-            'gender' => ['required', Rule::enum(Gender::class)],
-            'birth_place' => ['nullable', 'string', 'max:60'],
-            'birth_date' => ['nullable', 'date_format:Y-m-d', 'before_or_equal:today'],
-            'address' => ['nullable', 'string', 'max:500'],
+            ...$rules,
             'status' => ['required', Rule::enum(StudentStatus::class)],
             'classroom_id' => [
                 'nullable', 'integer',
@@ -91,15 +82,8 @@ class StudentRequest extends FormRequest
     public function attributes(): array
     {
         return [
+            ...self::fieldAttributes(),
             'unit_id' => 'unit',
-            'nis' => 'NIS',
-            'nisn' => 'NISN',
-            'name' => 'nama lengkap',
-            'nickname' => 'nama panggilan',
-            'gender' => 'jenis kelamin',
-            'birth_place' => 'tempat lahir',
-            'birth_date' => 'tanggal lahir',
-            'address' => 'alamat',
             'status' => 'status',
             'classroom_id' => 'rombel',
             'photo' => 'foto',
@@ -112,15 +96,62 @@ class StudentRequest extends FormRequest
     public function messages(): array
     {
         return [
+            ...self::fieldMessages(),
             'nis.unique' => 'NIS ini sudah dipakai siswa lain.',
-            'nis.regex' => 'NIS hanya boleh berisi huruf, angka, titik, garis miring, atau tanda hubung.',
             'nisn.unique' => 'NISN ini sudah dipakai siswa lain.',
-            'nisn.digits' => 'NISN harus 10 digit angka.',
-            'birth_date.before_or_equal' => 'Tanggal lahir tidak boleh setelah hari ini.',
             'photo.image' => 'Foto harus berupa gambar JPG, PNG, atau WebP.',
             'photo.mimes' => 'Foto harus berupa gambar JPG, PNG, atau WebP.',
             'photo.max' => 'Ukuran foto paling besar 2 MB.',
             'photo.dimensions' => 'Resolusi foto terlalu besar (maksimal 6000 piksel per sisi).',
+        ];
+    }
+
+    /**
+     * Aturan isian data diri siswa tanpa cek unik; dipakai juga oleh impor Excel (T-207),
+     * yang memeriksa keunikan NIS/NISN sekaligus untuk seluruh berkas.
+     *
+     * @return array<string, list<mixed>>
+     */
+    public static function fieldRules(): array
+    {
+        return [
+            'nis' => ['required', 'string', 'max:20', 'regex:/^[0-9A-Za-z.\-\/]+$/'],
+            'nisn' => ['nullable', 'string', 'digits:10'],
+            'name' => ['required', 'string', 'max:100'],
+            'nickname' => ['nullable', 'string', 'max:30'],
+            'gender' => ['required', Rule::enum(Gender::class)],
+            'birth_place' => ['nullable', 'string', 'max:60'],
+            'birth_date' => ['nullable', 'date_format:Y-m-d', 'before_or_equal:today'],
+            'address' => ['nullable', 'string', 'max:500'],
+        ];
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    public static function fieldAttributes(): array
+    {
+        return [
+            'nis' => 'NIS',
+            'nisn' => 'NISN',
+            'name' => 'nama lengkap',
+            'nickname' => 'nama panggilan',
+            'gender' => 'jenis kelamin',
+            'birth_place' => 'tempat lahir',
+            'birth_date' => 'tanggal lahir',
+            'address' => 'alamat',
+        ];
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    public static function fieldMessages(): array
+    {
+        return [
+            'nis.regex' => 'NIS hanya boleh berisi huruf, angka, titik, garis miring, atau tanda hubung.',
+            'nisn.digits' => 'NISN harus 10 digit angka.',
+            'birth_date.before_or_equal' => 'Tanggal lahir tidak boleh setelah hari ini.',
         ];
     }
 

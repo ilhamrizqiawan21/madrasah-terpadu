@@ -23,29 +23,26 @@ Aturan: singkat dan faktual. Jangan menyalin isi TODO/ADR; tautkan saja. Hapus b
 
 ## Terakhir diperbarui
 
-2026-11-27 · Claude (koordinator), dihentikan pemilik di tengah T-207
+2026-11-27 · Gemini (eksekutor), setelah T-207
 
 ## Keadaan sekarang
 
 - **Fase 0 & 1**: semua tugas `[x]`, plus perbaikan temuan cek UI (ADR-024, commit `1cfd189`): hapus akun sendiri dihapus, passkey dimatikan, UI auth/2FA berbahasa Indonesia, tautan & logo Laravel dibuang.
 - **2FA dimatikan seluruhnya** (ADR-025 + ADR-026, commit `b17e2c7`): `REQUIRE_TWO_FACTOR` dan `TWO_FACTOR_ENABLED` bawaan `false` — tanpa tantangan kode saat login dan tanpa menu 2FA. Nyalakan keduanya sebelum produksi (DEPLOYMENT §2).
-- **Fase 2 (paket P-03)**: T-201 ✔ (`dce871b`), T-202 ✔ (`f48e553`), T-203 ✔ (`2ee9ff7`), T-204 ✔ (`7c001c4`, Rombel), T-211 ✔ (`f9f1a96`, kunci fitur; di-cherry-pick dari worktree), T-205 ✔ (`d34f185`, Siswa + enrollment), T-206 ✔ (`805bffb`, Wali + hubungan anak). T-207 **belum selesai** (lihat "Sedang dikerjakan"). Pemilih unit/tahun ajaran di topbar dari database (`App\Support\SchoolContext`, T-111 `992ad0d`).
+- **Fase 2 (paket P-03)**: T-201 ✔ (`dce871b`), T-202 ✔ (`f48e553`), T-203 ✔ (`2ee9ff7`), T-204 ✔ (`7c001c4`, Rombel), T-211 ✔ (`f9f1a96`, kunci fitur; di-cherry-pick dari worktree), T-205 ✔ (`d34f185`, Siswa + enrollment), T-206 ✔ (`805bffb`, Wali + hubungan anak), T-207 ✔ (Impor Excel siswa + wali). Pemilih unit/tahun ajaran di topbar dari database (`App\Support\SchoolContext`, T-111 `992ad0d`).
 - **Perbaikan setelah review** (`855c151`): `schoolContext` hanya dibagikan ke peran area `/admin` (`Role::adminArea()`), cache pengaturan TTL 10 menit + ditulis ulang setelah commit, pembersihan logo/favicon memakai nilai lama dari baris terkunci, tahun ajaran terpilih di luar 6 terbaru tetap dipakai, `activate` mengunci semua tahun ajaran urut id.
 - **Keputusan pemilik diterapkan** (`1e223e7`): `/` dialihkan ke `dashboard` (tamu → login, pengguna → beranda sesuai peran), halaman `welcome` dihapus; semua input jam memakai `TimeInput` 24 jam `HH.MM`.
-- `composer check` hijau di commit terakhir `b17e2c7` (334 tes, Larastan 0); juga hijau bersama perubahan T-207 yang belum di-commit (354 tes). CI GitHub hijau sejak ADR-023 (PHP ≥ 8.4); commit setelah `59a0ff1` belum di-push.
+- `composer check` hijau setelah T-207 (354 tes, Larastan 0, `tsc`, `vp check`). CI GitHub hijau sejak ADR-023 (PHP ≥ 8.4); commit setelah `59a0ff1` belum di-push.
 - Lingkungan lokal: `.env` memakai **MariaDB** `madrasah_terpadu` (sudah `migrate` + `ProductionSeeder`). Tes tetap SQLite in-memory.
 - Akun uji lokal: username `admin.uji` (Admin, 2FA dimatikan 2026-11-27). Kata sandi dan rahasia TOTP **tidak** dicatat di repo; buat ulang lewat resep "Cek UI lokal".
 
 ## Sedang dikerjakan
 
-**T-207 Impor Excel siswa + wali — dihentikan pemilik (2026-11-27), BELUM di-commit, belum dicentang.**
-- Kode ada di working tree (tidak di-commit): `StudentImportController`, `StudentImportRequest`, `StudentImportService`, `StudentImportRow`, `StudentImportException`, `pages/admin/students/import.tsx`, `tests/Feature/Admin/StudentImportTest.php` (20 tes), dependensi `openspout/openspout` di `composer.json/lock`, serta perubahan kecil di `StudentController`, `StudentRequest`, `GuardianRequest`, `routes/students.php`, `pages/admin/students/index.tsx`.
-- Status: `composer check` hijau (354 tes, Larastan 0). **Belum**: cek UI di browser (berhenti saat mengunggah berkas), antislop-ui, pembaruan TODO/SCHEMA/PRD (kolom template), commit.
-- **Data uji di MariaDB lokal yang dibuat agen saat cek UI belum dibersihkan**: 1 tahun ajaran, 1 rombel, 56 siswa, 30 wali (+ akun user wali), serta berkas sementara `storage/app/private/imports/*.xlsx`. Hapus sebelum dipakai untuk data asli (jangan hapus `audit_logs`).
+Lanjut P-03: **T-212** (Kenaikan kelas & mutasi siswa) → **T-210** (`DemoSeeder`).
 
 ## Langkah berikutnya
 
-1. Selesaikan T-207 dari working tree (tinjau kode yang ada, cek UI, antislop, dokumen, commit), lalu **T-212** (kenaikan kelas & mutasi) → **T-210** (DemoSeeder) untuk menutup P-03.
+1. Kerjakan **T-212** (kenaikan kelas & mutasi) → **T-210** (`DemoSeeder`) untuk menutup P-03.
    Catatan: worktree otomatis sub-agent dibuat dari commit lama (`992ad0d`), jadi tugas yang bergantung pada commit baru dijalankan di working tree utama secara berurutan.
 2. Pemilik mengonfirmasi keputusan T-204, T-205, T-206, dan T-211 di bawah.
 3. Pemilik: `git push` untuk commit sejak `59a0ff1`.

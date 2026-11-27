@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Admin;
 
+use App\Enums\Permission;
 use App\Enums\StudentStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StudentRequest;
@@ -132,6 +133,9 @@ class StudentController extends Controller
                 'name' => $classroom->name,
             ])->values(),
             'statusOptions' => StudentStatus::options(),
+            // Impor bisa membuat akun wali (T-207), jadi tombolnya butuh kedua izin.
+            'canImport' => $request->user()?->can(Permission::StudentsManage->value) === true
+                && $request->user()->can(Permission::GuardiansManage->value),
         ]);
     }
 
