@@ -284,9 +284,9 @@ Unik (`student_id`,`habit_item_id`,`log_date`). Indeks (`log_date`,`verification
 
 ## I. Hafalan dan praktik ibadah (Fase 11)
 
-### `surahs` (T-1101, seeder data publik)
+### `surahs` (T-1101 ✅, seeder data publik `SurahSeeder`)
 
-`number tinyint unique` (1–114), `name_latin`, `name_arabic`, `ayah_count smallint`, `juz_start tinyint`.
+`number tinyint unique` (1–114), `name_latin`, `name_arabic`, `ayah_count smallint`, `juz_start tinyint`. Total 6.236 ayat.
 
 ### `memorization_materials` (T-1107, ADR-017) — master hadits & doa
 

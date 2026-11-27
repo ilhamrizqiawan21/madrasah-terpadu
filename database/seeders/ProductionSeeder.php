@@ -18,6 +18,7 @@ class ProductionSeeder extends Seeder
             RolesAndPermissionsSeeder::class,
             UnitSeeder::class,
             HabitItemSeeder::class,
+            SurahSeeder::class,
         ]);
     }
 }

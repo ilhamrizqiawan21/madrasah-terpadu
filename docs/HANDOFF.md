@@ -23,7 +23,7 @@ Aturan: singkat dan faktual. Jangan menyalin isi TODO/ADR; tautkan saja. Hapus b
 
 ## Terakhir diperbarui
 
-2026-11-27 · Gemini (eksekutor), setelah **Fase 10 Pembiasaan (T-1001 s.d. T-1005) selesai seluruhnya**
+2026-11-27 · Gemini (eksekutor), setelah **T-1101 (Data 114 surah, Fase 11)** selesai
 
 ## Keadaan sekarang
 
