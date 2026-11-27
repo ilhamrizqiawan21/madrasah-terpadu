@@ -356,7 +356,7 @@ final class StaffDashboardService
         $start = $today->subDays(self::TREND_LOOKBACK_DAYS);
 
         $holidays = SchoolHoliday::query()
-            ->whereBetween('holiday_date', [$start->toDateString(), $today->toDateString()])
+            ->whereDate('holiday_date', '>=', $start->toDateString())->whereDate('holiday_date', '<=', $today->toDateString())
             ->where('is_day_off', true)
             ->where(fn (Builder $q) => $q->whereNull('unit_id')->orWhere('unit_id', $unit->id))
             ->pluck('holiday_date')
@@ -383,7 +383,7 @@ final class StaffDashboardService
 
         AttendanceDay::query()
             ->whereIn('student_id', $studentIds)
-            ->whereBetween('school_date', [$schoolDays[0], end($schoolDays)])
+            ->whereDate('school_date', '>=', $schoolDays[0])->whereDate('school_date', '<=', end($schoolDays))
             ->select('school_date', 'status', DB::raw('count(*) as aggregate'))
             ->groupBy('school_date', 'status')
             ->get()

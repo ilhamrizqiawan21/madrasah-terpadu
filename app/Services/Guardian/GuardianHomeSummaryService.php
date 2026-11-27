@@ -176,7 +176,7 @@ final class GuardianHomeSummaryService
         $start = $now->subDays(14);
 
         $holidays = SchoolHoliday::query()
-            ->whereBetween('holiday_date', [$start->toDateString(), $now->toDateString()])
+            ->whereDate('holiday_date', '>=', $start->toDateString())->whereDate('holiday_date', '<=', $now->toDateString())
             ->where('is_day_off', true)
             ->where(fn (Builder $q) => $q->whereNull('unit_id')->orWhere('unit_id', $unit->id))
             ->pluck('holiday_date')
@@ -199,7 +199,7 @@ final class GuardianHomeSummaryService
 
         $records = AttendanceDay::query()
             ->where('student_id', $student->id)
-            ->whereBetween('school_date', [$days[0], end($days)])
+            ->whereDate('school_date', '>=', $days[0])->whereDate('school_date', '<=', end($days))
             ->get(['school_date', 'status'])
             ->mapWithKeys(fn (AttendanceDay $d): array => [$d->school_date->toDateString() => $d->status]);
 

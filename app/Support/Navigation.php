@@ -207,11 +207,7 @@ final class Navigation
                     ['label' => 'Tindak lanjut & ambang', 'route' => 'admin.behavior.discipline.index', 'permission' => Permission::ThresholdsManage->value, 'feature' => Feature::Behavior],
                     ['label' => 'Aturan poin', 'route' => 'admin.behavior.rules.index', 'permission' => Permission::PointRulesManage->value, 'feature' => Feature::Behavior],
                     ['label' => 'Reward & voucher', 'route' => 'admin.behavior.rewards.index', 'permission' => Permission::RewardsApprove->value, 'feature' => Feature::Rewards],
-                    [
-                        'label' => 'Penilaian karakter', 'soon' => 'nilai-sikap', 'permission' => Permission::AttitudeView->value,
-                        'description' => 'Capaian karakter per dimensi (Kurikulum Merdeka bawaan, K-13 opsional) dari pembiasaan, kehadiran, dan catatan perilaku; dikunci wali kelas dan disetujui kepala unit.',
-                        'plan' => 'Fase 12 (ADR-029), Paket P-18',
-                    ],
+                    ['label' => 'Penilaian karakter', 'route' => 'admin.character.index', 'permission' => Permission::AttitudeView->value, 'feature' => Feature::Attitude],
                     [
                         'label' => 'Asrama', 'soon' => 'asrama', 'permission' => Permission::StudentsManage->value,
                         'description' => 'Kamar asrama (kapasitas, jenis kelamin) dan penempatan siswa.',
