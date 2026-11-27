@@ -8,6 +8,7 @@ use App\Http\Controllers\Guardian\AccountController;
 use App\Http\Controllers\Guardian\AttendanceController;
 use App\Http\Controllers\Guardian\BillingController;
 use App\Http\Controllers\Guardian\ChildContextController;
+use App\Http\Controllers\Guardian\ExamResultController;
 use App\Http\Controllers\Guardian\HistoryController;
 use App\Http\Controllers\Guardian\HomeController;
 use App\Http\Controllers\Guardian\LeaveRequestController;
@@ -50,5 +51,9 @@ Route::prefix('anak/{student}')
             Route::get('izin/{leaveRequest}/lampiran', [LeaveRequestController::class, 'attachment'])
                 ->whereNumber('leaveRequest')
                 ->name('students.leave.attachment');
+        });
+
+        Route::middleware('feature:'.Feature::Cbt->value)->group(function (): void {
+            Route::get('ujian', ExamResultController::class)->name('students.exams.index');
         });
     });

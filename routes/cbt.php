@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\CbtEssayScoreController;
 use App\Http\Controllers\Admin\CbtExamController;
 use App\Http\Controllers\Admin\CbtMonitorController;
 use App\Http\Controllers\Admin\CbtQuestionController;
+use App\Http\Controllers\Admin\CbtResultController;
 use App\Http\Controllers\Admin\CbtStudentPinController;
 use App\Http\Controllers\Admin\CbtSubjectController;
 use App\Http\Controllers\Admin\CbtTeachingAssignmentController;
@@ -52,6 +53,9 @@ Route::middleware('feature:'.Feature::Cbt->value)
             Route::post('daftar/{exam}/monitor/{session}/buka-kunci', [CbtMonitorController::class, 'unlock'])->whereNumber(['exam', 'session'])->name('monitor.unlock');
             Route::post('daftar/{exam}/monitor/{session}/tambah-waktu', [CbtMonitorController::class, 'extraTime'])->whereNumber(['exam', 'session'])->name('monitor.extra-time');
             Route::post('daftar/{exam}/monitor/{session}/paksa-selesai', [CbtMonitorController::class, 'forceClose'])->whereNumber(['exam', 'session'])->name('monitor.force-close');
+
+            Route::get('daftar/{exam}/hasil', [CbtResultController::class, 'index'])->whereNumber('exam')->name('results.index');
+            Route::get('daftar/{exam}/hasil/ekspor', [CbtResultController::class, 'export'])->whereNumber('exam')->name('results.export');
         });
 
         Route::middleware('permission:'.Permission::CbtManage->value)->group(function (): void {
