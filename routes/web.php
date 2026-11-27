@@ -53,6 +53,8 @@ Route::middleware(['auth'])->group(function (): void {
             Route::inertia('pengaturan', 'admin/dashboard')
                 ->middleware('permission:'.Permission::SettingsManage->value)
                 ->name('settings.index');
+
+            require __DIR__.'/users.php';
         });
 
     Route::prefix('wali')

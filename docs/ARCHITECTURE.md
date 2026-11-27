@@ -51,6 +51,7 @@ app/
 │   ├── Quran/              # MemorizationService, PibAssessmentService
 │   ├── Attitude/           # AttitudeAssessmentService
 │   ├── Notifications/      # GuardianNotifier
+│   ├── Users/              # StaffUserService (akun staf, penjaga admin aktif terakhir)
 │   └── Audit/              # AuditLogger
 ├── Http/
 │   ├── Controllers/{Admin,Guardian,Gate,Canteen,Webhooks}/

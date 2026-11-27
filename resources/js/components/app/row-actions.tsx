@@ -1,6 +1,7 @@
 import { Link } from '@inertiajs/react';
 import { Eye, Pencil, Trash2 } from 'lucide-react';
 import { useState } from 'react';
+import type { ReactNode } from 'react';
 import { ConfirmDialog } from '@/components/app/confirm-dialog';
 import { Button } from '@/components/ui/button';
 import {
@@ -18,6 +19,8 @@ type RowActionsProps = {
     deleteDescription?: string;
     deleting?: boolean;
     itemName?: string;
+    /** Aksi icon-only tambahan (dengan tooltip), ditempatkan sebelum Hapus. */
+    children?: ReactNode;
 };
 
 export function RowActions({
@@ -29,6 +32,7 @@ export function RowActions({
     deleteDescription,
     deleting = false,
     itemName,
+    children,
 }: RowActionsProps) {
     const [confirmOpen, setConfirmOpen] = useState(false);
 
@@ -95,6 +99,8 @@ export function RowActions({
                         <TooltipContent>Ubah</TooltipContent>
                     </Tooltip>
                 )}
+
+                {children}
 
                 {onDelete && (
                     <Tooltip>

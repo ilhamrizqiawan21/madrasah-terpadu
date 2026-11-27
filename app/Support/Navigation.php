@@ -101,6 +101,11 @@ final class Navigation
                         'route' => 'admin.settings.index',
                         'permission' => Permission::SettingsManage->value,
                     ],
+                    [
+                        'label' => 'Pengguna staf',
+                        'route' => 'admin.users.index',
+                        'permission' => Permission::UsersManage->value,
+                    ],
                 ],
             ],
         ];
