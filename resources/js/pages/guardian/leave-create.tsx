@@ -1,3 +1,4 @@
+import { DateInput } from '@/components/app/date-input';
 import { Head, useForm } from '@inertiajs/react';
 import { CalendarPlus } from 'lucide-react';
 import type { FormEvent } from 'react';
@@ -129,9 +130,8 @@ export default function GuardianLeaveCreate({
                                     <Label htmlFor="leave-start">
                                         Tanggal mulai
                                     </Label>
-                                    <Input
+                                    <DateInput
                                         id="leave-start"
-                                        type="date"
                                         className="min-h-11"
                                         value={form.data.starts_on}
                                         onChange={(e) =>
@@ -154,9 +154,8 @@ export default function GuardianLeaveCreate({
                                     <Label htmlFor="leave-end">
                                         Tanggal selesai
                                     </Label>
-                                    <Input
+                                    <DateInput
                                         id="leave-end"
-                                        type="date"
                                         className="min-h-11"
                                         value={form.data.ends_on}
                                         onChange={(e) =>

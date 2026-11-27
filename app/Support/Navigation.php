@@ -350,11 +350,6 @@ final class Navigation
                         'label' => 'Laporan BK', 'route' => 'admin.reports.behavior.index', 'permission' => Permission::ReportsView->value, 'feature' => Feature::Behavior,
                     ],
                     [
-                        'label' => 'Laporan BK', 'soon' => 'laporan-bk', 'permission' => Permission::ReportsView->value,
-                        'description' => 'Catatan perilaku per periode, siswa dengan poin tertinggi, tindak lanjut, dan reward.',
-                        'plan' => 'T-1303, Paket P-19 Laporan non-keuangan',
-                    ],
-                    [
                         'label' => 'Laporan pembiasaan', 'route' => 'admin.reports.habits.index', 'permission' => Permission::ReportsView->value, 'feature' => Feature::Habits,
                     ],
                     [

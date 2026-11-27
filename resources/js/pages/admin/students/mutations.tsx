@@ -1,3 +1,4 @@
+import { DateInput } from '@/components/app/date-input';
 import { Head, router, useForm } from '@inertiajs/react';
 import { ArrowDownLeft, ArrowUpRight, Search } from 'lucide-react';
 import type { FormEvent } from 'react';
@@ -395,9 +396,8 @@ export default function StudentMutations({
 
                     <div className="space-y-1.5">
                         <Label htmlFor="in-date">Tanggal masuk</Label>
-                        <Input
+                        <DateInput
                             id="in-date"
-                            type="date"
                             value={formIn.data.mutated_on}
                             onChange={(e) =>
                                 formIn.setData('mutated_on', e.target.value)
@@ -549,9 +549,8 @@ export default function StudentMutations({
                 <div className="grid gap-3 sm:grid-cols-2">
                     <div className="space-y-1.5">
                         <Label htmlFor="out-date">Tanggal keluar</Label>
-                        <Input
+                        <DateInput
                             id="out-date"
-                            type="date"
                             value={formOut.data.mutated_on}
                             onChange={(e) =>
                                 formOut.setData('mutated_on', e.target.value)

@@ -1,3 +1,4 @@
+import { DateInput } from '@/components/app/date-input';
 import { Head, router, useForm } from '@inertiajs/react';
 import { Plus } from 'lucide-react';
 import type { FormEvent } from 'react';
@@ -304,9 +305,8 @@ export default function SchoolCalendarIndex({
                 <div className="grid gap-4">
                     <div className="grid gap-2">
                         <Label htmlFor="holiday-date">Tanggal</Label>
-                        <Input
+                        <DateInput
                             id="holiday-date"
-                            type="date"
                             value={form.data.holiday_date}
                             onChange={(e) =>
                                 form.setData('holiday_date', e.target.value)

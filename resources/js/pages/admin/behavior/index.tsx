@@ -1,3 +1,4 @@
+import { DateInput } from '@/components/app/date-input';
 import { Head, router, useForm } from '@inertiajs/react';
 import { Ban, CheckSquare, Image as ImageIcon, Plus } from 'lucide-react';
 import type { FormEvent, ReactNode } from 'react';
@@ -491,8 +492,7 @@ export default function BehaviorRecordsIndex({
                         </SelectContent>
                     </Select>
 
-                    <Input
-                        type="date"
+                    <DateInput
                         value={filters.date}
                         onChange={(e) => visitFilters({ date: e.target.value })}
                         className="w-[160px]"
@@ -577,9 +577,8 @@ export default function BehaviorRecordsIndex({
                             <Label htmlFor="record-date">
                                 Tanggal kejadian
                             </Label>
-                            <Input
+                            <DateInput
                                 id="record-date"
-                                type="date"
                                 value={form.data.occurred_on}
                                 onChange={(e) =>
                                     form.setData('occurred_on', e.target.value)

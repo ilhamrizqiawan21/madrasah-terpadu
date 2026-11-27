@@ -39,7 +39,8 @@ export function FormDialog({
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className={cn('sm:max-w-lg', contentClassName)}>
-                <form onSubmit={onSubmit} className="space-y-4">
+                {/* noValidate: pesan validasi berbahasa Indonesia dari server tampil inline, bukan tooltip browser berbahasa Inggris. */}
+                <form onSubmit={onSubmit} noValidate className="space-y-4">
                     <DialogHeader>
                         <DialogTitle>{title}</DialogTitle>
                         {description && (

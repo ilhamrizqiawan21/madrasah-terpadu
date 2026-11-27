@@ -1,3 +1,4 @@
+import { DateInput } from '@/components/app/date-input';
 import { Head, router, useForm } from '@inertiajs/react';
 import { Check, CheckCheck, X } from 'lucide-react';
 import type { FormEvent, ReactNode } from 'react';
@@ -200,8 +201,7 @@ export default function HabitVerifyIndex({
                         </SelectContent>
                     </Select>
 
-                    <Input
-                        type="date"
+                    <DateInput
                         value={date}
                         onChange={(e) => visitFilters({ date: e.target.value })}
                         className="w-[170px]"

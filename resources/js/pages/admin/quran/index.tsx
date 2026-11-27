@@ -1,3 +1,4 @@
+import { DateInput } from '@/components/app/date-input';
 import { Head, router, useForm } from '@inertiajs/react';
 import { ChevronRight } from 'lucide-react';
 import type { FormEvent, ReactNode } from 'react';
@@ -281,9 +282,8 @@ export default function MemorizationIndex({
 
                                 <div className="space-y-2">
                                     <Label htmlFor="mem-date">Tanggal</Label>
-                                    <Input
+                                    <DateInput
                                         id="mem-date"
-                                        type="date"
                                         value={form.data.recorded_on}
                                         onChange={(e) =>
                                             form.setData(

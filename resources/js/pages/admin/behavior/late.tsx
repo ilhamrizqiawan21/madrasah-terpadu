@@ -1,3 +1,4 @@
+import { DateInput } from '@/components/app/date-input';
 import { Head, router, useForm } from '@inertiajs/react';
 import { CheckSquare, ClockAlert } from 'lucide-react';
 import type { FormEvent, ReactNode } from 'react';
@@ -126,8 +127,7 @@ export default function LateBehaviorIndex({
                 />
 
                 <div className="flex flex-wrap items-center gap-3">
-                    <Input
-                        type="date"
+                    <DateInput
                         value={filters.date}
                         onChange={(e) => visitFilters({ date: e.target.value })}
                         className="w-[170px]"

@@ -1,3 +1,4 @@
+import { DateInput } from '@/components/app/date-input';
 import { Head, Link, router, useForm } from '@inertiajs/react';
 import {
     ImageUp,
@@ -886,9 +887,8 @@ export default function StudentsIndex({
                         <Label htmlFor="student-birth-date">
                             Tanggal lahir
                         </Label>
-                        <Input
+                        <DateInput
                             id="student-birth-date"
-                            type="date"
                             value={form.data.birth_date}
                             onChange={(event) =>
                                 setField('birth_date', event.target.value)

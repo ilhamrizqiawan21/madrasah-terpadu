@@ -51,6 +51,10 @@ type DataTableProps<TData> = {
     onPageChange?: (page: number) => void;
 };
 
+/** Kolom aksi tetap terlihat di kanan saat tabel lebar digulir ke samping (layar sedang/kecil). */
+const STICKY_ACTIONS =
+    'sticky right-0 z-[1] bg-card border-l border-border/70 lg:border-l-0';
+
 const alignClasses: Record<'left' | 'right' | 'center', string> = {
     left: 'text-left',
     right: 'text-right tabular-nums',
@@ -107,6 +111,8 @@ export function DataTable<TData>({
                                         scope="col"
                                         className={cn(
                                             'px-3 py-2 text-center font-medium whitespace-nowrap text-muted-foreground',
+                                            col.key === 'actions' &&
+                                                STICKY_ACTIONS,
                                             col.className,
                                         )}
                                     >
@@ -175,6 +181,8 @@ export function DataTable<TData>({
                                                   alignClasses[
                                                       col.align ?? 'left'
                                                   ],
+                                                  col.key === 'actions' &&
+                                                      STICKY_ACTIONS,
                                                   col.className,
                                               )}
                                           >

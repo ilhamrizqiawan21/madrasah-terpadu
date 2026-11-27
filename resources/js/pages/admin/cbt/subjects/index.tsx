@@ -440,7 +440,7 @@ export default function CbtSubjectsIndex({
         <StaffLayout
             breadcrumbs={[
                 { title: 'Beranda', href: AdminDashboardController.url() },
-                { title: 'Ujian', href: CbtSubjectController.index.url() },
+                { title: 'Akademik', href: CbtSubjectController.index.url() },
                 {
                     title: 'Mapel & penugasan',
                     href: CbtSubjectController.index.url(),

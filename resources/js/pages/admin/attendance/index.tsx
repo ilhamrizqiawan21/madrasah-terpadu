@@ -1,3 +1,4 @@
+import { DateInput } from '@/components/app/date-input';
 import { Head, router, useForm } from '@inertiajs/react';
 import { Pencil } from 'lucide-react';
 import type { FormEvent } from 'react';
@@ -349,9 +350,8 @@ export default function AdminAttendanceIndex({
                     {mode === 'daily' ? (
                         <div className="grid gap-1.5">
                             <Label htmlFor="attendance-date">Tanggal</Label>
-                            <Input
+                            <DateInput
                                 id="attendance-date"
-                                type="date"
                                 className="w-44"
                                 value={filters.date}
                                 onChange={(e) =>

@@ -1,3 +1,4 @@
+import { DateInput } from '@/components/app/date-input';
 import { Head, router, useForm } from '@inertiajs/react';
 import { CircleCheck, Plus } from 'lucide-react';
 import type { FormEvent } from 'react';
@@ -339,9 +340,8 @@ export default function AcademicYearsIndex({
                     </div>
                     <div className="grid gap-2">
                         <Label htmlFor="year-starts">Tanggal mulai</Label>
-                        <Input
+                        <DateInput
                             id="year-starts"
-                            type="date"
                             value={form.data.starts_on}
                             onChange={(event) =>
                                 form.setData('starts_on', event.target.value)
@@ -353,9 +353,8 @@ export default function AcademicYearsIndex({
                     </div>
                     <div className="grid gap-2">
                         <Label htmlFor="year-ends">Tanggal selesai</Label>
-                        <Input
+                        <DateInput
                             id="year-ends"
-                            type="date"
                             value={form.data.ends_on}
                             onChange={(event) =>
                                 form.setData('ends_on', event.target.value)
