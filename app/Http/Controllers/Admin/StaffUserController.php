@@ -10,6 +10,8 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StaffUserRequest;
 use App\Http\Requests\Admin\UpdateStaffUserStatusRequest;
 use App\Http\Resources\StaffUserResource;
+use App\Models\AcademicYear;
+use App\Models\Unit;
 use App\Models\User;
 use App\Services\Users\StaffUserService;
 use Illuminate\Database\Eloquent\Builder;
@@ -35,8 +37,18 @@ class StaffUserController extends Controller
         $sort = in_array($request->query('sort'), self::SORTABLE, true) ? (string) $request->query('sort') : 'name';
         $direction = $request->query('direction') === 'desc' ? 'desc' : 'asc';
 
+        $activeYearId = AcademicYear::query()->where('is_active', true)->value('id');
+
         $users = StaffUserService::staffQuery()
-            ->with('roles')
+            ->with([
+                'roles',
+                'staffProfile.unit',
+                'homeroomClassrooms' => fn ($query) => $query
+                    ->with('unit')
+                    ->when($activeYearId !== null, fn ($q) => $q->where('academic_year_id', $activeYearId))
+                    ->where('is_active', true)
+                    ->orderBy('name'),
+            ])
             ->when($search !== '', fn (Builder $query) => $query->where(function (Builder $inner) use ($search): void {
                 $inner->whereLike('name', "%{$search}%")
                     ->orWhereLike('username', "%{$search}%")
@@ -63,6 +75,16 @@ class StaffUserController extends Controller
                 fn (Role $option): array => ['value' => $option->value, 'label' => $option->label()],
                 Role::staff(),
             ),
+            'unitOptions' => Unit::query()
+                ->where('is_active', true)
+                ->orderBy('id')
+                ->get(['id', 'code', 'name'])
+                ->map(fn (Unit $unit): array => [
+                    'id' => $unit->id,
+                    'code' => $unit->code,
+                    'name' => $unit->name,
+                ])
+                ->values(),
         ]);
     }
 

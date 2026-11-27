@@ -3,6 +3,13 @@ export type RoleOption = {
     label: string;
 };
 
+export type StaffProfile = {
+    unit_id: number | null;
+    unit_code: string | null;
+    nip: string | null;
+    position: string | null;
+};
+
 export type StaffUser = {
     id: number;
     name: string;
@@ -11,6 +18,8 @@ export type StaffUser = {
     email: string | null;
     is_active: boolean;
     roles: RoleOption[];
+    profile?: StaffProfile | null;
+    homeroom_classrooms?: string[];
     two_factor_enabled: boolean;
     last_login_at: string | null;
     is_self: boolean;

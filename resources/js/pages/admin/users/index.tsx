@@ -55,10 +55,17 @@ type Filters = {
     direction: 'asc' | 'desc';
 };
 
+type UnitOption = {
+    id: number;
+    code: string;
+    name: string;
+};
+
 type Props = {
     users: PaginatedResource<StaffUser>;
     filters: Filters;
     roleOptions: RoleOption[];
+    unitOptions: UnitOption[];
 };
 
 type StaffForm = {
@@ -67,6 +74,9 @@ type StaffForm = {
     phone: string;
     email: string;
     roles: string[];
+    unit_id: number | null;
+    nip: string;
+    position: string;
 };
 
 const ALL = 'semua';
@@ -77,12 +87,16 @@ const emptyForm: StaffForm = {
     phone: '',
     email: '',
     roles: [],
+    unit_id: null,
+    nip: '',
+    position: '',
 };
 
 export default function StaffUsersIndex({
     users,
     filters,
     roleOptions,
+    unitOptions,
 }: Props) {
     const [search, setSearch] = useState(filters.search);
     const [loading, setLoading] = useState(false);
@@ -171,6 +185,9 @@ export default function StaffUsersIndex({
             phone: user.phone ?? '',
             email: user.email ?? '',
             roles: user.roles.map((role) => role.value),
+            unit_id: user.profile?.unit_id ?? null,
+            nip: user.profile?.nip ?? '',
+            position: user.profile?.position ?? '',
         });
         setFormOpen(true);
     };
@@ -297,6 +314,42 @@ export default function StaffUsersIndex({
                         Belum ada peran
                     </span>
                 ),
+        },
+        {
+            key: 'profile',
+            label: 'Unit & penugasan',
+            render: (user) => {
+                const unitCode = user.profile?.unit_code;
+                const position = user.profile?.position;
+                const nip = user.profile?.nip;
+                const homerooms = user.homeroom_classrooms ?? [];
+
+                if (!unitCode && !position && !nip && homerooms.length === 0) {
+                    return <span className="text-muted-foreground">—</span>;
+                }
+
+                return (
+                    <div className="min-w-36 text-sm">
+                        {(unitCode || position) && (
+                            <div>
+                                {[unitCode, position]
+                                    .filter(Boolean)
+                                    .join(' · ')}
+                            </div>
+                        )}
+                        {nip && (
+                            <div className="text-xs text-muted-foreground tabular-nums">
+                                NIP {nip}
+                            </div>
+                        )}
+                        {homerooms.length > 0 && (
+                            <div className="text-xs text-muted-foreground">
+                                Wali kelas: {homerooms.join(', ')}
+                            </div>
+                        )}
+                    </div>
+                );
+            },
         },
         {
             key: 'phone',
@@ -625,6 +678,66 @@ export default function StaffUsersIndex({
                     </div>
                     <InputError message={rolesError} />
                 </fieldset>
+                <div className="grid gap-4 sm:grid-cols-2">
+                    <div className="grid gap-2">
+                        <Label htmlFor="staff-unit">Unit (opsional)</Label>
+                        <Select
+                            value={
+                                form.data.unit_id !== null
+                                    ? String(form.data.unit_id)
+                                    : ALL
+                            }
+                            onValueChange={(value) =>
+                                form.setData(
+                                    'unit_id',
+                                    value === ALL ? null : Number(value),
+                                )
+                            }
+                        >
+                            <SelectTrigger id="staff-unit">
+                                <SelectValue placeholder="Semua / Yayasan" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value={ALL}>
+                                    Semua / Yayasan
+                                </SelectItem>
+                                {unitOptions.map((unit) => (
+                                    <SelectItem
+                                        key={unit.id}
+                                        value={String(unit.id)}
+                                    >
+                                        {unit.code} · {unit.name}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                        <InputError message={form.errors.unit_id} />
+                    </div>
+                    <div className="grid gap-2">
+                        <Label htmlFor="staff-nip">NIP (opsional)</Label>
+                        <Input
+                            id="staff-nip"
+                            value={form.data.nip}
+                            onChange={(event) =>
+                                form.setData('nip', event.target.value)
+                            }
+                            autoComplete="off"
+                        />
+                        <InputError message={form.errors.nip} />
+                    </div>
+                </div>
+                <div className="grid gap-2">
+                    <Label htmlFor="staff-position">Jabatan (opsional)</Label>
+                    <Input
+                        id="staff-position"
+                        value={form.data.position}
+                        onChange={(event) =>
+                            form.setData('position', event.target.value)
+                        }
+                        autoComplete="off"
+                    />
+                    <InputError message={form.errors.position} />
+                </div>
             </FormDialog>
 
             <ConfirmDialog

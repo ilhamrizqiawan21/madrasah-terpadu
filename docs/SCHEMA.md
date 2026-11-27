@@ -109,9 +109,9 @@ Ditulis hanya lewat `App\Services\Guardians\GuardianService` (audit `created|upd
 
 `id`, `guardian_id` (restrict), `student_id` (restrict), `relation string(10)`, `is_primary bool`. Unik (`guardian_id`,`student_id`); indeks (`student_id`,`is_primary`). Tepat satu wali utama per siswa dijaga `GuardianService` dalam transaksi (baris siswa terkait dikunci): menandai utama mencabut tanda wali lain; siswa yang kehilangan wali utama mendapat wali tertua lain yang tersisa. `relation` = hubungan wali saat ditautkan. Login NIS memetakan ke wali utama (FortifyServiceProvider).
 
-### `staff_profiles` (T-207)
+### `staff_profiles` (T-209 ✅)
 
-`user_id unique`, `unit_id null`, `nip null`, `position null`. Penugasan wali kelas lewat `classrooms.homeroom_teacher_id`.
+`user_id → users unique` (restrict), `unit_id → units null` (null on delete), `nip string(30) null`, `position string(80) null`, timestamps. Penugasan wali kelas lewat `classrooms.homeroom_teacher_id`. Ditulis lewat `StaffUserService`.
 
 ## B. Notifikasi (Fase 4)
 

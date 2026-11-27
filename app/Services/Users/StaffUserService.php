@@ -6,6 +6,7 @@ namespace App\Services\Users;
 
 use App\Enums\Role;
 use App\Exceptions\StaffUserGuardException;
+use App\Models\StaffProfile;
 use App\Models\User;
 use App\Services\Audit\AuditLogger;
 use App\Support\InitialPassword;
@@ -45,7 +46,7 @@ final class StaffUserService
     }
 
     /**
-     * @param  array{name: string, username: string, phone: ?string, email: ?string, roles: list<string>}  $data
+     * @param  array{name: string, username: string, phone: ?string, email: ?string, roles: list<string>, unit_id?: ?int, nip?: ?string, position?: ?string}  $data
      * @return array{user: User, password: string}
      */
     public function create(array $data, User $actor): array
@@ -63,6 +64,7 @@ final class StaffUserService
             ]);
 
             $user->syncRoles($data['roles']);
+            $this->syncProfile($user, $data);
 
             $this->auditLogger->record(
                 action: 'created',
@@ -78,7 +80,7 @@ final class StaffUserService
     }
 
     /**
-     * @param  array{name: string, username: string, phone: ?string, email: ?string, roles: list<string>}  $data
+     * @param  array{name: string, username: string, phone: ?string, email: ?string, roles: list<string>, unit_id?: ?int, nip?: ?string, position?: ?string}  $data
      */
     public function update(User $user, array $data, User $actor): User
     {
@@ -108,6 +110,7 @@ final class StaffUserService
             // Peran non-staf (mis. guru yang juga wali murid) dipertahankan.
             $nonStaffRoles = array_values(array_diff($currentRoles, self::staffRoleValues()));
             $user->syncRoles([...$data['roles'], ...$nonStaffRoles]);
+            $this->syncProfile($user, $data);
 
             $this->auditLogger->record(
                 action: 'updated',
@@ -196,17 +199,47 @@ final class StaffUserService
     }
 
     /**
+     * @param  array{unit_id?: ?int, nip?: ?string, position?: ?string}  $data
+     */
+    private function syncProfile(User $user, array $data): void
+    {
+        $unitId = $data['unit_id'] ?? null;
+        $nip = $data['nip'] ?? null;
+        $position = $data['position'] ?? null;
+
+        if ($unitId === null && $nip === null && $position === null && ! $user->staffProfile()->exists()) {
+            return;
+        }
+
+        StaffProfile::query()->updateOrCreate(
+            ['user_id' => $user->id],
+            [
+                'unit_id' => $unitId,
+                'nip' => $nip,
+                'position' => $position,
+            ],
+        );
+
+        $user->unsetRelation('staffProfile');
+    }
+
+    /**
      * @param  list<string>  $roles
      * @return array<string, mixed>
      */
     private function snapshot(User $user, array $roles): array
     {
+        $profile = $user->staffProfile;
+
         return [
             'name' => $user->name,
             'username' => $user->username,
             'phone' => $user->phone,
             'email' => $user->email,
             'roles' => $roles,
+            'unit_id' => $profile?->unit_id,
+            'nip' => $profile?->nip,
+            'position' => $profile?->position,
         ];
     }
 }

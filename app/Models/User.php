@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -81,5 +82,21 @@ class User extends Authenticatable implements MustVerifyEmail, PasskeyUser
     public function guardian(): HasOne
     {
         return $this->hasOne(Guardian::class);
+    }
+
+    /**
+     * @return HasOne<StaffProfile, $this>
+     */
+    public function staffProfile(): HasOne
+    {
+        return $this->hasOne(StaffProfile::class);
+    }
+
+    /**
+     * @return HasMany<Classroom, $this>
+     */
+    public function homeroomClassrooms(): HasMany
+    {
+        return $this->hasMany(Classroom::class, 'homeroom_teacher_id');
     }
 }
