@@ -355,9 +355,7 @@ final class Navigation
                         'plan' => 'T-1303, Paket P-19 Laporan non-keuangan',
                     ],
                     [
-                        'label' => 'Laporan pembiasaan', 'soon' => 'laporan-pembiasaan', 'permission' => Permission::ReportsView->value,
-                        'description' => 'Keterlaksanaan pembiasaan per item dan rombel.',
-                        'plan' => 'T-1306, Paket P-19 Laporan non-keuangan',
+                        'label' => 'Laporan pembiasaan', 'route' => 'admin.reports.habits.index', 'permission' => Permission::ReportsView->value, 'feature' => Feature::Habits,
                     ],
                     [
                         'label' => 'Laporan hafalan & PIB', 'route' => 'admin.reports.quran.index', 'permission' => Permission::ReportsView->value, 'feature' => Feature::Quran,

@@ -6,6 +6,7 @@ use App\Enums\Feature;
 use App\Enums\Permission;
 use App\Http\Controllers\Admin\AttendanceReportController;
 use App\Http\Controllers\Admin\BehaviorReportController;
+use App\Http\Controllers\Admin\HabitReportController;
 use App\Http\Controllers\Admin\QuranReportController;
 use Illuminate\Support\Facades\Route;
 
@@ -29,5 +30,11 @@ Route::prefix('laporan')
             Route::get('hafalan', [QuranReportController::class, 'index'])->name('quran.index');
             Route::get('hafalan/pdf', [QuranReportController::class, 'exportPdf'])->name('quran.pdf');
             Route::get('hafalan/excel', [QuranReportController::class, 'exportExcel'])->name('quran.excel');
+        });
+
+        Route::middleware('feature:'.Feature::Habits->value)->group(function (): void {
+            Route::get('pembiasaan', [HabitReportController::class, 'index'])->name('habits.index');
+            Route::get('pembiasaan/pdf', [HabitReportController::class, 'exportPdf'])->name('habits.pdf');
+            Route::get('pembiasaan/excel', [HabitReportController::class, 'exportExcel'])->name('habits.excel');
         });
     });
