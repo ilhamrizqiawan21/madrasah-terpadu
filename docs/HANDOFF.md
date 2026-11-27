@@ -42,6 +42,12 @@ Aturan: singkat dan faktual. Jangan menyalin isi TODO/ADR; tautkan saja. Hapus b
 - Lingkungan lokal: `.env` memakai **MariaDB** `madrasah_terpadu` (sudah `migrate` sampai `leave_requests` + `ProductionSeeder`). Tes tetap SQLite in-memory (`phpunit.xml` memakai `memory_limit=512M`).
 - Akun uji lokal: username `admin.uji` (Admin, 2FA dimatikan 2026-11-27). Kata sandi dan rahasia TOTP **tidak** dicatat di repo; buat ulang lewat resep "Cek UI lokal".
 
+## Beranda per peran (Claude, 2026-11-27)
+
+- Berkas milik sesi beranda — agen lain **jangan menyentuh**: `app/Services/Dashboard/*`, `app/Services/Guardian/GuardianHomeSummaryService.php`, `app/Http/Controllers/Admin/DashboardController.php`, `app/Http/Resources/GuardianHomeResource.php`, `resources/js/pages/admin/dashboard.tsx`, `resources/js/pages/guardian/home.tsx`, `resources/js/components/app/dashboard-panel.tsx`, tes `AdminDashboardTest` + `GuardianHomeSectionsTest`. Commit pakai `git add <berkas>`, bukan `git add -A`.
+- Data pratinjau lokal (MariaDB, bukan seeder): user `pratinjau.admin` / `pratinjau.guru` / `pratinjau.wali`, rombel MI id > 12, siswa id > 65, 2 ujian, aturan poin berawalan "Pratinjau". Hapus setelah review dengan skrip `preview_cleanup.php` di scratchpad sesi Claude (atau minta Claude menghapusnya).
+- Belum diperiksa visual: panel Ujian beranda staf (modul CBT nonaktif di DB lokal; tertutup tes).
+
 ## Sedang dikerjakan
 
 Tidak ada (Fase 15 Ujian CBT — Paket **P-16** & **P-17** selesai seluruhnya).

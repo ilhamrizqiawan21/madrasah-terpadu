@@ -1,6 +1,5 @@
 import { Link } from '@inertiajs/react';
 import type { InertiaLinkProps } from '@inertiajs/react';
-import { ArrowRight } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { cn } from '@/lib/utils';
 
@@ -58,10 +57,9 @@ export function DashboardPanel({
                 {action && (
                     <Link
                         href={action.href}
-                        className="inline-flex shrink-0 items-center gap-1 rounded-md px-2 py-1 text-xs font-medium text-primary transition-colors duration-150 hover:bg-primary/10 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+                        className="inline-flex min-h-9 shrink-0 items-center rounded-md px-2.5 text-xs font-medium text-primary transition-colors duration-150 hover:bg-primary/10 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
                     >
                         {action.label}
-                        <ArrowRight className="size-3.5" strokeWidth={1.75} />
                     </Link>
                 )}
             </header>

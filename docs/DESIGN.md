@@ -67,6 +67,7 @@ Palet aktif per layar maksimal: netral + primary + satu warna status yang releva
     - BK: "Tindak lanjut ambang yang masih terbuka" + "Catatan terbaru".
     - Wali kelas: "Siswa belum tap hari ini" + "Mutabaah menunggu verifikasi" + "Izin menunggu".
     - Admin: kombinasi ringkas di atas + status antrean/backup.
+    - Terapan (2026-11-27, `StaffDashboardService`): pita sapaan primer berisi tanggal, unit, tahun ajaran, dan tiga hitungan data induk yang bisa diklik; kolom utama = presensi hari ini (bar komposisi status + rombel/siswa belum tap) dan tren 7 hari sekolah; kolom samping = izin menunggu (`--accent-attention` bila bisa diputuskan), data induk perlu dilengkapi, mutasi terbaru, antrean (admin). Wali kelas melihat presensi & izin rombel yang ia walikan saja. Bagian dikirim `null` bila izin/kunci fitur tidak terpenuhi. Panel memakai `DashboardPanel` (kepala muted + isi kartu).
 
 ### Wali (`guardian-layout`) — override, lihat §8
 
@@ -74,6 +75,7 @@ Palet aktif per layar maksimal: netral + primary + satu warna status yang releva
 - Header: nama sekolah kecil + pemilih anak (bila > 1 anak) + lonceng kotak masuk.
 - Navigasi bawah 4 item: **Beranda**, **Tagihan**, **Riwayat**, **Akun**. Item aktif ditandai bentuk (indikator + tebal), bukan warna saja.
 - Beranda per anak: urutan kartu = urgensi. (1) Hari ini: presensi masuk/pulang. (2) Perlu tindakan: tagihan jatuh tempo, mutabaah belum dicentang, penawaran reward. (3) Kantin: saldo + jajan hari ini. (4) Perilaku: catatan terbaru + poin. Kartu yang tidak punya isi disembunyikan, bukan ditampilkan kosong.
+  Terapan (2026-11-27): izin yang menunggu tampil paling atas; kartu "Hari ini" mengikuti mockup 19 ("Masuk 06.52" + "Tepat waktu") ditambah pita 5 hari sekolah (huruf H/T/I/S/A + bentuk, bukan warna saja) dan tombol "Ajukan izin atau sakit"; lalu Ujian (rombel anak, 7 hari ke depan + nilai terbaru yang diizinkan) dan Buku saku (poin kebaikan/pelanggaran tahun ini + catatan terbaru).
 - Tombol aksi minimal 44 px tinggi.
 
 ### Kiosk (`kiosk-layout`) — gerbang & kantin

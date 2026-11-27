@@ -703,11 +703,13 @@ function TrendPanel({
                         label="Terlambat hari ini"
                         value={today.late}
                         average={averageLate}
+                        days={past.length}
                     />
                     <TrendStat
                         label="Alpa hari ini"
                         value={today.absent}
                         average={averageAbsent}
+                        days={past.length}
                     />
                 </dl>
             </div>
@@ -719,10 +721,12 @@ function TrendStat({
     label,
     value,
     average,
+    days,
 }: {
     label: string;
     value: number;
     average: number;
+    days: number;
 }) {
     const higher = value > average;
 
@@ -739,7 +743,8 @@ function TrendStat({
                         higher ? 'text-destructive' : 'text-muted-foreground',
                     )}
                 >
-                    rata-rata {decimalFormatter.format(average)}
+                    rata-rata {decimalFormatter.format(average)} · {days} hari
+                    sebelumnya
                 </span>
             </dd>
         </div>
