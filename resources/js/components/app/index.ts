@@ -10,6 +10,10 @@ export { EmptyState } from './empty-state';
 export { ErrorState } from './error-state';
 export { ExportButtons } from './export-buttons';
 export { FormDialog } from './form-dialog';
+export {
+    MistakeCounterGroup,
+    type MistakeCounterItem,
+} from './mistake-counter';
 export { MoneyText } from './money-text';
 export { NoAccessState } from './no-access-state';
 export { PageHeader } from './page-header';

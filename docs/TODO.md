@@ -240,7 +240,7 @@ Baca `PAYMENTS.md` seluruhnya sebelum mulai.
 - [ ] **T-1105 Progres hafalan** (P0) [UI] — KP: `memorized_ayahs` diperbarui dari ziyadah lulus; progres % terhadap target; tampilan wali (progres + riwayat setoran) dan guru (per kelompok). Tes: ayat yang sama tidak dihitung dua kali. **Tambahan ADR-017:** progres per jenis; hadits/doa = materi lulus / materi target; tab Qur'an/Hadits/Do'a di portal wali.
 - [ ] **T-1106 Praktik ibadah (PIB)** (P1) [UI] — Ref: REUSE_MAP §2. KP: port kurikulum bab/subbab/materi + `PibScore` (90 − kesalahan) + input nilai per rombel; rekap. Tes: port tes `ScoreCalculator` PIB. **Tambahan ADR-018:** input kesalahan memakai `MistakeCounter`.
 - [x] **T-1107 Materi hadits & doa** (P0) [UI] — Ref: ADR-017, SCHEMA `memorization_materials`. KP: CRUD oleh admin (judul, teks Arab RTL, terjemahan, sumber/perawi, urutan, aktif); materi yang punya setoran hanya dinonaktifkan. Tes: hanya admin; teks Arab tersimpan utuh (UTF-8). ✔ (MemorizationMaterialService, MemorizationMaterialController, admin/quran/materials.tsx, MemorizationMaterialTest 2 tes 10 asersi, PHPStan 0)
-- [ ] **T-1108 Komponen `MistakeCounter`** (P0) [UI] — Ref: ADR-018, DESIGN §4. KP: dipakai T-1104 & T-1106; satu kriteria aktif; PageDown/PageUp, panah kiri/kanan pindah kriteria; tombol ± ≥ 44 px; `aria-live`. Tes: komponen (tsc + uji perilaku bila ada alat), batas nilai.
+- [x] **T-1108 Komponen `MistakeCounter`** (P0) [UI] — Ref: ADR-018, DESIGN §4. KP: dipakai T-1104 & T-1106; satu kriteria aktif; PageDown/PageUp, panah kiri/kanan pindah kriteria; tombol ± ≥ 44 px; `aria-live`. Tes: komponen (tsc + uji perilaku bila ada alat), batas nilai. ✔ (components/app/mistake-counter.tsx, tsc + vp check ✔)
 
 ---
 
