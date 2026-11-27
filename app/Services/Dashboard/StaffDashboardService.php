@@ -6,7 +6,6 @@ namespace App\Services\Dashboard;
 
 use App\Domain\Attendance\AttendanceClassifier;
 use App\Enums\ExamResultStatus;
-use App\Enums\ExamSessionStatus;
 use App\Enums\ExamStatus;
 use App\Enums\LeaveRequestStatus;
 use App\Enums\Permission;

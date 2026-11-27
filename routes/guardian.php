@@ -6,6 +6,7 @@ use App\Enums\Feature;
 use App\Http\Controllers\Admin\StudentController;
 use App\Http\Controllers\Guardian\AccountController;
 use App\Http\Controllers\Guardian\AttendanceController;
+use App\Http\Controllers\Guardian\BehaviorController;
 use App\Http\Controllers\Guardian\BillingController;
 use App\Http\Controllers\Guardian\ChildContextController;
 use App\Http\Controllers\Guardian\ExamResultController;
@@ -55,5 +56,12 @@ Route::prefix('anak/{student}')
 
         Route::middleware('feature:'.Feature::Cbt->value)->group(function (): void {
             Route::get('ujian', ExamResultController::class)->name('students.exams.index');
+        });
+
+        Route::middleware('feature:'.Feature::Behavior->value)->group(function (): void {
+            Route::get('perilaku', [BehaviorController::class, 'index'])->name('students.behavior.index');
+            Route::post('perilaku/tukar', [BehaviorController::class, 'requestRedemption'])
+                ->middleware('feature:'.Feature::Rewards->value)
+                ->name('students.behavior.redeem');
         });
     });

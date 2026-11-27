@@ -23,7 +23,7 @@ Aturan: singkat dan faktual. Jangan menyalin isi TODO/ADR; tautkan saja. Hapus b
 
 ## Terakhir diperbarui
 
-2026-11-27 · Gemini (eksekutor), setelah **T-905 (Pemberitahuan penawaran tersedia, Fase 9 Paket P-11)** selesai
+2026-11-27 · Gemini (eksekutor), setelah **Paket P-11 (Fase 9 Buku Saku BK & reward: T-901 s.d. T-906) selesai**
 
 ## Keadaan sekarang
 

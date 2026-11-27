@@ -2,13 +2,24 @@
 
 declare(strict_types=1);
 
+use App\Enums\ExamSessionStatus;
+use App\Enums\ExamStatus;
+use App\Enums\Feature;
 use App\Enums\Role as RoleEnum;
 use App\Models\AcademicYear;
+use App\Models\AttendanceDay;
 use App\Models\Classroom;
+use App\Models\Enrollment;
+use App\Models\Exam;
+use App\Models\ExamSession;
+use App\Models\LeaveRequest;
 use App\Models\Student;
 use App\Models\Unit;
 use App\Models\User;
+use App\Services\Features\FeatureFlags;
+use Carbon\CarbonImmutable;
 use Database\Seeders\RolesAndPermissionsSeeder;
+use Illuminate\Support\Collection;
 use Inertia\Testing\AssertableInertia as Assert;
 
 beforeEach(function (): void {
@@ -47,10 +58,10 @@ function dashboardSchool(): array
     return ['unit' => $unit, 'year' => $year];
 }
 
-function enrollIn(Classroom $classroom, int $count): \Illuminate\Support\Collection
+function enrollIn(Classroom $classroom, int $count): Collection
 {
     return Student::factory()->count($count)->create(['unit_id' => $classroom->unit_id])
-        ->each(fn (Student $student) => \App\Models\Enrollment::factory()->create([
+        ->each(fn (Student $student) => Enrollment::factory()->create([
             'student_id' => $student->id,
             'classroom_id' => $classroom->id,
             'academic_year_id' => $classroom->academic_year_id,
@@ -61,10 +72,10 @@ test('beranda staf menghitung presensi hari ini per status dan siswa belum tap',
     ['unit' => $unit, 'year' => $year] = dashboardSchool();
     $classroom = Classroom::factory()->for($unit)->for($year)->create(['name' => '2-A']);
     $students = enrollIn($classroom, 4);
-    $today = \Carbon\CarbonImmutable::now('Asia/Makassar')->toDateString();
+    $today = CarbonImmutable::now('Asia/Makassar')->toDateString();
 
-    \App\Models\AttendanceDay::query()->create(['student_id' => $students[0]->id, 'school_date' => $today, 'status' => 'present', 'decided_by' => 'scan']);
-    \App\Models\AttendanceDay::query()->create(['student_id' => $students[1]->id, 'school_date' => $today, 'status' => 'late', 'decided_by' => 'scan']);
+    AttendanceDay::query()->create(['student_id' => $students[0]->id, 'school_date' => $today, 'status' => 'present', 'decided_by' => 'scan']);
+    AttendanceDay::query()->create(['student_id' => $students[1]->id, 'school_date' => $today, 'status' => 'late', 'decided_by' => 'scan']);
 
     $admin = User::factory()->create();
     $admin->assignRole(RoleEnum::Admin->value);
@@ -123,20 +134,20 @@ test('beranda staf menampilkan izin menunggu dan ujian yang sedang berlangsung',
     $admin = User::factory()->create();
     $admin->assignRole(RoleEnum::Admin->value);
 
-    \App\Models\LeaveRequest::query()->create([
+    LeaveRequest::query()->create([
         'student_id' => $students[0]->id, 'requested_by' => $admin->id, 'type' => 'sick',
         'starts_on' => now()->toDateString(), 'ends_on' => now()->toDateString(),
         'reason' => 'Demam', 'status' => 'pending',
     ]);
 
-    $exam = \App\Models\Exam::factory()->create([
-        'status' => \App\Enums\ExamStatus::Running,
+    $exam = Exam::factory()->create([
+        'status' => ExamStatus::Running,
         'opens_at' => now()->subHour(),
         'closes_at' => now()->addHour(),
     ]);
-    \App\Models\ExamSession::factory()->create(['exam_id' => $exam->id, 'student_id' => $students[0]->id]);
-    \App\Models\ExamSession::factory()->create(['exam_id' => $exam->id, 'student_id' => $students[1]->id, 'status' => \App\Enums\ExamSessionStatus::Submitted]);
-    \App\Models\Exam::factory()->create(['status' => \App\Enums\ExamStatus::Draft, 'opens_at' => now()]);
+    ExamSession::factory()->create(['exam_id' => $exam->id, 'student_id' => $students[0]->id]);
+    ExamSession::factory()->create(['exam_id' => $exam->id, 'student_id' => $students[1]->id, 'status' => ExamSessionStatus::Submitted]);
+    Exam::factory()->create(['status' => ExamStatus::Draft, 'opens_at' => now()]);
 
     $this->actingAs($admin)
         ->get(route('admin.dashboard'))
@@ -154,9 +165,9 @@ test('bagian beranda tidak dikirim bila modulnya dimatikan atau peran tidak beri
     dashboardSchool();
     $admin = User::factory()->create();
     $admin->assignRole(RoleEnum::Admin->value);
-    app(\App\Services\Features\FeatureFlags::class)->update([
-        \App\Enums\Feature::Attendance->value => false,
-        \App\Enums\Feature::Cbt->value => false,
+    app(FeatureFlags::class)->update([
+        Feature::Attendance->value => false,
+        Feature::Cbt->value => false,
     ], $admin);
 
     $this->actingAs($admin)
@@ -195,5 +206,31 @@ test('data induk yang perlu dilengkapi dihitung dari unit dan tahun ajaran terpi
             ->where('dataGaps.students_without_classroom', 3)
             ->where('dataGaps.students_without_guardian', 3)
             ->where('dataGaps.classrooms_without_homeroom', 1)
+        );
+});
+
+test('tren presensi berisi hari sekolah terakhir dan melewati akhir pekan unit', function (): void {
+    // Jumat 27 Nov 2026 WITA; akhir pekan bawaan Sabtu–Minggu.
+    $this->travelTo(CarbonImmutable::parse('2026-11-27 09:00', 'Asia/Makassar'));
+    ['unit' => $unit, 'year' => $year] = dashboardSchool();
+    $classroom = Classroom::factory()->for($unit)->for($year)->create();
+    $students = enrollIn($classroom, 2);
+
+    AttendanceDay::query()->create(['student_id' => $students[0]->id, 'school_date' => '2026-11-23', 'status' => 'late', 'decided_by' => 'scan']);
+    AttendanceDay::query()->create(['student_id' => $students[1]->id, 'school_date' => '2026-11-23', 'status' => 'present', 'decided_by' => 'scan']);
+    AttendanceDay::query()->create(['student_id' => $students[0]->id, 'school_date' => '2026-11-22', 'status' => 'present', 'decided_by' => 'manual']);
+
+    $admin = User::factory()->create();
+    $admin->assignRole(RoleEnum::Admin->value);
+
+    $this->actingAs($admin)
+        ->get(route('admin.dashboard'))
+        ->assertInertia(fn (Assert $page) => $page
+            ->has('attendance.trend', 7)
+            ->where('attendance.trend.6.date', '2026-11-27')
+            ->where('attendance.trend.2.date', '2026-11-23')
+            ->where('attendance.trend.2.late', 1)
+            ->where('attendance.trend.2.present', 1)
+            ->where('attendance.trend.1.date', '2026-11-20')
         );
 });

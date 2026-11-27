@@ -613,7 +613,9 @@ function TrendPanel({
     return (
         <DashboardPanel
             title={`Tren ${trend.length} hari sekolah terakhir`}
-            meta={isHomeroom ? 'Rombel yang Anda walikan' : 'Seluruh rombel unit'}
+            meta={
+                isHomeroom ? 'Rombel yang Anda walikan' : 'Seluruh rombel unit'
+            }
         >
             <div className="grid gap-6 sm:grid-cols-[1fr_11rem]">
                 <div>
