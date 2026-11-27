@@ -26,6 +26,7 @@ class BehaviorRecordService
 {
     public function __construct(
         private readonly PointLedgerService $ledger,
+        private readonly DisciplineFollowupService $followups,
         private readonly AuditLogger $audit,
         private readonly GuardianNotifier $notifier,
     ) {}
@@ -106,7 +107,7 @@ class BehaviorRecordService
                     'status' => BehaviorRecordStatus::Active->value,
                 ]);
 
-                $this->ledger->post(
+                $entry = $this->ledger->post(
                     student: $student,
                     academicYear: $year,
                     account: $account,
@@ -114,6 +115,15 @@ class BehaviorRecordService
                     source: $record,
                     idempotencyKey: "behavior-record:{$record->id}",
                 );
+
+                if ($account === PointAccount::Violation) {
+                    $this->followups->evaluateForStudent(
+                        student: $student,
+                        academicYear: $year,
+                        violationBalance: $entry->balance_after,
+                        actor: $actor,
+                    );
+                }
 
                 $this->audit->record(
                     action: 'behavior.recorded',

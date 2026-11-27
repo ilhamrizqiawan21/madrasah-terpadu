@@ -23,7 +23,7 @@ Aturan: singkat dan faktual. Jangan menyalin isi TODO/ADR; tautkan saja. Hapus b
 
 ## Terakhir diperbarui
 
-2026-11-27 · Gemini (eksekutor), setelah **T-902 (Catatan perilaku + ledger poin, Fase 9 Paket P-11)** selesai
+2026-11-27 · Gemini (eksekutor), setelah **T-903 (Ambang tindakan & tindak lanjut, Fase 9 Paket P-11)** selesai
 
 ## Keadaan sekarang
 

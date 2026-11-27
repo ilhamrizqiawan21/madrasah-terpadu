@@ -117,6 +117,12 @@ final class Navigation
                         'permission' => Permission::PointRulesManage->value,
                         'feature' => Feature::Behavior,
                     ],
+                    [
+                        'label' => 'Tindak lanjut & ambang',
+                        'route' => 'admin.behavior.discipline.index',
+                        'permission' => Permission::BehaviorView->value,
+                        'feature' => Feature::Behavior,
+                    ],
                 ],
             ],
             [

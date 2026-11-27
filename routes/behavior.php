@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Enums\Feature;
 use App\Enums\Permission;
 use App\Http\Controllers\Admin\BehaviorRecordController;
+use App\Http\Controllers\Admin\DisciplineController;
 use App\Http\Controllers\Admin\PointRuleController;
 use Illuminate\Support\Facades\Route;
 
@@ -41,5 +42,26 @@ Route::prefix('perilaku')
                 Route::patch('{pointRule}/status', 'toggle')->whereNumber('pointRule')->name('toggle');
                 Route::post('impor', 'import')->name('import');
                 Route::get('templat', 'template')->name('template');
+            });
+
+        Route::controller(DisciplineController::class)
+            ->group(function (): void {
+                Route::get('tindak-lanjut', 'index')
+                    ->middleware('permission:'.Permission::BehaviorView->value)
+                    ->name('discipline.index');
+                Route::post('tindak-lanjut/{followup}/selesai', 'completeFollowup')
+                    ->whereNumber('followup')
+                    ->name('followups.done');
+                Route::post('ambang', 'storeThreshold')
+                    ->middleware('permission:'.Permission::ThresholdsManage->value)
+                    ->name('thresholds.store');
+                Route::put('ambang/{threshold}', 'updateThreshold')
+                    ->whereNumber('threshold')
+                    ->middleware('permission:'.Permission::ThresholdsManage->value)
+                    ->name('thresholds.update');
+                Route::patch('ambang/{threshold}/status', 'toggleThreshold')
+                    ->whereNumber('threshold')
+                    ->middleware('permission:'.Permission::ThresholdsManage->value)
+                    ->name('thresholds.toggle');
             });
     });

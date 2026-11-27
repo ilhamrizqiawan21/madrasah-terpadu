@@ -248,14 +248,14 @@ Indeks (`status`,`due_date`), (`student_id`,`status`). Sisa = `amount - adjustme
 `student_id` (`→ students`, restrict), `academic_year_id` (`→ academic_years`, restrict), `account string(20)` (`violation|merit`), `delta int` (bertanda), `balance_after int`, `source_type`, `source_id`, `idempotency_key unique`, `created_at`.
 Indeks (`student_id`,`academic_year_id`,`account`). Ditulis lewat `PointLedgerService`.
 
-### `discipline_thresholds` (T-903)
+### `discipline_thresholds` (T-903 ✅)
 
-`unit_id null`, `points smallint`, `action_name` (Teguran lisan, SP1, ...), `notify_guardian bool`, `is_active`. Unik (`unit_id`,`points`).
+`unit_id null` (`→ units`, restrict), `points smallint unsigned`, `action_name string(120)` (Teguran lisan, SP1, ...), `notify_guardian bool`, `is_active`, timestamps. Unik (`unit_id`,`points`). Ditulis lewat `DisciplineThresholdService`.
 
-### `discipline_followups` (T-903)
+### `discipline_followups` (T-903 ✅)
 
-`student_id`, `academic_year_id`, `discipline_threshold_id`, `triggered_at`, `status string` (`open|done`), `done_by null`, `done_at null`, `note null`.
-Unik (`student_id`,`academic_year_id`,`discipline_threshold_id`) — satu ambang hanya memicu sekali per tahun ajaran.
+`student_id` (`→ students`, restrict), `academic_year_id` (`→ academic_years`, restrict), `discipline_threshold_id` (`→ discipline_thresholds`, restrict), `triggered_at`, `status string(20)` (`open|done`), `done_by null` (`→ users`), `done_at null`, `note text null`, timestamps.
+Unik (`student_id`,`academic_year_id`,`discipline_threshold_id`) — satu ambang hanya memicu sekali per tahun ajaran. Ditulis lewat `DisciplineFollowupService`.
 
 ### `reward_offers` (T-904)
 
