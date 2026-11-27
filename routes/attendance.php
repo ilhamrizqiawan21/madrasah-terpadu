@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Enums\Feature;
 use App\Enums\Permission;
+use App\Http\Controllers\Admin\AttendanceController;
 use App\Http\Controllers\Admin\LeaveRequestController;
 use App\Http\Controllers\Admin\SchoolCalendarController;
 use Illuminate\Support\Facades\Route;
@@ -16,9 +17,12 @@ Route::prefix('presensi')
     ->name('attendance.')
     ->middleware('feature:'.Feature::Attendance->value)
     ->group(function (): void {
-        Route::inertia('/', 'admin/dashboard')
+        Route::get('/', [AttendanceController::class, 'index'])
             ->middleware('permission:'.Permission::AttendanceView->value)
             ->name('index');
+        Route::post('koreksi', [AttendanceController::class, 'correct'])
+            ->middleware('permission:'.Permission::AttendanceManage->value)
+            ->name('correct');
 
         Route::prefix('izin')
             ->name('leaves.')
