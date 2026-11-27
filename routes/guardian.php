@@ -8,6 +8,7 @@ use App\Http\Controllers\Guardian\AccountController;
 use App\Http\Controllers\Guardian\AttendanceController;
 use App\Http\Controllers\Guardian\BehaviorController;
 use App\Http\Controllers\Guardian\BillingController;
+use App\Http\Controllers\Guardian\CharacterController;
 use App\Http\Controllers\Guardian\ChildContextController;
 use App\Http\Controllers\Guardian\ExamResultController;
 use App\Http\Controllers\Guardian\HabitController;
@@ -70,6 +71,13 @@ Route::prefix('anak/{student}')
         Route::middleware('feature:'.Feature::Habits->value)->group(function (): void {
             Route::get('pembiasaan', [HabitController::class, 'index'])->name('students.habits.index');
             Route::post('pembiasaan/centang', [HabitController::class, 'toggle'])->name('students.habits.toggle');
+        });
+
+        Route::middleware('feature:'.Feature::Attitude->value)->group(function (): void {
+            Route::get('karakter', [CharacterController::class, 'index'])->name('students.character.index');
+            Route::get('karakter/{review}/pdf', [CharacterController::class, 'pdf'])
+                ->whereNumber('review')
+                ->name('students.character.pdf');
         });
 
         Route::middleware('feature:'.Feature::Quran->value)->group(function (): void {

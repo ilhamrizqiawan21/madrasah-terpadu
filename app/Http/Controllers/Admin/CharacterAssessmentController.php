@@ -20,13 +20,16 @@ use App\Models\Enrollment;
 use App\Models\Unit;
 use App\Models\User;
 use App\Services\Character\CharacterAssessmentService;
+use App\Services\Character\CharacterReportService;
 use App\Support\SchoolContext;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response as HttpResponse;
 use Illuminate\Support\Collection;
 use Inertia\Inertia;
 use Inertia\Response;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 /**
  * Kesiswaan > Penilaian karakter (ADR-029, T-1203). Wali kelas menghitung & mengoreksi rombelnya,
@@ -235,6 +238,31 @@ class CharacterAssessmentController extends Controller
         Inertia::flash('toast', ['type' => 'success', 'message' => 'Kunci dibuka; penilaian kembali menjadi draf.']);
 
         return back();
+    }
+
+    public function pdf(Request $request, Classroom $classroom, CharacterReportService $reports): HttpResponse
+    {
+        $user = $this->actor($request);
+        $this->authorizeView($user, $classroom);
+        $review = $this->review($classroom);
+        $studentId = $request->integer('student') ?: null;
+
+        $name = 'karakter-'.str($classroom->name)->slug().($studentId !== null ? '-'.$studentId : '').'.pdf';
+
+        return response($reports->pdf($review, $studentId), 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'inline; filename="'.$name.'"',
+        ]);
+    }
+
+    public function excel(Request $request, Classroom $classroom, CharacterReportService $reports): BinaryFileResponse
+    {
+        $user = $this->actor($request);
+        $this->authorizeView($user, $classroom);
+
+        return response()
+            ->download($reports->excel($this->review($classroom)), 'karakter-'.str($classroom->name)->slug().'.xlsx')
+            ->deleteFileAfterSend(true);
     }
 
     private function review(Classroom $classroom): CharacterReview

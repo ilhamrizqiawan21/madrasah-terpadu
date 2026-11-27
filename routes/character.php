@@ -33,6 +33,8 @@ Route::middleware(['feature:'.Feature::Attitude->value, 'permission:'.Permission
         Route::post('{classroom}/hitung', 'compute')->whereNumber('classroom')->name('compute');
         Route::post('{classroom}/ajukan', 'submit')->whereNumber('classroom')->name('submit');
         Route::post('{classroom}/setujui', 'approve')->whereNumber('classroom')->name('approve');
+        Route::get('{classroom}/pdf', 'pdf')->whereNumber('classroom')->name('pdf');
+        Route::get('{classroom}/excel', 'excel')->whereNumber('classroom')->name('excel');
         Route::post('{classroom}/buka-kunci', 'reopen')->whereNumber('classroom')->name('reopen');
         Route::patch('nilai/{assessment}', 'correct')->whereNumber('assessment')->name('correct');
     });

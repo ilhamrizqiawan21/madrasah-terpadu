@@ -1,5 +1,14 @@
 import { Head, router, useForm, usePage } from '@inertiajs/react';
-import { Check, Info, Lock, PencilLine, RefreshCw, Unlock } from 'lucide-react';
+import {
+    Check,
+    FileDown,
+    FileSpreadsheet,
+    Info,
+    Lock,
+    PencilLine,
+    RefreshCw,
+    Unlock,
+} from 'lucide-react';
 import type { FormEvent } from 'react';
 import { Fragment, useState } from 'react';
 import CharacterAssessmentController from '@/actions/App/Http/Controllers/Admin/CharacterAssessmentController';
@@ -188,6 +197,50 @@ export default function CharacterShow(props: Props) {
                                     />
                                     Ajukan & kunci
                                 </Button>
+                            )}
+                            {computed && (
+                                <>
+                                    <Button
+                                        type="button"
+                                        variant="ghost"
+                                        size="icon"
+                                        asChild
+                                        aria-label="Unduh PDF lampiran rapor rombel"
+                                    >
+                                        <a
+                                            href={CharacterAssessmentController.pdf.url(
+                                                classroom.id,
+                                            )}
+                                            target="_blank"
+                                            rel="noopener"
+                                            title="PDF lampiran rapor"
+                                        >
+                                            <FileDown
+                                                className="size-4"
+                                                strokeWidth={1.75}
+                                            />
+                                        </a>
+                                    </Button>
+                                    <Button
+                                        type="button"
+                                        variant="ghost"
+                                        size="icon"
+                                        asChild
+                                        aria-label="Unduh Excel untuk RDM"
+                                    >
+                                        <a
+                                            href={CharacterAssessmentController.excel.url(
+                                                classroom.id,
+                                            )}
+                                            title="Excel untuk RDM"
+                                        >
+                                            <FileSpreadsheet
+                                                className="size-4"
+                                                strokeWidth={1.75}
+                                            />
+                                        </a>
+                                    </Button>
+                                </>
                             )}
                             {can.reopen && (
                                 <Button

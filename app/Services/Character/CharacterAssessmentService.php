@@ -18,7 +18,9 @@ use App\Models\CharacterReview;
 use App\Models\Classroom;
 use App\Models\HabitItem;
 use App\Models\User;
+use App\Notifications\CharacterAssessmentApprovedNotification;
 use App\Services\Audit\AuditLogger;
+use App\Services\Notifications\GuardianNotifier;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
@@ -33,6 +35,7 @@ final class CharacterAssessmentService
         private readonly CharacterInputService $inputs,
         private readonly CharacterScoreCalculator $calculator,
         private readonly AuditLogger $auditLogger,
+        private readonly GuardianNotifier $notifier,
     ) {}
 
     public function compute(Classroom $classroom, AcademicYear $year, User $actor): CharacterReview
@@ -188,6 +191,19 @@ final class CharacterAssessmentService
     {
         return $this->transition($review, CharacterReviewStatus::Submitted, CharacterReviewStatus::Approved, $actor, function (CharacterReview $locked, User $actor): void {
             $locked->forceFill(['approved_by' => $actor->id, 'approved_at' => now()]);
+
+            // Notifikasi dikirim setelah commit lewat GuardianNotifier (ARCHITECTURE §5).
+            $year = $locked->academicYear;
+            $semester = $year->name.' '.$year->semester->label();
+
+            $locked->assessments()
+                ->with('student')
+                ->get()
+                ->unique('student_id')
+                ->each(fn (CharacterAssessment $a) => $this->notifier->notifyStudentGuardians(
+                    $a->student,
+                    new CharacterAssessmentApprovedNotification($locked->id, $a->student_id, $a->student->nickname ?? $a->student->name, $semester),
+                ));
         });
     }
 
