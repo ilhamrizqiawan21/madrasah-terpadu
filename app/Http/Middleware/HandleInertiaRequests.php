@@ -7,6 +7,7 @@ namespace App\Http\Middleware;
 use App\Enums\Role;
 use App\Services\Settings\SettingsRepository;
 use App\Support\Branding;
+use App\Support\GuardianContext;
 use App\Support\Navigation;
 use App\Support\SchoolContext;
 use Illuminate\Http\Request;
@@ -62,6 +63,9 @@ class HandleInertiaRequests extends Middleware
             // Hanya staf yang boleh masuk grup /admin yang memakai pemilih unit/tahun ajaran.
             'schoolContext' => fn (): ?array => $request->user()?->hasAnyRole(array_map(fn (Role $role): string => $role->value, Role::adminArea()))
                 ? SchoolContext::resolve($request->session())
+                : null,
+            'guardianContext' => fn (): ?array => $request->user()?->hasRole(Role::Guardian->value)
+                ? GuardianContext::resolve($request->user(), $request->session())
                 : null,
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
         ];
