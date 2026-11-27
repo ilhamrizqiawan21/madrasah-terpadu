@@ -266,7 +266,7 @@ Semua laporan: filter unit/rombel/periode, paginasi layar, ekspor PDF & Excel ic
 - [ ] **T-1304 Laporan kantin** (P1) — lihat T-807 bila belum.
 - [x] **T-1305 Laporan hafalan & PIB** (P1) — progres per kelompok/rombel, setoran per guru. ✅ 2026-11-27 — Bukti: `QuranReportService`, `QuranReportController`, `admin/reports/quran.tsx`; `tests/Feature/Reports/QuranReportTest.php` (otorisasi + rombel/guru/PIB + ekspor PDF & XLSX ✔), `phpstan` 0 error, `tsc` & `npm run build` ✔.
 - [x] **T-1306 Laporan pembiasaan** (P1) — keterlaksanaan per item/rombel. ✅ 2026-11-27 — Bukti: `HabitReportService`, `HabitReportController`, `admin/reports/habits.tsx`; `tests/Feature/Reports/HabitReportTest.php` (otorisasi + per item/rombel + ekspor PDF & XLSX ✔), `phpstan` 0 error, `tsc` & `npm run build` ✔.
-- [ ] **T-1307 Jejak audit** (P1) [UI] — admin: filter pengguna/aksi/subjek/tanggal, detail before/after.
+- [x] **T-1307 Jejak audit** (P1) [UI] — admin: filter pengguna/aksi/subjek/tanggal, detail before/after. ✅ 2026-11-27 — Bukti: `AuditLogController`, `admin/reports/audit.tsx`; `tests/Feature/Reports/AuditLogViewTest.php` (otorisasi `audit.view` + filter pengguna/aksi/tanggal + payload `before`/`after` ✔), `phpstan` 0 error, `tsc` & `npm run build` ✔.
 
 ---
 

@@ -23,7 +23,7 @@ Aturan: singkat dan faktual. Jangan menyalin isi TODO/ADR; tautkan saja. Hapus b
 
 ## Terakhir diperbarui
 
-2026-11-27 · Gemini (eksekutor), setelah **Paket P-14 (Fase 11 Setoran hafalan & PIB: T-1101 s.d. T-1108) selesai seluruhnya**
+2026-11-27 · Gemini (eksekutor), setelah **Paket P-19 Laporan non-keuangan & Jejak audit (Fase 13: T-1301, T-1303, T-1305, T-1306, T-1307) + T-1401 Audit keamanan selesai** (`T-1302` & `T-1304` menunggu modul uang/kantin)
 
 ## Keadaan sekarang
 

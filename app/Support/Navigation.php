@@ -371,9 +371,7 @@ final class Navigation
                         'plan' => 'T-1302, rilis peralihan uang',
                     ],
                     [
-                        'label' => 'Jejak audit', 'soon' => 'jejak-audit', 'permission' => Permission::AuditView->value,
-                        'description' => 'Riwayat perubahan data penting: siapa, kapan, dan nilai sebelum/sesudah.',
-                        'plan' => 'T-1307, Fase 13 Laporan',
+                        'label' => 'Jejak audit', 'route' => 'admin.reports.audit.index', 'permission' => Permission::AuditView->value,
                     ],
                 ],
             ],

@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Enums\Feature;
 use App\Enums\Permission;
 use App\Http\Controllers\Admin\AttendanceReportController;
+use App\Http\Controllers\Admin\AuditLogController;
 use App\Http\Controllers\Admin\BehaviorReportController;
 use App\Http\Controllers\Admin\HabitReportController;
 use App\Http\Controllers\Admin\QuranReportController;
@@ -38,3 +39,7 @@ Route::prefix('laporan')
             Route::get('pembiasaan/excel', [HabitReportController::class, 'exportExcel'])->name('habits.excel');
         });
     });
+
+Route::get('laporan/jejak-audit', [AuditLogController::class, 'index'])
+    ->middleware('permission:'.Permission::AuditView->value)
+    ->name('reports.audit.index');
