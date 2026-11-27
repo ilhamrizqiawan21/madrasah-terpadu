@@ -23,7 +23,7 @@ Aturan: singkat dan faktual. Jangan menyalin isi TODO/ADR; tautkan saja. Hapus b
 
 ## Terakhir diperbarui
 
-2026-11-27 · Gemini (eksekutor), setelah **Paket P-19 Laporan non-keuangan & Jejak audit (Fase 13: T-1301, T-1303, T-1305, T-1306, T-1307) + T-1401 Audit keamanan selesai** (`T-1302` & `T-1304` menunggu modul uang/kantin)
+2026-11-27 · Claude (arsitek) — beranda, navigasi ADR-028, Fase 12 ADR-029, polesan CRUD (lihat bagian "Sesi Claude"). Sebelumnya: Gemini, setelah **Paket P-19 Laporan non-keuangan & Jejak audit (Fase 13: T-1301, T-1303, T-1305, T-1306, T-1307) + T-1401 Audit keamanan selesai** (`T-1302` & `T-1304` menunggu modul uang/kantin)
 
 ## Keadaan sekarang
 
@@ -42,11 +42,16 @@ Aturan: singkat dan faktual. Jangan menyalin isi TODO/ADR; tautkan saja. Hapus b
 - Lingkungan lokal: `.env` memakai **MariaDB** `madrasah_terpadu` (sudah `migrate` sampai `leave_requests` + `ProductionSeeder`). Tes tetap SQLite in-memory (`phpunit.xml` memakai `memory_limit=512M`).
 - Akun uji lokal: username `admin.uji` (Admin, 2FA dimatikan 2026-11-27). Kata sandi dan rahasia TOTP **tidak** dicatat di repo; buat ulang lewat resep "Cek UI lokal".
 
-## Beranda per peran (Claude, 2026-11-27)
+## Sesi Claude 2026-11-27 (beranda, navigasi, Fase 12, polesan CRUD) — semua sudah di-push
 
-- Berkas milik sesi beranda — agen lain **jangan menyentuh**: `app/Services/Dashboard/*`, `app/Services/Guardian/GuardianHomeSummaryService.php`, `app/Http/Controllers/Admin/DashboardController.php`, `app/Http/Resources/GuardianHomeResource.php`, `resources/js/pages/admin/dashboard.tsx`, `resources/js/pages/guardian/home.tsx`, `resources/js/components/app/dashboard-panel.tsx`, tes `AdminDashboardTest` + `GuardianHomeSectionsTest`. Commit pakai `git add <berkas>`, bukan `git add -A`.
-- Data pratinjau lokal (MariaDB, bukan seeder): user `pratinjau.admin` / `pratinjau.guru` / `pratinjau.wali`, rombel MI id > 12, siswa id > 65, 2 ujian, aturan poin berawalan "Pratinjau". Hapus setelah review dengan skrip `preview_cleanup.php` di scratchpad sesi Claude (atau minta Claude menghapusnya).
-- Belum diperiksa visual: panel Ujian beranda staf (modul CBT nonaktif di DB lokal; tertutup tes).
+- **Beranda per peran** (`28a3dfe`, `92de690`, `4238b7b`): staf = presensi hari ini + tren 7 hari, izin, ujian, data perlu dilengkapi, mutasi; admin juga perbandingan unit, status sistem, keamanan akun, dan baris "Keuangan & layanan yayasan" (susunan dasbor lama, isi jujur: modul uang "masih di aplikasi lama"; tautan opsional `LEGACY_FINANCE_URL`). Wali = kartu Hari ini (mockup 19), izin, ujian, buku saku. Angka keuangan nyata menyusul di **T-617**.
+- **Navigasi staf (ADR-028)**: sidebar kiri berkelompok (akordeon, animasi, mode ikon, sheet ponsel) + topbar ramping (hamburger, breadcrumb, lonceng "Perlu tindakan", pemilih unit/tahun, pita tahun ajaran lama). Katalog menu tunggal di `App\Support\Navigation`; modul belum jadi = label "Segera" → `admin.soon`. **Saat membangun modul, ganti item "Segera"-nya** (tes `ComingSoonTest` menolak label ganda).
+- **Fase 12 Penilaian karakter (ADR-029) T-1201–T-1204 selesai** — lihat TODO untuk sisa: `check:mysql` belum dijalankan, komponen hafalan belum tersambung, kolom ekspor RDM menunggu contoh klien, nama dimensi/skala Merdeka wajib dicocokkan KMA 1503.
+- **Polesan CRUD** (`1539563`, `362e9d0`, `712b778`): halaman galat Indonesia (`pages/error.tsx`, `bootstrap/app.php`), `FormDialog noValidate`, `DateInput` dd/mm/yyyy (ganti semua `type="date"`, jangan pakai lagi), kolom `actions` `DataTable` lengket kanan, **Profil siswa** `admin.students.show` (mockup 03; tombol Cetak kartu belum), `StudentSearch` di Izin/Tindak lanjut/Reward, jumlah siswa per rombel, bar komposisi di Rekap presensi.
+- **Deploy**: setiap rilis jalankan `php artisan migrate --force` **dan** `php artisan db:seed --class=RolesAndPermissionsSeeder --force` (izin baru tidak otomatis masuk peran; tanpa ini admin 403).
+- **Data pratinjau lokal** (MariaDB, bukan seeder): user `pratinjau.admin` / `pratinjau.guru` / `pratinjau.wali` (sandi lokal `pratinjau-lokal-123`), rombel MI id > 12, siswa id > 65, ujian/aturan poin berawalan "Pratinjau", konfigurasi karakter unit MI. Hapus dengan skrip `preview_cleanup.php` di scratchpad sesi Claude, atau minta Claude.
+- Belum dicek: tampilan ponsel 360 px (browser otomasi tidak bisa < ±700 px), halaman wali penilaian karakter & isi PDF, panel Ujian beranda.
+- Sisa usulan polesan: strip ringkasan yang bisa diklik di atas daftar utama, aksi massal (pindah rombel, cetak kartu terpilih, setujui izin), Cetak kartu di profil siswa, filter status yang tidak menghapus kata kunci cari.
 
 ## Sedang dikerjakan
 
