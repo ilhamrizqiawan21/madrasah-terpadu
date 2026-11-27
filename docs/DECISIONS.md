@@ -250,6 +250,16 @@ Akun wali dibuat lewat impor/data induk dengan password awal acak. Tidak ada hal
 **Keputusan:** sakelar `sekolah.security.two_factor_enabled` (`TWO_FACTOR_ENABLED`, **bawaan `false`**). Saat `false`: pipeline login (`Fortify::authenticateThrough` di `FortifyServiceProvider`, sama dengan pipeline bawaan Fortify) tidak memasang tantangan 2FA; halaman Keamanan tidak menampilkan pengaturan 2FA; `EnsureTwoFactorForPrivilegedRoles` dilewati walau `REQUIRE_TWO_FACTOR=true`, agar admin tidak terkunci. Data 2FA yang tersimpan tidak dihapus. Rute Fortify 2FA tetap terdaftar (dibutuhkan Wayfinder) dan tes jalur 2FA tetap berjalan dengan sakelar dinyalakan.
 **Akibat:** sebelum produksi pemilik menyalakan `TWO_FACTOR_ENABLED=true` (dan `REQUIRE_TWO_FACTOR=true` bila tetap wajib untuk Admin/Bendahara), DEPLOYMENT §2.
 
+## ADR-028 — Navigasi staf: sidebar kiri + topbar ramping, katalog menu lengkap dengan label "Segera" (Diterima, 2026-11-27; keputusan pemilik)
+
+**Konteks:** pengamatan menu admin aplikasi lama (±15 grup, ±130 item, REUSE_MAP §4) dan permintaan pemilik agar jumlah menu disempurnakan dulu, isi menyusul satu per satu. Menu topbar (DESIGN §3, mockup 01) hanya muat ±8 grup di 1280 px; katalog baru ±12 grup. Rute sementara `tagihan`/`hafalan`/`laporan` merender Beranda (menu mati).
+**Keputusan:**
+
+- Area staf memakai **sidebar kiri berkelompok** (dapat diciutkan menjadi ikon di ≥ 1024 px, diingat per perangkat; sheet kiri di < 1024 px) dan **topbar ramping** (tombol sidebar, breadcrumb, pemilih unit/tahun ajaran, akun). Override atas mockup 01 dan standar 02 (topbar menu), dicatat di DESIGN §3 dan §8.
+- Katalog menu = modul yang sudah ada + modul yang direncanakan (TODO) + celah dari pengamatan aplikasi lama. Modul "bukan tujuan" PRD §2 (PPDB, CMS, perpustakaan, armada, koperasi, helpdesk, biometrik, WA API) **tidak** masuk menu.
+- Item yang modulnya belum dibangun tampil dengan label **"Segera"** dan membuka halaman jujur "Modul ini sedang disiapkan" (`admin.soon`), bukan Beranda. Item tetap disaring izin; item modul uang tetap mengikuti kunci fitur (ADR-021), item lain tidak.
+  **Akibat:** `App\Support\Navigation` menjadi satu-satunya katalog menu (ikon grup, item jadi/segera); `layouts/staff-layout.tsx` ditulis ulang; DESIGN §3/§8 diperbarui. Saat modul selesai, itemnya diganti dari "segera" ke rute nyata pada tugas modul tersebut.
+
 ---
 
 ## Usulan terbuka (menunggu klien, lihat PRD §8)

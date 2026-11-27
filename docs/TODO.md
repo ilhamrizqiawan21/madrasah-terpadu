@@ -28,7 +28,7 @@ Jalur **A** = Claude (risiko tinggi: uang, Midtrans, ledger, sesi ujian). Jalur 
 | P-07 Presensi gerbang + RFID  | C     | S      | T-501–T-509                      | T-501/T-502 menerima UID RFID (ADR-022)                                                                    |
 | P-16 CBT inti                 | A     | T      | T-1501–T-1506                    | Jalur A mulai dari sini; tanpa periode ujian selama masa paralel                                           |
 | P-11 Buku Saku BK & reward    | B     | S      | T-901–T-906                      | Selesai (2026-11-27). Reward menerbitkan voucher kantin: simpan voucher, pemakaian menunggu `wallet` aktif |
-| P-12 Pembiasaan               | C     | R      | T-1001–T-1004                    |                                                                                                            |
+| P-12 Pembiasaan               | C     | R      | T-1001–T-1004                    | Selesai (2026-11-27)                                                                                       |
 | P-14 Hafalan & PIB            | C     | S      | T-1101–T-1108                    |                                                                                                            |
 | P-17 CBT pengawasan & hasil   | A     | S      | T-1507–T-1511                    |                                                                                                            |
 | P-21 Kerangka paritas         | B     | R      | T-1601–T-1606                    | [KERANGKA], semua di balik kunci fitur                                                                     |
@@ -226,7 +226,7 @@ Baca `PAYMENTS.md` seluruhnya sebelum mulai.
 - [x] **T-1001 Item pembiasaan** (P0) [UI] — Ref: PRD §4.9, ADR-019. KP: CRUD per unit oleh admin, aspek spiritual/sosial, urutan (naik/turun), aktif; seeder lima item sholat **terkunci** (tidak bisa dihapus/dinonaktifkan/diganti nama, hanya urutan; ikon gembok + tooltip "Item wajib sekolah"); item yang punya catatan hanya dinonaktifkan. Tes: urutan stabil; item terkunci ditolak di Service + Policy (bukan hanya UI). ✔ (HabitItemService, HabitItemController, HabitItemSeeder, admin/habits/items.tsx, HabitItemTest 2 tes 15 asersi, PHPStan 0)
 - [x] **T-1002 Centang oleh wali** (P0) [UI] — KP: daftar item hari ini per anak, centang/batal centang sampai diverifikasi, maks 3 hari ke belakang, simpan cepat (optimistic UI + rollback bila gagal). Tes: tidak bisa mengubah log yang sudah diverifikasi; tanggal > 3 hari ditolak. ✔ (HabitLogService, Guardian\HabitController, guardian/habits.tsx, GuardianHabitTest 1 tes 20 asersi, PHPStan 0)
 - [x] **T-1003 Verifikasi oleh wali kelas** (P0) [UI] — KP: tabel rombel × item untuk satu tanggal; verifikasi massal per siswa/per item; tolak dengan catatan; notifikasi ringkas ke wali bila ada penolakan. Tes: guru rombel lain 403. ✔ (HabitVerificationService, HabitVerificationController, admin/habits/verify.tsx, HabitVerificationTest 2 tes 10 asersi, PHPStan 0)
-- [ ] **T-1004 Rekap pembiasaan** (P1) [UI] — KP: persentase per siswa per aspek per bulan/semester (hanya terverifikasi); dipakai Fase 12.
+- [x] **T-1004 Rekap pembiasaan** (P1) [UI] — KP: persentase per siswa per aspek per bulan/semester (hanya terverifikasi); dipakai Fase 12. ✔ (HabitRecapService, HabitRecapController, admin/habits/recap.tsx, HabitRecapTest 1 tes 16 asersi, PHPStan 0)
 - [ ] **T-1005 Streak → poin** (P2) — **[TERBUKA U-04]**. Jangan dikerjakan sebelum diputuskan.
 
 ---

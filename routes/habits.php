@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Enums\Feature;
 use App\Enums\Permission;
 use App\Http\Controllers\Admin\HabitItemController;
+use App\Http\Controllers\Admin\HabitRecapController;
 use App\Http\Controllers\Admin\HabitVerificationController;
 use Illuminate\Support\Facades\Route;
 
@@ -34,4 +35,8 @@ Route::prefix('pembiasaan')
                 Route::post('massal', 'verifyBulk')->name('bulk');
                 Route::post('{habitLog}/tolak', 'reject')->whereNumber('habitLog')->name('reject');
             });
+
+        Route::get('rekap', [HabitRecapController::class, 'index'])
+            ->middleware('permission:'.Permission::HabitsVerify->value)
+            ->name('recap.index');
     });

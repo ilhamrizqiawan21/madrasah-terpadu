@@ -159,6 +159,12 @@ final class Navigation
                         'permission' => Permission::HabitsVerify->value,
                         'feature' => Feature::Habits,
                     ],
+                    [
+                        'label' => 'Rekap pembiasaan',
+                        'route' => 'admin.habits.recap.index',
+                        'permission' => Permission::HabitsVerify->value,
+                        'feature' => Feature::Habits,
+                    ],
                 ],
             ],
             [
