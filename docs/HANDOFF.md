@@ -23,29 +23,26 @@ Aturan: singkat dan faktual. Jangan menyalin isi TODO/ADR; tautkan saja. Hapus b
 
 ## Terakhir diperbarui
 
-2026-11-27 · Claude (jalur A)
+2026-11-27 · Claude (jalur A), setelah ADR-025
 
 ## Keadaan sekarang
 
-- **Fase 0 & 1**: semua tugas `[x]`. CI GitHub hijau sejak ADR-023 (PHP minimum 8.4).
-- **Fase 2 (paket P-03)** sedang berjalan: T-201 selesai (commit `dce871b`). Berikutnya T-202.
-- `composer check` hijau di commit terakhir (184 tes, Larastan 0).
+- **Fase 0 & 1**: semua tugas `[x]`, plus perbaikan temuan cek UI (ADR-024, commit `1cfd189`): hapus akun sendiri dihapus, passkey dimatikan, UI auth/2FA berbahasa Indonesia, tautan & logo Laravel dibuang.
+- **2FA tidak wajib lagi** (ADR-025, commit `e475b81`): sakelar `REQUIRE_TWO_FACTOR` (bawaan `false`). Fitur 2FA tetap opsional; akun yang sudah mengaktifkannya tetap ditanya kode.
+- **Fase 2 (paket P-03)**: T-201 selesai (commit `dce871b`, termasuk halaman Pengaturan > Tampilan untuk logo/favicon). **Berikutnya T-202.**
+- `composer check` hijau di commit terakhir (187 tes, Larastan 0). CI GitHub hijau sejak ADR-023 (PHP ≥ 8.4); commit setelah `59a0ff1` belum di-push.
 - Lingkungan lokal: `.env` memakai **MariaDB** `madrasah_terpadu` (sudah `migrate` + `ProductionSeeder`). Tes tetap SQLite in-memory.
-- Akun uji lokal: username `admin.uji` (peran Admin, 2FA aktif), dibuat untuk cek UI. Kata sandi dan rahasia TOTP **tidak** dicatat di repo; buat ulang lewat `php artisan tinker` bila perlu (lihat "Cek UI lokal").
+- Akun uji lokal: username `admin.uji` (Admin, 2FA aktif). Kata sandi dan rahasia TOTP **tidak** dicatat di repo; buat ulang lewat resep "Cek UI lokal".
 
 ## Sedang dikerjakan
 
-Perbaikan temuan Fase 1 dari cek UI, keputusan pemilik 2026-11-27:
-
-1. **Hapus fitur "Hapus akun" sendiri** (`DELETE /settings/profile`, komponen `DeleteUser`, 2 tes bawaan di `tests/Feature/Settings/ProfileUpdateTest.php`). Alasan: ADR-014; fitur ini memungkinkan admin terakhir menghapus diri tanpa audit. Ganti dengan tes "rute 404".
-2. **Nonaktifkan passkey** (Fortify feature + tombol di login + menu di Keamanan). Tidak ada di PRD; login hanya username/HP/NIS (T-103).
-3. **Terjemahkan teks Inggris starter kit** ke Bahasa Indonesia: `pages/auth/*` (two-factor-challenge, confirm-password, reset-password, forgot-password), `components/{two-factor-setup-modal,manage-two-factor,two-factor-recovery-codes}.tsx`, `pages/settings/security.tsx`. Tanpa huruf kapital semua (DESIGN §2).
-4. Catat ketiganya sebagai ADR di `DECISIONS.md` dan bukti di TODO (baris T-101/T-113 atau catatan perbaikan Fase 1).
+Tidak ada (semua perubahan sudah di-commit).
 
 ## Langkah berikutnya
 
-1. Selesaikan "Sedang dikerjakan", commit `fix(auth): ...`.
-2. Lanjut P-03 berurutan: T-202 → T-203 → T-204 → T-205 → T-206 → T-207 → T-210 → T-211 → T-212 (lihat TODO "Rencana rilis & paket").
+1. Lanjut P-03 berurutan: **T-202** → T-203 → T-204 → T-205 → T-206 → T-207 → T-210 → T-211 → T-212 (lihat TODO "Rencana rilis & paket").
+   Unit & tahun ajaran masuk sub-navigasi Pengaturan (mockup 12: "Unit & jam presensi"); pakai `SettingsShell`.
+2. Pemilik: `git push` untuk commit sejak `59a0ff1`.
 
 ## Arahan pemilik yang berlaku
 
@@ -56,6 +53,8 @@ Perbaikan temuan Fase 1 dari cek UI, keputusan pemilik 2026-11-27:
 
 ## Temuan terbuka (belum ada tugasnya)
 
+- **Halaman `/` masih halaman sambutan Laravel** (`resources/js/pages/welcome.tsx`, rute `home`). Butuh keputusan pemilik: alihkan ke login/beranda, atau halaman depan sekolah. Dua tes memakai `route('home')` dengan status 200 (`ExampleTest`, `SecurityMiddlewareTest`).
+- Sisa starter yang tidak terpakai: `components/app-header.tsx` + `layouts/app/app-header-layout.tsx` (tidak dirender di mana pun).
 - Halaman **Pengguna staf** belum memakai `SettingsShell`, padahal ada di sub-navigasi Pengaturan (mockup menaruhnya di sana sebagai "Pengguna & peran").
 - Topbar staf masih memakai inisial "MT", belum logo unggahan (masuk sisa T-208).
 - `npx shadcn@latest add` gagal karena mencoba `pnpm`; proyek memakai npm. Komponen `textarea` belum ada.
