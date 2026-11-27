@@ -6,6 +6,7 @@ namespace App\Services\AcademicYears;
 
 use App\Exceptions\AcademicYearGuardException;
 use App\Models\AcademicYear;
+use App\Models\Classroom;
 use App\Models\User;
 use App\Services\Audit\AuditLogger;
 use Illuminate\Support\Facades\DB;
@@ -93,7 +94,8 @@ final class AcademicYearService
     }
 
     /**
-     * Pemakaian oleh rombel/enrollment diperiksa juga sejak T-204.
+     * Tahun ajaran aktif atau yang sudah dipakai rombel (T-204) tidak boleh dihapus,
+     * karena rombel, enrollment, dan laporan menunjuk ke sana.
      */
     public function delete(AcademicYear $year, User $actor): void
     {
@@ -102,6 +104,10 @@ final class AcademicYearService
 
             if ($locked->is_active) {
                 throw AcademicYearGuardException::cannotDeleteActive();
+            }
+
+            if (Classroom::query()->where('academic_year_id', $locked->id)->exists()) {
+                throw AcademicYearGuardException::usedByClassrooms();
             }
 
             $this->auditLogger->record(

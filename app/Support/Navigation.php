@@ -40,6 +40,11 @@ final class Navigation
                         'route' => 'admin.academic-years.index',
                         'permission' => Permission::AcademicYearsManage->value,
                     ],
+                    [
+                        'label' => 'Rombel',
+                        'route' => 'admin.classrooms.index',
+                        'permission' => Permission::ClassroomsManage->value,
+                    ],
                 ],
             ],
             [

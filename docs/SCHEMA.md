@@ -73,15 +73,17 @@ Kunci yang diizinkan = enum `App\Enums\SettingKey` (kunci lain ditolak): `identi
 ### `academic_years` (T-203 ✅)
 
 `name string(9)` (2026/2027, dua tahun berurutan), `semester string(6)` (`ganjil|genap`, enum `App\Enums\Semester`), `starts_on date`, `ends_on date` (> `starts_on`), `is_active bool default false`, timestamps. Unik (`name`,`semester`), indeks `is_active`.
-Maks satu aktif dijaga `AcademicYearService::activate` (lock baris + transaksi) + tes. Tahun ajaran aktif tidak dapat dihapus; pemeriksaan "dipakai rombel" ditambahkan di T-204.
+Maks satu aktif dijaga `AcademicYearService::activate` (lock baris + transaksi) + tes. Tahun ajaran aktif atau yang sudah dipakai rombel tidak dapat dihapus (`AcademicYearGuardException`; FK `classrooms.academic_year_id` juga restrict).
 
 ### `school_calendar_days` (T-505)
 
 `unit_id → units null` (null = semua unit), `date`, `type string` (`holiday|event`), `title`. Unik (`unit_id`,`date`).
 
-### `classrooms` (rombel, T-204)
+### `classrooms` (rombel, T-204 ✅)
 
-`unit_id`, `academic_year_id`, `grade string(10)` (1–6, A/B, jilid), `name string(30)` (1-A), `homeroom_teacher_id → users null`, `is_active`. Unik (`academic_year_id`,`unit_id`,`name`).
+`unit_id → units` (restrict on delete), `academic_year_id → academic_years` (restrict on delete), `grade string(10)` (1–6, A/B, jilid; teks bebas), `name string(30)` (1-A), `homeroom_teacher_id → users null` (null on delete), `is_active bool default true`, timestamps. Unik (`academic_year_id`,`unit_id`,`name`).
+Ditulis hanya lewat `App\Services\Classrooms\ClassroomService` (audit `created|updated|activated|deactivated|copied`). Wali kelas wajib pengguna aktif berperan `guru` (`ClassroomService::homeroomCandidates()`). Rombel tidak dihapus, hanya dinonaktifkan; unit & tahun ajaran rombel tidak bisa dipindah lewat ubah.
+"Salin dari tahun lain" (`copyFromYear`): menyalin rombel **aktif** satu unit dari tahun ajaran sumber ke tujuan, melewati nama yang sudah ada (tanpa beda huruf besar/kecil), wali kelas ikut hanya bila masih guru aktif; satu entri audit `copied` berisi jumlah disalin/dilewati.
 
 ### `students` (T-205)
 

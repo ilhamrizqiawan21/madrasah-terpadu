@@ -23,14 +23,14 @@ Aturan: singkat dan faktual. Jangan menyalin isi TODO/ADR; tautkan saja. Hapus b
 
 ## Terakhir diperbarui
 
-2026-11-27 · Claude (jalur A), setelah ADR-025
+2026-11-27 · Claude (eksekutor), setelah T-204
 
 ## Keadaan sekarang
 
 - **Fase 0 & 1**: semua tugas `[x]`, plus perbaikan temuan cek UI (ADR-024, commit `1cfd189`): hapus akun sendiri dihapus, passkey dimatikan, UI auth/2FA berbahasa Indonesia, tautan & logo Laravel dibuang.
 - **2FA tidak wajib lagi** (ADR-025, commit `e475b81`): sakelar `REQUIRE_TWO_FACTOR` (bawaan `false`). Fitur 2FA tetap opsional; akun yang sudah mengaktifkannya tetap ditanya kode.
-- **Fase 2 (paket P-03)**: T-201 ✔ (`dce871b`, termasuk Pengaturan > Tampilan untuk logo/favicon), T-202 ✔ (Unit & jam presensi, Pengaturan), T-203 ✔ (Tahun ajaran, Data Induk, pola master mockup 01). Pemilih unit/tahun ajaran di topbar sudah dari database (`App\Support\SchoolContext`). **Berikutnya T-204.**
-- `composer check` hijau di commit terakhir (223 tes, Larastan 0). CI GitHub hijau sejak ADR-023 (PHP ≥ 8.4); commit setelah `59a0ff1` belum di-push.
+- **Fase 2 (paket P-03)**: T-201 ✔ (`dce871b`, termasuk Pengaturan > Tampilan untuk logo/favicon), T-202 ✔ (Unit & jam presensi, Pengaturan), T-203 ✔ (Tahun ajaran, Data Induk, pola master mockup 01), T-204 ✔ (Rombel di Data Induk: CRUD per unit + tahun ajaran, wali kelas guru aktif, salin dari tahun lain, nonaktifkan bukan hapus; tahun ajaran yang dipakai rombel tidak bisa dihapus). Pemilih unit/tahun ajaran di topbar sudah dari database (`App\Support\SchoolContext`) dan menjadi bawaan saringan Rombel. **Berikutnya T-205.**
+- `composer check` hijau di commit terakhir (249 tes, Larastan 0). CI GitHub hijau sejak ADR-023 (PHP ≥ 8.4); commit setelah `59a0ff1` belum di-push.
 - Lingkungan lokal: `.env` memakai **MariaDB** `madrasah_terpadu` (sudah `migrate` + `ProductionSeeder`). Tes tetap SQLite in-memory.
 - Akun uji lokal: username `admin.uji` (Admin, 2FA aktif). Kata sandi dan rahasia TOTP **tidak** dicatat di repo; buat ulang lewat resep "Cek UI lokal".
 
@@ -40,9 +40,9 @@ Tidak ada (semua perubahan sudah di-commit).
 
 ## Langkah berikutnya
 
-1. Lanjut P-03 berurutan: T-204 → T-204 → T-205 → T-206 → T-207 → T-210 → T-211 → T-212 (lihat TODO "Rencana rilis & paket").
-   Master data (rombel, siswa, wali) memakai pola mockup 01 di menu Data Induk; contoh baku: `pages/admin/academic-years/index.tsx` dan `pages/admin/users/index.tsx`.
-   Rombel memakai unit & tahun ajaran dari `SchoolContext` sebagai bawaan filter; T-204 juga menambah tolak-hapus tahun ajaran yang dipakai rombel.
+1. Lanjut P-03 berurutan: T-205 → T-206 → T-207 → T-210 → T-211 → T-212 (lihat TODO "Rencana rilis & paket").
+   Siswa (T-205) memakai pola mockup 01 seperti `pages/admin/classrooms/index.tsx` (saringan unit/tahun ajaran dari `SchoolContext`, cari, paginasi 25).
+   Enrollment menunjuk `classrooms`; pilihan rombel sebaiknya hanya rombel aktif (`classrooms.is_active`).
 2. Pemilik: `git push` untuk commit sejak `59a0ff1`.
 
 ## Arahan pemilik yang berlaku

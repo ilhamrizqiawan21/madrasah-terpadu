@@ -12,4 +12,9 @@ final class AcademicYearGuardException extends RuntimeException
     {
         return new self('Tahun ajaran yang sedang aktif tidak dapat dihapus. Aktifkan tahun ajaran lain lebih dulu.');
     }
+
+    public static function usedByClassrooms(): self
+    {
+        return new self('Tahun ajaran ini sudah dipakai rombel sehingga tidak dapat dihapus.');
+    }
 }

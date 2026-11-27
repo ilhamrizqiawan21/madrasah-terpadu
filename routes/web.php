@@ -58,6 +58,7 @@ Route::middleware(['auth'])->group(function (): void {
             require __DIR__.'/users.php';
             require __DIR__.'/admin-settings.php';
             require __DIR__.'/academic-years.php';
+            require __DIR__.'/classrooms.php';
         });
 
     Route::prefix('wali')
