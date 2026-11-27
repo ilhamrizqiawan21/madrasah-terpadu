@@ -5,10 +5,15 @@ declare(strict_types=1);
 use App\Enums\Permission;
 use App\Enums\Role;
 use App\Http\Controllers\Admin\SchoolContextController;
+use App\Http\Controllers\BrandingAssetController;
 use App\Http\Controllers\DashboardController;
 use Illuminate\Support\Facades\Route;
 
 Route::inertia('/', 'welcome')->name('home');
+
+Route::get('branding/{asset}', BrandingAssetController::class)
+    ->whereIn('asset', ['logo', 'favicon'])
+    ->name('branding.show');
 
 Route::middleware(['auth'])->group(function (): void {
     Route::get('dashboard', DashboardController::class)->name('dashboard');
@@ -50,11 +55,8 @@ Route::middleware(['auth'])->group(function (): void {
                 ->middleware('permission:'.Permission::ReportsView->value)
                 ->name('reports.index');
 
-            Route::inertia('pengaturan', 'admin/dashboard')
-                ->middleware('permission:'.Permission::SettingsManage->value)
-                ->name('settings.index');
-
             require __DIR__.'/users.php';
+            require __DIR__.'/admin-settings.php';
         });
 
     Route::prefix('wali')

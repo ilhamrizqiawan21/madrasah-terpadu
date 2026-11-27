@@ -97,8 +97,13 @@ final class Navigation
                 'label' => 'Pengaturan',
                 'items' => [
                     [
-                        'label' => 'Pengaturan',
-                        'route' => 'admin.settings.index',
+                        'label' => 'Identitas sekolah',
+                        'route' => 'admin.settings.identity.edit',
+                        'permission' => Permission::SettingsManage->value,
+                    ],
+                    [
+                        'label' => 'Tampilan',
+                        'route' => 'admin.settings.appearance.edit',
                         'permission' => Permission::SettingsManage->value,
                     ],
                     [

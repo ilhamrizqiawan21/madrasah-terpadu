@@ -86,15 +86,16 @@ public/manifest.webmanifest
 
 ## 4. Area aplikasi dan routing
 
-| Area    | Prefix                | Layout                                                                    | Akses                                                 |
-| ------- | --------------------- | ------------------------------------------------------------------------- | ----------------------------------------------------- |
-| Staf    | `/admin/...`          | `staff-layout`: topbar, grup menu rata tengah di desktop, sheet di ponsel | peran staf sesuai menu                                |
-| Wali    | `/wali/...`           | `guardian-layout`: mobile-first, navigasi bawah 4 item                    | `wali` + `EnsureGuardianOwnsStudent`                  |
-| Gerbang | `/gerbang`            | `kiosk-layout`                                                            | `petugas_gerbang`, `admin`                            |
-| Kantin  | `/kantin`             | `kiosk-layout`                                                            | `kasir_kantin`, `bendahara`, `admin`                  |
-| Webhook | `/webhooks/midtrans`  | —                                                                         | publik, signature wajib, `throttle:120,1`, tanpa CSRF |
-| Push    | `/push/subscriptions` | —                                                                         | pengguna login                                        |
-| Ujian   | `/ujian/...`          | `exam-layout`: layar penuh, tanpa menu, satu soal per layar               | guard `student` (NIS + PIN), hanya sesi ujiannya      |
+| Area     | Prefix                      | Layout                                                                    | Akses                                                 |
+| -------- | --------------------------- | ------------------------------------------------------------------------- | ----------------------------------------------------- |
+| Staf     | `/admin/...`                | `staff-layout`: topbar, grup menu rata tengah di desktop, sheet di ponsel | peran staf sesuai menu                                |
+| Wali     | `/wali/...`                 | `guardian-layout`: mobile-first, navigasi bawah 4 item                    | `wali` + `EnsureGuardianOwnsStudent`                  |
+| Gerbang  | `/gerbang`                  | `kiosk-layout`                                                            | `petugas_gerbang`, `admin`                            |
+| Kantin   | `/kantin`                   | `kiosk-layout`                                                            | `kasir_kantin`, `bendahara`, `admin`                  |
+| Webhook  | `/webhooks/midtrans`        | —                                                                         | publik, signature wajib, `throttle:120,1`, tanpa CSRF |
+| Branding | `/branding/{logo\|favicon}` | —                                                                         | publik (dibutuhkan halaman login), hanya dua aset itu |
+| Push     | `/push/subscriptions`       | —                                                                         | pengguna login                                        |
+| Ujian    | `/ujian/...`                | `exam-layout`: layar penuh, tanpa menu, satu soal per layar               | guard `student` (NIS + PIN), hanya sesi ujiannya      |
 
 `/dashboard` mengarahkan sesuai peran: wali → `/wali`, petugas gerbang → `/gerbang`, kasir → `/kantin`, lainnya → `/admin`.
 Menu dibangun **di server** dari izin pengguna (`HandleInertiaRequests` membagikan `navigation`): menu tidak pernah menampilkan rute yang akan ditolak.
@@ -154,6 +155,7 @@ Rincian, status, dan skenario uji: `PAYMENTS.md`. Ringkasnya:
 - **CSRF**: aktif kecuali `/webhooks/midtrans` (dilindungi signature + Get Status API).
 - **Header** (`SecurityHeaders`): CSP kompatibel Vite & domain Snap Midtrans, `X-Frame-Options: DENY`, `Referrer-Policy: strict-origin-when-cross-origin`, `Permissions-Policy` kamera hanya untuk `/gerbang` dan `/kantin`.
 - **Berkas**: disk privat; akses lewat rute ber-policy atau `temporarySignedRoute` 5 menit; MIME/ekstensi/ukuran ≤ 2 MB divalidasi; gambar dikompres.
+  Pengecualian: logo & favicon (T-201) disajikan publik lewat `BrandingAssetController` (`/branding/{logo|favicon}?v=<hash>`, `Cache-Control` 1 hari, `nosniff`); SVG ditolak saat unggah karena bisa memuat skrip.
 - **Token kartu QR**: 32 byte acak, disimpan sebagai hash SHA-256; dapat dicabut.
 - **Secret** hanya di `.env`. `APP_DEBUG=false` di produksi. Log tanpa token, password, payload pembayaran lengkap, nomor HP utuh.
 - **Audit**: `audit_logs` untuk data induk, keuangan, poin, nilai, peran, pengaturan, dispensasi ujian, koreksi kunci soal.

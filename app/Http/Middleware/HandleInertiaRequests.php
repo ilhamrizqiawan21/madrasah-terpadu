@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Middleware;
 
+use App\Services\Settings\SettingsRepository;
+use App\Support\Branding;
 use App\Support\Navigation;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
@@ -41,11 +43,15 @@ class HandleInertiaRequests extends Middleware
         return [
             ...parent::share($request),
             'name' => config('app.name'),
-            'branding' => fn (): array => [
-                'appName' => (string) config('app.name'),
-                'foundationName' => (string) config('sekolah.foundation_name', 'Yayasan Amal Jaya Berkah'),
-                'logoUrl' => null,
-            ],
+            'branding' => function (): array {
+                $identity = app(SettingsRepository::class)->identity();
+
+                return [
+                    'appName' => $identity['app_name'],
+                    'foundationName' => $identity['foundation_name'],
+                    'logoUrl' => Branding::assetUrl('logo', $identity['logo_path']),
+                ];
+            },
             'auth' => [
                 'user' => $request->user(),
             ],
