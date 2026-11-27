@@ -27,7 +27,7 @@ Jalur **A** = Claude (risiko tinggi: uang, Midtrans, ledger, sesi ujian). Jalur 
 | P-06 Portal wali & notifikasi | B     | S      | T-301–T-305, T-401–T-404         | Kartu tagihan di beranda wali disembunyikan saat `billing` nonaktif                  |
 | P-07 Presensi gerbang + RFID  | C     | S      | T-501–T-509                      | T-501/T-502 menerima UID RFID (ADR-022)                                              |
 | P-16 CBT inti                 | A     | T      | T-1501–T-1506                    | Jalur A mulai dari sini; tanpa periode ujian selama masa paralel                     |
-| P-11 Buku Saku BK & reward    | B     | S      | T-901–T-906                      | Reward menerbitkan voucher kantin: simpan voucher, pemakaian menunggu `wallet` aktif |
+| P-11 Buku Saku BK & reward    | B     | S      | T-901–T-906                      | Selesai (2026-11-27). Reward menerbitkan voucher kantin: simpan voucher, pemakaian menunggu `wallet` aktif |
 | P-12 Pembiasaan               | C     | R      | T-1001–T-1004                    |                                                                                      |
 | P-14 Hafalan & PIB            | C     | S      | T-1101–T-1108                    |                                                                                      |
 | P-17 CBT pengawasan & hasil   | A     | S      | T-1507–T-1511                    |                                                                                      |
