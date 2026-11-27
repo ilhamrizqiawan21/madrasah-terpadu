@@ -5,6 +5,8 @@ declare(strict_types=1);
 use App\Enums\Permission;
 use App\Http\Controllers\Admin\StudentController;
 use App\Http\Controllers\Admin\StudentImportController;
+use App\Http\Controllers\Admin\StudentMutationController;
+use App\Http\Controllers\Admin\StudentPromotionController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -47,3 +49,25 @@ Route::prefix('siswa/impor')
         Route::post('simpan', 'commit')->name('commit');
         Route::get('hasil', 'result')->name('result');
     });
+
+/*
+| Kenaikan kelas massal & mutasi siswa (T-212).
+*/
+Route::middleware('permission:'.Permission::StudentsManage->value)->group(function (): void {
+    Route::prefix('siswa/kenaikan-kelas')
+        ->name('students.promotions.')
+        ->controller(StudentPromotionController::class)
+        ->group(function (): void {
+            Route::get('/', 'index')->name('index');
+            Route::post('/', 'store')->name('store');
+        });
+
+    Route::prefix('siswa/mutasi')
+        ->name('students.mutations.')
+        ->controller(StudentMutationController::class)
+        ->group(function (): void {
+            Route::get('/', 'index')->name('index');
+            Route::post('masuk', 'storeIn')->name('store-in');
+            Route::post('keluar', 'storeOut')->name('store-out');
+        });
+});

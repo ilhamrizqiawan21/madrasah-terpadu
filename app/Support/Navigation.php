@@ -39,6 +39,16 @@ final class Navigation
                         'permission' => Permission::StudentsView->value,
                     ],
                     [
+                        'label' => 'Kenaikan kelas',
+                        'route' => 'admin.students.promotions.index',
+                        'permission' => Permission::StudentsManage->value,
+                    ],
+                    [
+                        'label' => 'Mutasi siswa',
+                        'route' => 'admin.students.mutations.index',
+                        'permission' => Permission::StudentsManage->value,
+                    ],
+                    [
                         'label' => 'Wali',
                         'route' => 'admin.guardians.index',
                         'permission' => Permission::GuardiansManage->value,

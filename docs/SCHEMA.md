@@ -95,6 +95,10 @@ Indeks: (`unit_id`,`status`), (`name`). FK `unit_id` → `units` restrict. `gend
 
 `student_id`, `classroom_id`, `academic_year_id`, timestamps. Unik (`student_id`,`academic_year_id`); indeks (`classroom_id`,`academic_year_id`). Semua FK restrict. Rombel aktif siswa = enrollment tahun ajaran aktif. Pindah rombel di tahun yang sama memperbarui baris itu dengan audit `enrollment_moved` (sebelum/sesudah rombel); baris tahun lain tidak disentuh (riwayat).
 
+### `student_mutations` (T-212 ✅) — append-only
+
+`student_id → students` (restrict on delete), `type string(20)` (`in|out|graduated`, enum `App\Enums\MutationType`), `mutated_on date`, `school_name string(120) null`, `reason string(255)`, `recorded_by → users` (restrict on delete), `created_at`. Indeks: (`student_id`,`mutated_on`), (`type`,`mutated_on`). Ditulis hanya lewat `StudentMutationService` / `StudentPromotionService`.
+
 ### `guardians` (T-206 ✅)
 
 `user_id → users unique` (restrict), `name`, `phone string(20)`, `relation string(10)` default `wali` (`ayah|ibu|wali`, enum `GuardianRelation`), `address text null`, timestamps, `deleted_at`. Indeks (`name`).
