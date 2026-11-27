@@ -10,6 +10,27 @@ beforeEach(function (): void {
     foreach (RoleEnum::cases() as $role) {
         Role::findOrCreate($role->value, 'web');
     }
+
+    // Kewajiban 2FA bisa dimatikan sementara (ADR-025); tes T-104 menguji saat dinyalakan.
+    config(['sekolah.security.require_two_factor' => true]);
+});
+
+test('saat kewajiban 2FA dimatikan, admin tanpa 2FA tetap bisa masuk area staf', function (): void {
+    config(['sekolah.security.require_two_factor' => false]);
+
+    $admin = User::factory()->create();
+    $admin->assignRole(RoleEnum::Admin->value);
+
+    $this->actingAs($admin)
+        ->get(route('admin.dashboard'))
+        ->assertOk();
+});
+
+test('kewajiban 2FA nonaktif secara bawaan selama masa pengembangan', function (): void {
+    config()->offsetUnset('sekolah.security.require_two_factor');
+    $config = require base_path('config/sekolah.php');
+
+    expect($config['security']['require_two_factor'])->toBeFalse();
 });
 
 test('admin tanpa 2FA diarahkan ke pengaturan keamanan', function (): void {

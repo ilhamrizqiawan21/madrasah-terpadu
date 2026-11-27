@@ -232,6 +232,12 @@ Akun wali dibuat lewat impor/data induk dengan password awal acak. Tidak ada hal
 **Keputusan:** rute, request, dan komponen hapus akun sendiri dihapus; akun hanya dinonaktifkan oleh admin (T-114, T-206). `Features::passkeys` dimatikan di `config/fortify.php`; tombol dan pengelolaan passkey dihapus dari UI. Tabel `passkeys` dibiarkan (migrasi lama tidak diedit). Dua tes starter "user can delete their account" dihapus dan asersi passkey di `SecurityTest` dibalik, karena tes itu menjamin perilaku yang kini dilarang; penggantinya `tests/Feature/Auth/AccountLockdownTest.php`.
 **Akibat:** menyalakan kembali passkey butuh ADR baru (perlu audit login passkey + pemeriksaan `is_active` di jalur itu).
 
+## ADR-025 — Kewajiban 2FA Admin & Bendahara dimatikan sementara (Diterima, 2026-11-27; keputusan pemilik)
+
+**Konteks:** T-104 mewajibkan Admin dan Bendahara mengaktifkan 2FA sebelum memakai aplikasi. Pemilik meminta verifikasi dua langkah dinonaktifkan dulu selama masa pengembangan.
+**Keputusan:** kewajiban 2FA dikendalikan sakelar `sekolah.security.require_two_factor` (`REQUIRE_TWO_FACTOR` di `.env`), **bawaan `false`**. Saat `false`, `EnsureTwoFactorForPrivilegedRoles` melewatkan semua pengguna. Fitur 2FA Fortify tetap ada sebagai pilihan: akun yang mengaktifkannya tetap ditanya kode saat masuk. Tes T-104 tetap menguji jalur wajib dengan sakelar dinyalakan.
+**Akibat:** sebelum produksi pemilik menyalakan `REQUIRE_TWO_FACTOR=true` (DEPLOYMENT §2), atau mencatat ADR baru bila tetap opsional.
+
 ---
 
 ## Usulan terbuka (menunggu klien, lihat PRD §8)

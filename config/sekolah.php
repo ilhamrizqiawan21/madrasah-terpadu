@@ -12,6 +12,12 @@ return [
 
     'foundation_name' => 'Yayasan Amal Jaya Berkah',
 
+    'security' => [
+        // Wajib 2FA untuk Admin & Bendahara (T-104). Dimatikan sementara atas
+        // keputusan pemilik (ADR-025); nyalakan sebelum produksi.
+        'require_two_factor' => (bool) env('REQUIRE_TWO_FACTOR', false),
+    ],
+
     'attendance' => [
         // Default gate times per unit, overridable in Pengaturan > Presensi.
         'defaults' => [
