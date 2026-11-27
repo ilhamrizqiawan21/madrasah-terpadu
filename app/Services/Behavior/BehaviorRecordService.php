@@ -27,6 +27,7 @@ class BehaviorRecordService
     public function __construct(
         private readonly PointLedgerService $ledger,
         private readonly DisciplineFollowupService $followups,
+        private readonly RewardOfferNoticeService $offerNotices,
         private readonly AuditLogger $audit,
         private readonly GuardianNotifier $notifier,
     ) {}
@@ -122,6 +123,12 @@ class BehaviorRecordService
                         academicYear: $year,
                         violationBalance: $entry->balance_after,
                         actor: $actor,
+                    );
+                } else {
+                    $this->offerNotices->notifyEligibleOffers(
+                        student: $student,
+                        academicYear: $year,
+                        meritBalance: $entry->balance_after,
                     );
                 }
 

@@ -200,7 +200,7 @@ export default function AdminDashboard({
         },
         summary.guardians !== null && {
             key: 'guardians',
-            label: 'Wali terhubung',
+            label: 'Wali',
             value: summary.guardians,
             href: GuardianController.index(),
         },
@@ -564,6 +564,186 @@ function NotYetStudents({
     );
 }
 
+const trendStack: {
+    label: string;
+    swatch: string;
+    value: (day: TrendDay) => number;
+}[] = [
+    { label: 'Hadir', swatch: 'bg-success', value: (d) => d.present },
+    { label: 'Terlambat', swatch: 'bg-warning', value: (d) => d.late },
+    {
+        label: 'Izin/sakit',
+        swatch: 'bg-primary/45',
+        value: (d) => d.excused + d.sick,
+    },
+    { label: 'Alpa', swatch: 'bg-destructive', value: (d) => d.absent },
+];
+
+const weekdayFormatter = new Intl.DateTimeFormat('id-ID', {
+    weekday: 'short',
+    timeZone: 'Asia/Makassar',
+});
+
+const dayFormatter = new Intl.DateTimeFormat('id-ID', {
+    day: 'numeric',
+    timeZone: 'Asia/Makassar',
+});
+
+const decimalFormatter = new Intl.NumberFormat('id-ID', {
+    maximumFractionDigits: 1,
+});
+
+function TrendPanel({
+    trend,
+    total,
+    isHomeroom,
+}: {
+    trend: TrendDay[];
+    total: number;
+    isHomeroom: boolean;
+}) {
+    const past = trend.slice(0, -1);
+    const today = trend[trend.length - 1];
+    const averageLate =
+        past.reduce((sum, day) => sum + day.late, 0) / Math.max(past.length, 1);
+    const averageAbsent =
+        past.reduce((sum, day) => sum + day.absent, 0) /
+        Math.max(past.length, 1);
+
+    return (
+        <DashboardPanel
+            title={`Tren ${trend.length} hari sekolah terakhir`}
+            meta={isHomeroom ? 'Rombel yang Anda walikan' : 'Seluruh rombel unit'}
+        >
+            <div className="grid gap-6 sm:grid-cols-[1fr_11rem]">
+                <div>
+                    <div className="flex h-40 items-end gap-2 sm:gap-3">
+                        {trend.map((day, index) => {
+                            const isToday = index === trend.length - 1;
+                            const date = new Date(`${day.date}T12:00:00+08:00`);
+                            const description = trendStack
+                                .map((s) => `${s.label} ${s.value(day)}`)
+                                .join(', ');
+
+                            return (
+                                <div
+                                    key={day.date}
+                                    className="flex h-full flex-1 flex-col items-center gap-1.5"
+                                >
+                                    <div
+                                        className={cn(
+                                            'relative flex w-full max-w-12 flex-1 flex-col-reverse overflow-hidden rounded-md bg-muted',
+                                            isToday &&
+                                                'ring-2 ring-primary/30 ring-offset-2 ring-offset-card',
+                                        )}
+                                        role="img"
+                                        aria-label={`${formatDate(day.date)}: ${description}`}
+                                        title={`${formatDate(day.date)} · ${description}`}
+                                    >
+                                        {trendStack.map((segment) => {
+                                            const value = segment.value(day);
+
+                                            return value > 0 ? (
+                                                <div
+                                                    key={segment.label}
+                                                    className={cn(
+                                                        'w-full border-t border-card first:border-t-0',
+                                                        segment.swatch,
+                                                    )}
+                                                    style={{
+                                                        height: `${(value / Math.max(total, 1)) * 100}%`,
+                                                    }}
+                                                />
+                                            ) : null;
+                                        })}
+                                    </div>
+                                    <div className="text-center leading-tight">
+                                        <p
+                                            className={cn(
+                                                'text-[11px] text-muted-foreground',
+                                                isToday &&
+                                                    'font-semibold text-foreground',
+                                            )}
+                                        >
+                                            {isToday
+                                                ? 'Hari ini'
+                                                : weekdayFormatter.format(date)}
+                                        </p>
+                                        <p className="text-[11px] text-muted-foreground tabular-nums">
+                                            {dayFormatter.format(date)}
+                                        </p>
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+                    <ul className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
+                        {trendStack.map((segment) => (
+                            <li
+                                key={segment.label}
+                                className="flex items-center gap-1.5"
+                            >
+                                <span
+                                    className={cn(
+                                        'size-2.5 rounded-sm',
+                                        segment.swatch,
+                                    )}
+                                    aria-hidden
+                                />
+                                {segment.label}
+                            </li>
+                        ))}
+                    </ul>
+                </div>
+
+                <dl className="grid grid-cols-2 gap-3 self-start sm:grid-cols-1">
+                    <TrendStat
+                        label="Terlambat hari ini"
+                        value={today.late}
+                        average={averageLate}
+                    />
+                    <TrendStat
+                        label="Alpa hari ini"
+                        value={today.absent}
+                        average={averageAbsent}
+                    />
+                </dl>
+            </div>
+        </DashboardPanel>
+    );
+}
+
+function TrendStat({
+    label,
+    value,
+    average,
+}: {
+    label: string;
+    value: number;
+    average: number;
+}) {
+    const higher = value > average;
+
+    return (
+        <div className="rounded-lg border border-border bg-background/60 px-3 py-2.5">
+            <dt className="text-xs text-muted-foreground">{label}</dt>
+            <dd className="mt-0.5 flex items-baseline gap-2">
+                <span className="text-2xl font-semibold tabular-nums">
+                    {numberFormatter.format(value)}
+                </span>
+                <span
+                    className={cn(
+                        'text-xs tabular-nums',
+                        higher ? 'text-destructive' : 'text-muted-foreground',
+                    )}
+                >
+                    rata-rata {decimalFormatter.format(average)}
+                </span>
+            </dd>
+        </div>
+    );
+}
+
 function ClassroomBreakdown({
     classrooms,
 }: {
@@ -584,7 +764,7 @@ function ClassroomBreakdown({
                                 href={AttendanceController.index({
                                     query: { classroom_id: classroom.id },
                                 })}
-                                className="group -mx-2 grid grid-cols-[4.5rem_1fr_auto] items-center gap-3 rounded-md px-2 py-1 text-sm transition-colors duration-150 hover:bg-muted/60 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none sm:grid-cols-[6rem_1fr_auto]"
+                                className="group -mx-2 grid grid-cols-[3.5rem_1fr_auto] items-center gap-3 rounded-md px-2 py-1 text-sm transition-colors duration-150 hover:bg-muted/60 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none sm:grid-cols-[6rem_1fr_10rem]"
                             >
                                 <span className="truncate font-medium group-hover:text-primary">
                                     {classroom.name}

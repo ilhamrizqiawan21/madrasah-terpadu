@@ -266,9 +266,9 @@ Unik (`student_id`,`academic_year_id`,`discipline_threshold_id`) — satu ambang
 `student_id` (`→ students`, restrict), `academic_year_id` (`→ academic_years`, restrict), `reward_offer_id` (`→ reward_offers`, restrict), `cost_points` (snapshot), `voucher_amount` (snapshot), `requested_by → users` (restrict), `status string(20)` (`pending|approved|rejected|cancelled`),
 `decided_by null` (`→ users`), `decided_at null`, `decision_note text null`, timestamps. Ditulis lewat `RewardRedemptionService`.
 
-### `reward_offer_notices` (T-905)
+### `reward_offer_notices` (T-905 ✅)
 
-`student_id`, `reward_offer_id`, `academic_year_id`, `notified_at`. Unik ketiganya — notifikasi "penawaran tersedia" hanya sekali.
+`student_id` (`→ students`, restrict), `reward_offer_id` (`→ reward_offers`, restrict), `academic_year_id` (`→ academic_years`, restrict), `notified_at`. Unik ketiganya — notifikasi "penawaran tersedia" hanya sekali. Ditulis lewat `RewardOfferNoticeService`.
 
 ## H. Pembiasaan / mutabaah (Fase 10)
 

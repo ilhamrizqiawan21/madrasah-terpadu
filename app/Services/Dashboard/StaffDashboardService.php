@@ -157,11 +157,17 @@ final class StaffDashboardService
     /**
      * @return array{count: int, items: list<array{id: int, student_name: string, type_label: string, starts_on: string, ends_on: string, submitted_at: string}>}
      */
-    public function pendingLeaves(?Unit $unit, int $limit = 4): array
+    public function pendingLeaves(User $user, ?Unit $unit, ?int $yearId, int $limit = 4): array
     {
+        $homeroomOnly = $this->isHomeroomOnly($user);
+
         $query = LeaveRequest::query()
             ->where('status', LeaveRequestStatus::Pending->value)
-            ->when($unit !== null, fn (Builder $q) => $q->whereHas('student', fn (Builder $s) => $s->where('unit_id', $unit->id)));
+            ->when($unit !== null, fn (Builder $q) => $q->whereHas('student', fn (Builder $s) => $s->where('unit_id', $unit->id)))
+            // Wali kelas hanya diminta memutuskan izin siswa rombel yang ia walikan.
+            ->when($homeroomOnly, fn (Builder $q) => $q->whereHas('student.enrollments', fn (Builder $e) => $e
+                ->where('academic_year_id', $yearId)
+                ->whereHas('classroom', fn (Builder $c) => $c->where('homeroom_teacher_id', $user->id))));
 
         $count = (clone $query)->count();
 

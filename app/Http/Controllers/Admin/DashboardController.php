@@ -66,7 +66,7 @@ class DashboardController extends Controller
                 'guardians' => $canManageGuardians ? $this->guardians($unit) : null,
             ],
             'attendance' => $attendanceOn ? $this->dashboard->attendanceToday($user, $unit, $yearId) : null,
-            'leaves' => $attendanceOn ? $this->dashboard->pendingLeaves($unit) : null,
+            'leaves' => $attendanceOn ? $this->dashboard->pendingLeaves($user, $unit, $yearId) : null,
             'exams' => $cbtOn ? $this->dashboard->exams($user) : null,
             'dataGaps' => $canManageStudents ? $this->dashboard->dataGaps($unit, $yearId) : null,
             'queue' => $user->hasRole(Role::Admin->value) ? $this->dashboard->queueHealth() : null,

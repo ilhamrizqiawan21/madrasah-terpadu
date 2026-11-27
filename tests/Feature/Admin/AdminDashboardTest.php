@@ -92,7 +92,15 @@ test('wali kelas hanya melihat presensi rombel yang ia walikan beserta nama sisw
     $own = Classroom::factory()->for($unit)->for($year)->create(['name' => '2-A', 'homeroom_teacher_id' => $teacher->id]);
     $other = Classroom::factory()->for($unit)->for($year)->create(['name' => '3-A']);
     $mine = enrollIn($own, 2);
-    enrollIn($other, 5);
+    $others = enrollIn($other, 5);
+
+    foreach ([$mine[0], $others[0]] as $student) {
+        LeaveRequest::query()->create([
+            'student_id' => $student->id, 'requested_by' => $teacher->id, 'type' => 'sick',
+            'starts_on' => now()->toDateString(), 'ends_on' => now()->toDateString(),
+            'reason' => 'Demam', 'status' => 'pending',
+        ]);
+    }
 
     $this->actingAs($teacher)
         ->get(route('admin.dashboard'))
@@ -103,10 +111,9 @@ test('wali kelas hanya melihat presensi rombel yang ia walikan beserta nama sisw
             ->where('attendance.not_yet_students.0.classroom', '2-A')
             ->where('queue', null)
             ->where('dataGaps', null)
-            ->where('leaves.count', 0)
+            ->where('leaves.count', 1)
+            ->where('leaves.items.0.student_name', $mine[0]->name)
         );
-
-    expect($mine)->toHaveCount(2);
 });
 
 test('beranda staf menampilkan izin menunggu dan ujian yang sedang berlangsung', function (): void {
