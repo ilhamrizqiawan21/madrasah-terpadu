@@ -47,15 +47,13 @@ final class IdentitySettingsService
         bool $removeFavicon,
         User $actor,
     ): void {
-        $current = $this->settings->identity();
         $values = [];
         $newFiles = [];
-        $obsoleteFiles = [];
 
         foreach ([
-            [SettingKey::LogoPath, $logo, $removeLogo, $current['logo_path']],
-            [SettingKey::FaviconPath, $favicon, $removeFavicon, $current['favicon_path']],
-        ] as [$key, $upload, $remove, $existingPath]) {
+            [SettingKey::LogoPath, $logo, $removeLogo],
+            [SettingKey::FaviconPath, $favicon, $removeFavicon],
+        ] as [$key, $upload, $remove]) {
             if ($upload instanceof UploadedFile) {
                 $path = $upload->store(self::DIRECTORY, self::DISK);
 
@@ -69,12 +67,6 @@ final class IdentitySettingsService
                 $values[$key->value] = $path;
             } elseif ($remove) {
                 $values[$key->value] = null;
-            } else {
-                continue;
-            }
-
-            if ($existingPath !== null) {
-                $obsoleteFiles[] = $existingPath;
             }
         }
 
@@ -83,12 +75,19 @@ final class IdentitySettingsService
         }
 
         try {
-            $this->settings->setMany($values, $actor);
+            $before = $this->settings->setMany($values, $actor);
         } catch (Throwable $exception) {
             $this->deleteFiles($newFiles);
 
             throw $exception;
         }
+
+        // Jalur lama diambil dari baris yang dikunci di setMany (bukan dari cache), agar unggahan
+        // bersamaan tidak meninggalkan berkas yatim.
+        $obsoleteFiles = array_values(array_filter(
+            $before,
+            fn (mixed $path): bool => is_string($path) && $path !== '',
+        ));
 
         // Berkas lama baru dihapus setelah jalur baru tersimpan, agar logo tidak pernah hilang di tengah jalan.
         DB::afterCommit(fn () => $this->deleteFiles($obsoleteFiles));

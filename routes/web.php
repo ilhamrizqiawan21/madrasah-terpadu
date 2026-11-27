@@ -21,13 +21,7 @@ Route::middleware(['auth'])->group(function (): void {
 
     Route::prefix('admin')
         ->name('admin.')
-        ->middleware('role:'.implode('|', [
-            Role::Admin->value,
-            Role::Treasurer->value,
-            Role::Teacher->value,
-            Role::Counselor->value,
-            Role::UnitHead->value,
-        ]))
+        ->middleware('role:'.implode('|', array_map(fn (Role $role): string => $role->value, Role::adminArea())))
         ->group(function (): void {
             Route::inertia('/', 'admin/dashboard')->name('dashboard');
             Route::post('context', SchoolContextController::class)->name('context.update');

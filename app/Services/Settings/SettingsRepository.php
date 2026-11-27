@@ -14,11 +14,15 @@ use InvalidArgumentException;
 
 /**
  * Satu-satunya pintu baca/tulis tabel `settings` (T-201).
- * Semua nilai dibaca sekaligus dan di-cache; cache dibuang setelah commit.
+ * Semua nilai dibaca sekaligus dan di-cache. Setelah commit cache ditulis ulang dari database
+ * (bukan sekadar dibuang), sehingga permintaan lain yang membaca baris lama sebelum commit
+ * tidak bisa mengisi cache dengan nilai basi tanpa batas; TTL terbatas menjadi jaring pengaman.
  */
 final class SettingsRepository
 {
     private const CACHE_KEY = 'settings.values';
+
+    private const CACHE_TTL_MINUTES = 10;
 
     public function __construct(private readonly AuditLogger $auditLogger) {}
 
@@ -28,11 +32,11 @@ final class SettingsRepository
     public function all(): array
     {
         /** @var array<string, mixed> */
-        return Cache::rememberForever(self::CACHE_KEY, fn (): array => Setting::query()
-            ->orderBy('key')
-            ->get(['key', 'value'])
-            ->mapWithKeys(fn (Setting $setting): array => [$setting->key => $setting->value])
-            ->all());
+        return Cache::remember(
+            self::CACHE_KEY,
+            now()->addMinutes(self::CACHE_TTL_MINUTES),
+            fn (): array => $this->loadFromDatabase(),
+        );
     }
 
     public function get(SettingKey $key, mixed $default = null): mixed
@@ -58,10 +62,13 @@ final class SettingsRepository
 
     /**
      * Simpan beberapa kunci dalam satu transaksi + satu baris audit berisi kunci yang berubah.
+     * Mengembalikan nilai lama kunci yang berubah, dibaca di bawah `lockForUpdate`
+     * (bukan dari cache), agar pemanggil bisa membersihkan berkas lama dengan tepat.
      *
      * @param  array<string, mixed>  $values
+     * @return array<string, mixed>
      */
-    public function setMany(array $values, User $actor): void
+    public function setMany(array $values, User $actor): array
     {
         foreach (array_keys($values) as $key) {
             if (SettingKey::tryFrom($key) === null) {
@@ -69,7 +76,7 @@ final class SettingsRepository
             }
         }
 
-        DB::transaction(function () use ($values, $actor): void {
+        return DB::transaction(function () use ($values, $actor): array {
             $current = Setting::query()
                 ->whereIn('key', array_keys($values))
                 ->orderBy('key')
@@ -93,7 +100,7 @@ final class SettingsRepository
             }
 
             if ($after === []) {
-                return;
+                return [];
             }
 
             $now = now();
@@ -119,8 +126,26 @@ final class SettingsRepository
                 userId: $actor->id,
             );
 
-            DB::afterCommit(fn () => Cache::forget(self::CACHE_KEY));
+            DB::afterCommit(fn () => Cache::put(
+                self::CACHE_KEY,
+                $this->loadFromDatabase(),
+                now()->addMinutes(self::CACHE_TTL_MINUTES),
+            ));
+
+            return $before;
         });
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function loadFromDatabase(): array
+    {
+        return Setting::query()
+            ->orderBy('key')
+            ->get(['key', 'value'])
+            ->mapWithKeys(fn (Setting $setting): array => [$setting->key => $setting->value])
+            ->all();
     }
 
     private function stringOr(SettingKey $key, string $default): string

@@ -124,3 +124,51 @@ test('pemilih konteks menolak unit nonaktif dan tahun ajaran yang tidak ada', fu
         ->post(route('admin.context.update'), ['unit' => 'TPQ', 'academic_year_id' => 999])
         ->assertSessionHasErrors(['unit', 'academic_year_id']);
 });
+
+test('konteks sekolah tidak dibagikan ke tamu, wali, dan petugas di luar area staf', function (): void {
+    Unit::factory()->create(['code' => 'MI']);
+    AcademicYear::factory()->active()->create(['name' => '2026/2027', 'semester' => Semester::Ganjil]);
+
+    $this->get(route('login'))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page->where('schoolContext', null));
+
+    $guardian = User::factory()->create();
+    $guardian->assignRole(RoleEnum::Guardian->value);
+
+    $this->actingAs($guardian)
+        ->get(route('guardian.home'))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page->where('schoolContext', null));
+
+    $gateOfficer = User::factory()->create();
+    $gateOfficer->assignRole(RoleEnum::GateOfficer->value);
+
+    $this->actingAs($gateOfficer)
+        ->get(route('gate.index'))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page->where('schoolContext', null));
+});
+
+test('tahun ajaran terpilih di luar daftar terbaru tetap dipakai dan ditampilkan di pemilih', function (): void {
+    $admin = User::factory()->withTwoFactor()->create();
+    $admin->assignRole(RoleEnum::Admin->value);
+    $oldest = AcademicYear::factory()->create(['name' => '2010/2011', 'semester' => Semester::Ganjil]);
+
+    foreach (range(2020, 2025) as $start) {
+        AcademicYear::factory()->create(['name' => $start.'/'.($start + 1), 'semester' => Semester::Ganjil]);
+    }
+
+    $this->actingAs($admin)
+        ->post(route('admin.context.update'), ['academic_year_id' => $oldest->id])
+        ->assertRedirect();
+
+    $this->actingAs($admin)
+        ->get(route('admin.dashboard'))
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('schoolContext.academicYearId', $oldest->id)
+            ->where('schoolContext.academicYear', '2010/2011 Ganjil')
+            ->has('schoolContext.academicYears', 7)
+            ->where('schoolContext.academicYears', fn ($years): bool => collect($years)->contains('id', $oldest->id)),
+        );
+});

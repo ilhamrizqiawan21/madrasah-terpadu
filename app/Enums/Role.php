@@ -51,4 +51,20 @@ enum Role: string
             self::CanteenCashier,
         ];
     }
+
+    /**
+     * Roles allowed into the /admin route group (the staff panel with the unit/year picker).
+     *
+     * @return list<self>
+     */
+    public static function adminArea(): array
+    {
+        return [
+            self::Admin,
+            self::Treasurer,
+            self::Teacher,
+            self::Counselor,
+            self::UnitHead,
+        ];
+    }
 }

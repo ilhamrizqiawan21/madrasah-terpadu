@@ -187,6 +187,37 @@ test('menyimpan pengaturan membuang cache sehingga nilai baru langsung terbaca',
     expect($repository->identity()['app_name'])->toBe('Nama Baru');
 });
 
+test('setelah menyimpan, cache langsung berisi nilai baru tanpa query ke database', function (): void {
+    $repository = app(SettingsRepository::class);
+    $admin = identityAdmin();
+    $repository->setMany([SettingKey::AppName->value => 'Nama Lama'], $admin);
+    $repository->identity();
+
+    $repository->setMany([SettingKey::AppName->value => 'Nama Baru'], $admin);
+
+    DB::enableQueryLog();
+    $identity = $repository->identity();
+
+    expect($identity['app_name'])->toBe('Nama Baru')
+        ->and(DB::getQueryLog())->toBe([]);
+});
+
+test('setMany mengembalikan nilai lama yang dibaca di bawah kunci baris', function (): void {
+    $repository = app(SettingsRepository::class);
+    $admin = identityAdmin();
+    $repository->setMany([SettingKey::AppName->value => 'Nama Lama'], $admin);
+
+    $before = $repository->setMany([
+        SettingKey::AppName->value => 'Nama Baru',
+        SettingKey::Phone->value => '081234567890',
+    ], $admin);
+
+    expect($before)->toBe([
+        SettingKey::AppName->value => 'Nama Lama',
+        SettingKey::Phone->value => null,
+    ]);
+});
+
 test('kunci pengaturan yang tidak dikenal ditolak', function (): void {
     app(SettingsRepository::class)->setMany(['tidak.dikenal' => 'x'], identityAdmin());
 })->throws(InvalidArgumentException::class);
@@ -238,6 +269,30 @@ test('logo baru menggantikan berkas lama dan logo dapat dihapus', function (): v
     expect(app(SettingsRepository::class)->identity()['logo_path'])->toBeNull();
     Storage::disk('local')->assertMissing($newPath);
     $this->get(route('branding.show', ['asset' => 'logo']))->assertNotFound();
+});
+
+test('logo lama yang dihapus mengikuti nilai di database, bukan nilai cache yang basi', function (): void {
+    $admin = identityAdmin();
+    $this->actingAs($admin)->post(route('admin.settings.appearance.update'), [
+        'logo' => UploadedFile::fake()->image('pertama.png'),
+    ]);
+    $firstPath = app(SettingsRepository::class)->identity()['logo_path'];
+
+    // Unggahan lain sudah tersimpan di database, tetapi cache proses ini masih menyimpan jalur pertama.
+    $concurrentPath = 'branding/serentak.png';
+    Storage::disk('local')->put($concurrentPath, 'png');
+    Setting::query()->where('key', SettingKey::LogoPath->value)->firstOrFail()
+        ->forceFill(['value' => $concurrentPath])->save();
+
+    $this->actingAs($admin)->post(route('admin.settings.appearance.update'), [
+        'logo' => UploadedFile::fake()->image('ketiga.png'),
+    ])->assertSessionHasNoErrors();
+
+    $finalPath = app(SettingsRepository::class)->identity()['logo_path'];
+
+    expect($finalPath)->not->toBe($concurrentPath)->not->toBe($firstPath);
+    Storage::disk('local')->assertMissing($concurrentPath);
+    Storage::disk('local')->assertExists($finalPath);
 });
 
 test('logo SVG, berkas bukan gambar, dan berkas terlalu besar ditolak', function (Closure $file): void {

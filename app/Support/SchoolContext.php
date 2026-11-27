@@ -45,9 +45,19 @@ final class SchoolContext
         $unit = in_array($chosenUnit, $units, true) ? $chosenUnit : ($units[0] ?? null);
 
         $chosenYearId = $session->get(self::SESSION_ACADEMIC_YEAR);
-        $year = $years->firstWhere('id', $chosenYearId)
-            ?? $years->firstWhere('is_active', true)
-            ?? AcademicYear::query()->where('is_active', true)->first();
+        $year = $years->firstWhere('id', $chosenYearId);
+
+        // Tahun lama yang dipilih tetap dipakai dan ditambahkan ke daftar agar pemilih menampilkannya.
+        if ($year === null && is_int($chosenYearId)) {
+            $year = AcademicYear::query()->find($chosenYearId);
+
+            if ($year !== null) {
+                $years->push($year);
+            }
+        }
+
+        $year ??= $years->firstWhere('is_active', true)
+            ?? AcademicYear::query()->where('is_active', true)->orderBy('id')->first();
 
         return [
             'unit' => $unit,

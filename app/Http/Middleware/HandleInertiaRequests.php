@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Middleware;
 
+use App\Enums\Role;
 use App\Services\Settings\SettingsRepository;
 use App\Support\Branding;
 use App\Support\Navigation;
@@ -57,7 +58,10 @@ class HandleInertiaRequests extends Middleware
                 'user' => $request->user(),
             ],
             'navigation' => fn (): array => Navigation::forUser($request->user()),
-            'schoolContext' => fn (): array => SchoolContext::resolve($request->session()),
+            // Hanya staf yang boleh masuk grup /admin yang memakai pemilih unit/tahun ajaran.
+            'schoolContext' => fn (): ?array => $request->user()?->hasAnyRole(array_map(fn (Role $role): string => $role->value, Role::adminArea()))
+                ? SchoolContext::resolve($request->session())
+                : null,
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
         ];
     }

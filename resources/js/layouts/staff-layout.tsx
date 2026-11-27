@@ -35,7 +35,7 @@ type SharedProps = {
     name: string;
     auth: Auth;
     navigation?: StaffNavGroup[];
-    schoolContext?: SchoolContext;
+    schoolContext?: SchoolContext | null;
 };
 
 export default function StaffLayout({

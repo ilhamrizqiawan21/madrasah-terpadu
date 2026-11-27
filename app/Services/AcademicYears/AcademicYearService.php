@@ -9,6 +9,7 @@ use App\Models\AcademicYear;
 use App\Models\Classroom;
 use App\Models\User;
 use App\Services\Audit\AuditLogger;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -60,23 +61,21 @@ final class AcademicYearService
     }
 
     /**
-     * Jadikan aktif dan matikan yang lain dalam satu transaksi. Baris aktif dikunci
-     * agar dua admin yang mengaktifkan bersamaan tidak menghasilkan dua tahun aktif.
+     * Jadikan aktif dan matikan yang lain dalam satu transaksi. Semua baris dikunci dengan
+     * urutan id yang tetap, agar dua admin yang mengaktifkan bersamaan tidak saling menunggu
+     * (deadlock) dan tidak menghasilkan dua tahun aktif.
      */
     public function activate(AcademicYear $year, User $actor): AcademicYear
     {
         return DB::transaction(function () use ($year, $actor): AcademicYear {
-            $locked = AcademicYear::query()->whereKey($year->id)->lockForUpdate()->firstOrFail();
+            $all = AcademicYear::query()->orderBy('id')->lockForUpdate()->get();
+            $locked = $all->firstWhere('id', $year->id) ?? throw (new ModelNotFoundException)->setModel(AcademicYear::class, [$year->id]);
 
             if ($locked->is_active) {
                 return $locked;
             }
 
-            $previous = AcademicYear::query()
-                ->where('is_active', true)
-                ->orderBy('id')
-                ->lockForUpdate()
-                ->get();
+            $previous = $all->filter(fn (AcademicYear $item): bool => $item->is_active)->values();
 
             AcademicYear::query()->whereKey($previous->modelKeys())->update(['is_active' => false]);
             $locked->forceFill(['is_active' => true])->save();
