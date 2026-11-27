@@ -105,6 +105,7 @@ class GuardianController extends Controller
             ])->values(),
             'relationOptions' => GuardianRelation::options(),
             'maxChildren' => GuardianRequest::MAX_CHILDREN,
+            'canSendTestNotification' => $this->actor($request)->can('sendTestNotification', Guardian::class),
             // Kop "surat akun wali" yang dicetak dari browser.
             'letter' => [
                 'foundation_name' => $identity['foundation_name'],
@@ -229,6 +230,28 @@ class GuardianController extends Controller
         Inertia::flash([
             'toast' => ['type' => 'success', 'message' => 'Kata sandi berhasil direset.'],
             'credentials' => $this->credentials($guardian, $password),
+        ]);
+
+        return back();
+    }
+
+    public function sendTestNotification(Request $request, Guardian $guardian): RedirectResponse
+    {
+        Gate::authorize('sendTestNotification', Guardian::class);
+
+        try {
+            $subscriptionCount = $this->service->sendTestNotification($guardian, $this->actor($request));
+        } catch (GuardianAccountException $exception) {
+            return $this->rejected($exception);
+        }
+
+        $message = $subscriptionCount > 0
+            ? "Notifikasi uji dikirim ke {$guardian->name} ({$subscriptionCount} perangkat push aktif)."
+            : "Notifikasi uji dikirim ke kotak masuk {$guardian->name}. Belum ada perangkat push terdaftar.";
+
+        Inertia::flash('toast', [
+            'type' => 'success',
+            'message' => $message,
         ]);
 
         return back();

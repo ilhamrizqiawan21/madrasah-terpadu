@@ -10,7 +10,9 @@ use App\Exceptions\GuardianAccountException;
 use App\Models\Guardian;
 use App\Models\GuardianStudent;
 use App\Models\User;
+use App\Notifications\AdminTestNotification;
 use App\Services\Audit\AuditLogger;
+use App\Services\Notifications\GuardianNotifier;
 use App\Services\Users\StaffUserService;
 use App\Support\InitialPassword;
 use Illuminate\Database\Eloquent\Builder;
@@ -49,7 +51,10 @@ final class GuardianService
 
     public const OUTCOME_ATTACHED_STAFF = 'attached_staff';
 
-    public function __construct(private readonly AuditLogger $auditLogger) {}
+    public function __construct(
+        private readonly AuditLogger $auditLogger,
+        private readonly GuardianNotifier $notifier,
+    ) {}
 
     /**
      * @param  GuardianData  $data
@@ -234,6 +239,42 @@ final class GuardianService
     public function isSharedStaffAccount(User $user): bool
     {
         return $user->hasAnyRole(StaffUserService::staffRoleValues());
+    }
+
+    /**
+     * Mengirim notifikasi uji ke akun wali untuk dukungan teknis (T-405).
+     *
+     * @return int Jumlah perangkat Web Push terdaftar pada akun wali.
+     */
+    public function sendTestNotification(Guardian $guardian, User $actor): int
+    {
+        return DB::transaction(function () use ($guardian, $actor): int {
+            /** @var User $user */
+            $user = User::query()
+                ->whereKey($guardian->user_id)
+                ->lockForUpdate()
+                ->firstOrFail();
+
+            if (! $user->is_active) {
+                throw new GuardianAccountException('Akun wali sedang nonaktif. Aktifkan akun terlebih dahulu sebelum mengirim notifikasi uji.');
+            }
+
+            $subscriptionCount = $user->pushSubscriptions()->count();
+            $sentAtLabel = now('Asia/Makassar')->format('H.i');
+
+            $this->auditLogger->record(
+                action: 'guardian_test_notification_sent',
+                subject: $guardian,
+                after: [
+                    'push_subscriptions_count' => $subscriptionCount,
+                ],
+                userId: $actor->id,
+            );
+
+            $this->notifier->notifyUser($user, new AdminTestNotification($sentAtLabel));
+
+            return $subscriptionCount;
+        });
     }
 
     /**

@@ -1,5 +1,6 @@
 import { Head, router, useForm } from '@inertiajs/react';
 import {
+    BellRing,
     Copy,
     KeyRound,
     Plus,
@@ -104,6 +105,7 @@ type Props = {
     unitOptions: UnitOption[];
     relationOptions: { value: Relation; label: string }[];
     maxChildren: number;
+    canSendTestNotification: boolean;
     letter: LetterIdentity;
 };
 
@@ -295,6 +297,7 @@ export default function GuardiansIndex({
     unitOptions,
     relationOptions,
     maxChildren,
+    canSendTestNotification,
     letter,
 }: Props) {
     const [search, setSearch] = useState(filters.search);
@@ -305,6 +308,9 @@ export default function GuardiansIndex({
     const [selected, setSelected] = useState<SelectedChild[]>([]);
     const [statusTarget, setStatusTarget] = useState<Guardian | null>(null);
     const [resetTarget, setResetTarget] = useState<Guardian | null>(null);
+    const [testNotifTarget, setTestNotifTarget] = useState<Guardian | null>(
+        null,
+    );
     const [acting, setActing] = useState(false);
     const [credentials, setCredentials] = useState<GuardianCredentials | null>(
         null,
@@ -480,6 +486,25 @@ export default function GuardiansIndex({
         );
     };
 
+    const confirmTestNotification = (): void => {
+        if (!testNotifTarget) {
+            return;
+        }
+
+        router.post(
+            GuardianController.sendTestNotification.url(testNotifTarget.id),
+            {},
+            {
+                preserveScroll: true,
+                onStart: () => setActing(true),
+                onFinish: () => {
+                    setActing(false);
+                    setTestNotifTarget(null);
+                },
+            },
+        );
+    };
+
     const copyPassword = async (): Promise<void> => {
         if (!credentials) {
             return;
@@ -636,6 +661,14 @@ export default function GuardiansIndex({
                     itemName={guardian.name}
                     onEdit={() => openEdit(guardian)}
                 >
+                    {canSendTestNotification &&
+                        guardian.is_active &&
+                        iconButton(
+                            `Kirim notifikasi uji ke ${guardian.name}`,
+                            'Kirim notifikasi uji',
+                            <BellRing className="size-4" strokeWidth={1.75} />,
+                            () => setTestNotifTarget(guardian),
+                        )}
                     {guardian.is_staff_account ? (
                         // Kata sandi & status akun staf dikelola di Pengguna staf; kolom tetap sejajar.
                         <span aria-hidden="true" className="w-[4.75rem]" />
@@ -996,6 +1029,17 @@ export default function GuardiansIndex({
                 variant="default"
                 loading={acting}
                 onConfirm={confirmReset}
+            />
+
+            <ConfirmDialog
+                open={testNotifTarget !== null}
+                onOpenChange={(open) => !open && setTestNotifTarget(null)}
+                title="Kirim notifikasi uji?"
+                description={`Kirim notifikasi uji ke kotak masuk dan perangkat push milik ${testNotifTarget?.name ?? ''} untuk memastikan notifikasi masuk.`}
+                confirmLabel="Kirim notifikasi uji"
+                variant="default"
+                loading={acting}
+                onConfirm={confirmTestNotification}
             />
 
             <Dialog

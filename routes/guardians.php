@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Enums\Permission;
+use App\Enums\Role;
 use App\Http\Controllers\Admin\GuardianController;
 use Illuminate\Support\Facades\Route;
 
@@ -21,4 +22,8 @@ Route::prefix('wali')
         Route::put('{guardian}', 'update')->whereNumber('guardian')->name('update');
         Route::patch('{guardian}/status', 'updateStatus')->whereNumber('guardian')->name('status.update');
         Route::post('{guardian}/reset-kata-sandi', 'resetPassword')->whereNumber('guardian')->name('password.reset');
+        Route::post('{guardian}/notifikasi-uji', 'sendTestNotification')
+            ->whereNumber('guardian')
+            ->middleware('role:'.Role::Admin->value)
+            ->name('test-notification.send');
     });

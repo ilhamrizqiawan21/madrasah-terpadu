@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Policies;
 
 use App\Enums\Permission;
+use App\Enums\Role;
 use App\Models\Guardian;
 use App\Models\User;
 
@@ -26,5 +27,10 @@ class GuardianPolicy
     public function update(User $actor, Guardian $guardian): bool
     {
         return $actor->can(Permission::GuardiansManage->value);
+    }
+
+    public function sendTestNotification(User $actor): bool
+    {
+        return $actor->hasRole(Role::Admin->value);
     }
 }
