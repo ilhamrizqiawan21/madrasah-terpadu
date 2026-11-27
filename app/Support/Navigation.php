@@ -208,9 +208,9 @@ final class Navigation
                     ['label' => 'Aturan poin', 'route' => 'admin.behavior.rules.index', 'permission' => Permission::PointRulesManage->value, 'feature' => Feature::Behavior],
                     ['label' => 'Reward & voucher', 'route' => 'admin.behavior.rewards.index', 'permission' => Permission::RewardsApprove->value, 'feature' => Feature::Rewards],
                     [
-                        'label' => 'Nilai sikap', 'soon' => 'nilai-sikap', 'permission' => Permission::AttitudeView->value,
-                        'description' => 'Predikat sikap spiritual dan sosial per semester dari rekap pembiasaan dan poin perilaku, dikunci wali kelas.',
-                        'plan' => 'Fase 12, Paket P-18 Nilai sikap',
+                        'label' => 'Penilaian karakter', 'soon' => 'nilai-sikap', 'permission' => Permission::AttitudeView->value,
+                        'description' => 'Capaian karakter per dimensi (Kurikulum Merdeka bawaan, K-13 opsional) dari pembiasaan, kehadiran, dan catatan perilaku; dikunci wali kelas dan disetujui kepala unit.',
+                        'plan' => 'Fase 12 (ADR-029), Paket P-18',
                     ],
                     [
                         'label' => 'Asrama', 'soon' => 'asrama', 'permission' => Permission::StudentsManage->value,
@@ -230,12 +230,7 @@ final class Navigation
                     ['label' => 'Materi hadits & doa', 'route' => 'admin.quran.materials.index', 'permission' => Permission::QuranManage->value, 'feature' => Feature::Quran],
                     ['label' => 'Target hafalan', 'route' => 'admin.quran.targets.index', 'permission' => Permission::QuranManage->value, 'feature' => Feature::Quran],
                     ['label' => 'Rubrik hafalan', 'route' => 'admin.quran.rubrics.index', 'permission' => Permission::QuranManage->value, 'feature' => Feature::Quran],
-                    [
-                        'label' => 'Setoran hafalan', 'route' => 'admin.quran.index', 'soon' => 'setoran-hafalan',
-                        'permission' => Permission::QuranView->value, 'feature' => Feature::Quran,
-                        'description' => "Guru mencatat setoran ziyadah dan murāja'ah per siswa dengan rubrik penilaian; progres tampil ke wali.",
-                        'plan' => 'T-1104–T-1105, Paket P-14 Hafalan & PIB',
-                    ],
+                    ['label' => 'Setoran hafalan', 'route' => 'admin.quran.index', 'permission' => Permission::QuranView->value, 'feature' => Feature::Quran],
                     [
                         'label' => 'Praktik ibadah (PIB)', 'soon' => 'praktik-ibadah', 'permission' => Permission::QuranRecord->value,
                         'description' => 'Penilaian praktik ibadah per bab dan materi untuk setiap rombel.',

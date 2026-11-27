@@ -36,7 +36,7 @@ Jalur **A** = Claude (risiko tinggi: uang, Midtrans, ledger, sesi ujian). Jalur 
 
 #### Rilis 1.1 — pelengkap
 
-P-13 Pelengkap (T-208, T-209, T-405) · P-18 Nilai sikap (setelah U-01) · P-19 Laporan non-keuangan (Fase 13 bagian presensi, BK, hafalan, pembiasaan).
+P-13 Pelengkap (T-208, T-209, T-405) · P-18 Penilaian karakter (T-1201–T-1204, ADR-029) · P-19 Laporan non-keuangan (Fase 13 bagian presensi, BK, hafalan, pembiasaan).
 
 #### Rilis peralihan — saat klien memindahkan uang ke aplikasi ini
 
@@ -237,20 +237,21 @@ Baca `PAYMENTS.md` seluruhnya sebelum mulai.
 - [x] **T-1102 Target hafalan** (P0) [UI] — KP: per unit + tingkat + tahun ajaran; rentang surah:ayat divalidasi `AyahRange`. Tes: rentang melewati jumlah ayat ditolak. **Tambahan ADR-017:** `kind` quran/hadith/prayer; target hadits/doa berupa daftar materi. ✔ (AyahRange, MemorizationTargetService, MemorizationTargetController, admin/quran/targets.tsx, MemorizationTargetTest 2 tes 7 asersi, PHPStan 0)
 - [x] **T-1103 Rubrik berversi** (P0) — Ref: REUSE_MAP §3. KP: port `RubricScorer` + aturan versi; versi terbit immutable; seeder rubrik default (Kelancaran, Tajwid, Makhraj) sebagai draf yang harus diterbitkan admin. Tes: port tes perhitungan dari penilaian-tahfidz (hasil identik). ✔ (RubricScorer, RubricService, RubricSeeder, RubricController, admin/quran/rubrics.tsx, RubricScorerTest + RubricTest 3 tes 13 asersi, PHPStan 0)
 - [x] **T-1104 Input setoran** (P0) [UI] — KP: guru memilih siswa (kelompoknya), jenis ziyadah/murajaah, rentang ayat, nilai per kriteria (keyboard-first: Tab antar-kriteria, Enter simpan & lanjut siswa berikut), nilai akhir & predikat dihitung server; notifikasi ke wali. Tes: guru bukan pengampu 403; nilai di luar rentang ditolak. **Tambahan ADR-017/018:** pilih jenis Qur'an/Hadits/Do'a (hadits/doa: pilih materi, tanpa ziyadah/murajaah); kriteria mode pengurangan memakai `MistakeCounter` (PageDown +1, PageUp −1 pada kriteria aktif, tidak aktif saat fokus di kolom teks; tombol ± di HP). Tes: validasi per jenis di Service; tombol keyboard mengubah kriteria aktif saja; batas 0..maks. ✔ (MemorizationService, MemorizationController, admin/quran/index.tsx, MemorizationRecordTest 1 tes 9 asersi, PHPStan 0)
-- [ ] **T-1105 Progres hafalan** (P0) [UI] — KP: `memorized_ayahs` diperbarui dari ziyadah lulus; progres % terhadap target; tampilan wali (progres + riwayat setoran) dan guru (per kelompok). Tes: ayat yang sama tidak dihitung dua kali. **Tambahan ADR-017:** progres per jenis; hadits/doa = materi lulus / materi target; tab Qur'an/Hadits/Do'a di portal wali.
+- [x] **T-1105 Progres hafalan** (P0) [UI] — KP: `memorized_ayahs` diperbarui dari ziyadah lulus; progres % terhadap target; tampilan wali (progres + riwayat setoran) dan guru (per kelompok). Tes: ayat yang sama tidak dihitung dua kali. **Tambahan ADR-017:** progres per jenis; hadits/doa = materi lulus / materi target; tab Qur'an/Hadits/Do'a di portal wali. ✔ (MemorizedAyah, MemorizationProgressService, Guardian\MemorizationController, guardian/quran.tsx, MemorizationProgressTest 1 tes 9 asersi, PHPStan 0)
 - [ ] **T-1106 Praktik ibadah (PIB)** (P1) [UI] — Ref: REUSE_MAP §2. KP: port kurikulum bab/subbab/materi + `PibScore` (90 − kesalahan) + input nilai per rombel; rekap. Tes: port tes `ScoreCalculator` PIB. **Tambahan ADR-018:** input kesalahan memakai `MistakeCounter`.
 - [x] **T-1107 Materi hadits & doa** (P0) [UI] — Ref: ADR-017, SCHEMA `memorization_materials`. KP: CRUD oleh admin (judul, teks Arab RTL, terjemahan, sumber/perawi, urutan, aktif); materi yang punya setoran hanya dinonaktifkan. Tes: hanya admin; teks Arab tersimpan utuh (UTF-8). ✔ (MemorizationMaterialService, MemorizationMaterialController, admin/quran/materials.tsx, MemorizationMaterialTest 2 tes 10 asersi, PHPStan 0)
 - [x] **T-1108 Komponen `MistakeCounter`** (P0) [UI] — Ref: ADR-018, DESIGN §4. KP: dipakai T-1104 & T-1106; satu kriteria aktif; PageDown/PageUp, panah kiri/kanan pindah kriteria; tombol ± ≥ 44 px; `aria-live`. Tes: komponen (tsc + uji perilaku bila ada alat), batas nilai. ✔ (components/app/mistake-counter.tsx, tsc + vp check ✔)
 
 ---
 
-## Fase 12 — Nilai sikap sosial & spiritual
+## Fase 12 — Penilaian karakter (nilai sikap) — ADR-029
 
-**Diblokir sampai U-01 diputuskan.**
+Tidak lagi diblokir (U-01 ditutup ADR-029). Sebelum dipakai klien: cocokkan nama dimensi & label skala dengan panduan kokurikuler KMA 1503, dan minta contoh format impor RDM.
 
-- [ ] **T-1201 `AttitudeScoreCalculator`** (P0) — Ref: PRD §4.11. KP: rumus dari konfigurasi (bukan hardcode); input: rekap pembiasaan terverifikasi, poin semester; output skor + predikat + deskripsi otomatis; `inputs` disimpan untuk jejak. Tes: tabel kasus batas predikat.
-- [ ] **T-1202 Hitung, koreksi, kunci** (P0) [UI] — KP: wali kelas menghitung untuk rombelnya, mengubah predikat final/deskripsi (alasan bila berbeda dari hitungan), mengunci; kepala unit menyetujui; setelah dikunci tidak bisa diubah kecuali dibuka kepala unit (audit). Tes: alur status draft → locked → approved.
-- [ ] **T-1203 Cetak & tampilan wali** (P0) [UI] — KP: PDF lampiran rapor sikap per siswa/rombel; wali melihat setelah `approved`. Tes: wali tidak melihat draf.
+- [ ] **T-1201 Profil kurikulum, dimensi, komponen** (P0) [UI] — Ref: ADR-029, SCHEMA §J. KP: Pengaturan > Penilaian karakter per unit: pilih kurikulum (Merdeka bawaan / K-13) yang mengisi dimensi & skala bawaan; ubah skala, dimensi (urut, aktif, templat deskripsi), komponen (sumber, bobot = 100, tingkatan poin); audit. Seeder bawaan per unit. Tes: bobot ≠ 100 ditolak; ganti kurikulum tidak menghapus dimensi yang sudah dipakai; non-admin 403.
+- [ ] **T-1202 `CharacterScoreCalculator` (Domain)** (P0) — KP: murni tanpa DB; input = nilai komponen + cakupan + konfigurasi; normalisasi bobot saat komponen kurang data; "data kurang" bila bobot tersisa < 50; skala → capaian; pilih komponen/item terkuat & terlemah untuk deskripsi. Tes: tabel kasus batas skala, normalisasi, data kurang, tingkatan poin.
+- [ ] **T-1203 Hitung, koreksi, ajukan, setujui** (P0) [UI] [mysql] — Ref: mockup 10 (disesuaikan ke dimensi). KP: wali kelas menghitung rombelnya (input dari `HabitRecapService`, catatan perilaku aktif semester, presensi; poin yang diperoleh, bukan saldo), mengoreksi capaian/deskripsi (alasan bila beda), mengisi observasi guru, mengajukan; hitung ulang tidak menimpa koreksi; kepala unit mengubah capaian (alasan) dan menyetujui atau membuka kunci (alasan); semua tercatat audit. Tes: alur draft → submitted → approved → reopen; guru rombel lain 403; hitung ulang mempertahankan koreksi.
+- [ ] **T-1204 Keluaran: wali, PDF, ekspor RDM** (P0) [UI] — KP: wali melihat capaian + deskripsi setelah disetujui (notifikasi lewat `GuardianNotifier`); PDF lampiran per siswa/rombel; ekspor Excel per rombel (kolom menyesuaikan contoh RDM dari klien). Tes: wali tidak melihat draf/diajukan; anak lain 404.
 
 ---
 

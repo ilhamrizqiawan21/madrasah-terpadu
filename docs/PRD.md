@@ -149,15 +149,13 @@ Data dibatasi per **unit** (MI/RA/TPQ) kecuali untuk `admin` dan `bendahara` yay
 - Wali melihat progres hafalan dan riwayat setoran, dan mendapat notifikasi tiap setoran.
 - **Penghitung kesalahan** (ADR-018) untuk kriteria rubrik mode pengurangan dan nilai PIB: di laptop **PageDown = tambah 1, PageUp = kurang 1** pada kriteria aktif (cocok dengan clicker presenter); di HP tombol − / + ≥ 44 px. Tidak bisa di bawah 0 atau melewati batas; nilai dihitung ulang di server.
 
-### 4.11 Nilai sikap sosial dan spiritual
+### 4.11 Penilaian karakter (nilai sikap) — ADR-029
 
-- Dihitung per siswa per semester, lalu **dikoreksi dan dikunci oleh wali kelas**, disetujui kepala unit.
-- Rumus usulan **[TERBUKA — wajib dikonfirmasi klien sebelum Fase 12]**:
-    - Spiritual = persentase pembiasaan aspek spiritual yang terverifikasi terhadap yang diharapkan (hari efektif × item aktif).
-    - Sosial = 100 − poin pelanggaran semester + min(poin kebaikan semester, 10), dibatasi 0–100.
-    - Predikat: A ≥ 90, B ≥ 80, C ≥ 70, D < 70.
-    - Deskripsi otomatis disusun dari item/aturan terkuat dan terlemah; wali kelas boleh mengubah.
-- Rumus dan ambang disimpan sebagai konfigurasi, bukan hardcode.
+- Dihitung per siswa per **dimensi** per semester dari data yang sudah ada (pembiasaan terverifikasi, kehadiran, catatan perilaku, hafalan, observasi guru), lalu **dikoreksi dan dikunci oleh wali kelas**, disetujui kepala unit (yang boleh mengubah capaian dengan alasan).
+- Profil kurikulum per unit: **Kurikulum Merdeka (bawaan)** atau K-13. Dimensi, skala capaian, komponen, bobot, dan tingkatan poin diatur admin di Pengaturan; bawaan dan aturan kecukupan data ada di ADR-029.
+- Dimensi dengan data kurang tidak diberi capaian otomatis; wali kelas menetapkannya dengan alasan.
+- Deskripsi otomatis dari templat per tingkatan; dapat diubah.
+- Wali murid melihat capaian dan deskripsi setelah disetujui. Keluaran: PDF lampiran dan ekspor Excel untuk RDM.
 
 ### 4.12 Portal wali
 

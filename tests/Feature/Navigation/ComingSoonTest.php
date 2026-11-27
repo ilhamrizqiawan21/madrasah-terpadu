@@ -33,10 +33,10 @@ test('menu segera membuka halaman sedang disiapkan, bukan beranda', function ():
         );
 
     $this->actingAs(soonUser(RoleEnum::Admin))
-        ->get(route('admin.quran.index'))
+        ->get(route('admin.reports.index'))
         ->assertInertia(fn (Assert $page) => $page
             ->component('admin/coming-soon')
-            ->where('module.label', 'Setoran hafalan')
+            ->where('module.label', 'Laporan presensi')
         );
 });
 

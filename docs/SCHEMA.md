@@ -41,7 +41,7 @@ erDiagram
   reward_offers ||--o{ reward_redemptions : redeemed
   habit_items ||--o{ habit_logs : logged
   students ||--o{ memorization_records : setoran
-  students ||--o{ attitude_assessments : semester
+  students ||--o{ character_assessments : semester
 ```
 
 ---
@@ -305,21 +305,35 @@ Unik (`student_id`,`habit_item_id`,`log_date`). Indeks (`log_date`,`verification
 `student_id` (`→ students`, restrict), `teacher_id → users` (restrict), `rubric_version_id` (`→ rubric_versions`, restrict), `kind string(20)` (`quran|hadith|prayer`), `type string(20) null` (`ziyadah|murajaah`, wajib hanya untuk `quran`), `memorization_material_id null` (`→ memorization_materials`, wajib untuk hadits/doa), `surah_from null`, `ayah_from null`, `surah_to null`, `ayah_to null` (wajib untuk `quran`), `scores json` (per kriteria),
 `final_score decimal(5,2)`, `predicate string(2)`, `passed bool`, `note null`, `recorded_on date`, timestamps. Indeks (`student_id`,`recorded_on`). Ditulis lewat `MemorizationService`.
 
-### `memorized_ayahs` (T-1105) — turunan untuk progres
+### `memorized_ayahs` (T-1105 ✅) — turunan untuk progres
 
-`student_id`, `surah`, `ayah`, `first_passed_record_id`. Unik (`student_id`,`surah`,`ayah`).
+`student_id` (`→ students`, restrict), `surah tinyint unsigned`, `ayah smallint unsigned`, `first_passed_record_id` (`→ memorization_records`, restrict). Unik (`student_id`,`surah`,`ayah`). Ditulis lewat `MemorizationService`.
 
 ### `pib_chapters`, `pib_subchapters`, `pib_materials`, `pib_scores` (T-1106, port pib-laravel)
 
 `pib_scores`: `student_id`, `pib_material_id`, `academic_year_id`, `mistakes tinyint` (0–90), `score tinyint` (= 90 − mistakes, dihitung di Domain), `assessed_by`, timestamps. Unik (`student_id`,`pib_material_id`,`academic_year_id`).
 
-## J. Nilai sikap (Fase 12)
+## J. Penilaian karakter (Fase 12, ADR-029)
 
-### `attitude_assessments` (T-1201)
+### `character_profiles` (T-1201)
 
-`student_id`, `academic_year_id`, `aspect string` (`spiritual|social`), `computed_score decimal(5,2)`, `computed_predicate string(1)`, `final_predicate string(1) null`,
-`description text null`, `inputs json` (angka sumber perhitungan, untuk jejak), `status string` (`draft|locked|approved`), `locked_by null`, `locked_at null`, `approved_by null`, `approved_at null`, timestamps.
-Unik (`student_id`,`academic_year_id`,`aspect`).
+`unit_id → units` (unik), `curriculum string(20)` (`merdeka|k13`), `scale json` (daftar `{code, label, min}` urut menurun), `coverage_min_pct unsignedTinyInteger default 60`, `updated_by → users null`, timestamps. Ditulis lewat `CharacterSettingsService` + audit.
+
+### `character_dimensions` (T-1201)
+
+`unit_id → units`, `code string(30)`, `name string(100)`, `position unsignedSmallInteger`, `is_active bool`, `description_templates json` (kalimat per kode skala), timestamps. Unik (`unit_id`,`code`). Dimensi yang sudah dipakai hasil penilaian tidak dihapus, hanya dinonaktifkan.
+
+### `character_components` (T-1201)
+
+`character_dimension_id → character_dimensions` (cascade), `source string(30)` (`habits_aspect|habits_items|attendance_on_time|violation_points|merit_points|memorization|teacher_observation`), `weight unsignedTinyInteger` (jumlah per dimensi = 100, divalidasi service), `params json` (aspek, id item, tingkatan poin), timestamps.
+
+### `character_reviews` (T-1202)
+
+`classroom_id → classrooms`, `academic_year_id → academic_years`, `status string` (`draft|submitted|approved`), `computed_at null`, `submitted_by/at null`, `approved_by/at null`, `reopened_by/at null`, `reopen_reason text null`, timestamps. Unik (`classroom_id`,`academic_year_id`).
+
+### `character_assessments` (T-1202)
+
+`character_review_id → character_reviews` (cascade), `student_id → students`, `character_dimension_id → character_dimensions` (restrict), `computed_score decimal(5,2) null` (null = data kurang), `computed_level string(10) null`, `final_level string(10) null`, `override_reason text null`, `overridden_by → users null`, `description text null`, `inputs json` (angka sumber, cakupan, salinan konfigurasi), timestamps. Unik (`character_review_id`,`student_id`,`character_dimension_id`).
 
 ## K. Ujian CBT (Fase 15, ADR-020)
 
