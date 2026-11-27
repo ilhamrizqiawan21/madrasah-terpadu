@@ -227,7 +227,7 @@ Baca `PAYMENTS.md` seluruhnya sebelum mulai.
 - [x] **T-1002 Centang oleh wali** (P0) [UI] — KP: daftar item hari ini per anak, centang/batal centang sampai diverifikasi, maks 3 hari ke belakang, simpan cepat (optimistic UI + rollback bila gagal). Tes: tidak bisa mengubah log yang sudah diverifikasi; tanggal > 3 hari ditolak. ✔ (HabitLogService, Guardian\HabitController, guardian/habits.tsx, GuardianHabitTest 1 tes 20 asersi, PHPStan 0)
 - [x] **T-1003 Verifikasi oleh wali kelas** (P0) [UI] — KP: tabel rombel × item untuk satu tanggal; verifikasi massal per siswa/per item; tolak dengan catatan; notifikasi ringkas ke wali bila ada penolakan. Tes: guru rombel lain 403. ✔ (HabitVerificationService, HabitVerificationController, admin/habits/verify.tsx, HabitVerificationTest 2 tes 10 asersi, PHPStan 0)
 - [x] **T-1004 Rekap pembiasaan** (P1) [UI] — KP: persentase per siswa per aspek per bulan/semester (hanya terverifikasi); dipakai Fase 12. ✔ (HabitRecapService, HabitRecapController, admin/habits/recap.tsx, HabitRecapTest 1 tes 16 asersi, PHPStan 0)
-- [ ] **T-1005 Streak → poin** (P2) — **[TERBUKA U-04]**. Jangan dikerjakan sebelum diputuskan.
+- [x] **T-1005 Streak → poin** (P2) — Diputuskan pemilik (2026-11-27, U-04): poin streak mutabaah dapat dikustomisasi admin (aktif/nonaktif, hari berturut-turut, bobot poin kebaikan). ✔ (HabitStreakService, SettingKey::HabitStreak*, HabitItemController::updateStreakConfig, HabitStreakTest 1 tes 8 asersi, PHPStan 0)
 
 ---
 

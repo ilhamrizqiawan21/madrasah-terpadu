@@ -26,6 +26,10 @@ Route::prefix('pembiasaan')
                 Route::delete('{habitItem}', 'destroy')->whereNumber('habitItem')->name('destroy');
             });
 
+        Route::put('streak', [HabitItemController::class, 'updateStreakConfig'])
+            ->middleware('permission:'.Permission::HabitsManage->value)
+            ->name('streak.update');
+
         Route::prefix('verifikasi')
             ->name('verify.')
             ->middleware('permission:'.Permission::HabitsVerify->value)

@@ -20,6 +20,7 @@ class HabitVerificationService
     public function __construct(
         private readonly AuditLogger $audit,
         private readonly GuardianNotifier $notifier,
+        private readonly HabitStreakService $streaks,
     ) {}
 
     /**
@@ -44,12 +45,14 @@ class HabitVerificationService
 
         return DB::transaction(function () use ($actor, $classroom, $logDate, $uniqueIds, $enrolledStudentIds): int {
             $logs = HabitLog::query()
+                ->with('student')
                 ->whereIn('id', $uniqueIds)
                 ->whereIn('student_id', $enrolledStudentIds)
                 ->whereDate('log_date', $logDate)
                 ->lockForUpdate()
                 ->get();
 
+            $classroom->loadMissing('academicYear');
             $count = 0;
             foreach ($logs as $log) {
                 $log->update([
@@ -58,6 +61,7 @@ class HabitVerificationService
                     'verified_at' => now(),
                     'note' => null,
                 ]);
+                $this->streaks->evaluateAfterVerification($log, $classroom->academicYear);
                 $count++;
             }
 

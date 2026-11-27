@@ -10,6 +10,7 @@ use App\Models\HabitItem;
 use App\Models\Unit;
 use App\Models\User;
 use App\Services\Habits\HabitItemService;
+use App\Services\Habits\HabitStreakService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -21,6 +22,7 @@ class HabitItemController extends Controller
 {
     public function __construct(
         private readonly HabitItemService $service,
+        private readonly HabitStreakService $streaks,
     ) {}
 
     public function index(Request $request): Response
@@ -65,7 +67,30 @@ class HabitItemController extends Controller
                 'aspect' => $aspect,
             ],
             'canManage' => $user instanceof User && $user->can('create', HabitItem::class),
+            'streakConfig' => $this->streaks->config(),
         ]);
+    }
+
+    public function updateStreakConfig(Request $request): RedirectResponse
+    {
+        Gate::authorize('create', HabitItem::class);
+
+        $validated = $request->validate([
+            'enabled' => ['required', 'boolean'],
+            'days' => ['required', 'integer', 'min:1', 'max:90'],
+            'points' => ['required', 'integer', 'min:1', 'max:500'],
+        ]);
+
+        /** @var User $actor */
+        $actor = $request->user();
+        $this->streaks->updateConfig(
+            actor: $actor,
+            enabled: (bool) $validated['enabled'],
+            days: (int) $validated['days'],
+            points: (int) $validated['points'],
+        );
+
+        return back()->with('success', 'Pengaturan poin streak mutabaah berhasil diperbarui.');
     }
 
     public function store(Request $request): RedirectResponse

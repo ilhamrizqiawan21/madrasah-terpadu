@@ -11,6 +11,7 @@ import { RowActions } from '@/components/app/row-actions';
 import { StatusBadge } from '@/components/app/status-badge';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
@@ -48,6 +49,7 @@ type Props = {
     aspects: AspectOption[];
     filters: { unit_id: string; aspect: string };
     canManage: boolean;
+    streakConfig: { enabled: boolean; days: number; points: number };
 };
 
 type ItemForm = {
@@ -64,6 +66,7 @@ export default function HabitItemsIndex({
     aspects,
     filters,
     canManage,
+    streakConfig,
 }: Props) {
     const [formOpen, setFormOpen] = useState(false);
     const [editing, setEditing] = useState<HabitItemRow | null>(null);
@@ -73,6 +76,31 @@ export default function HabitItemsIndex({
         name: '',
         aspect: 'spiritual',
     });
+
+    const streakForm = useForm({
+        enabled: streakConfig.enabled,
+        days: String(streakConfig.days),
+        points: String(streakConfig.points),
+    });
+
+    function saveStreakConfig(e: FormEvent<HTMLFormElement>) {
+        e.preventDefault();
+        router.put(
+            HabitItemController.updateStreakConfig.url(),
+            {
+                enabled: streakForm.data.enabled,
+                days: Number(streakForm.data.days),
+                points: Number(streakForm.data.points),
+            },
+            {
+                preserveScroll: true,
+                onError: (errors) =>
+                    streakForm.setError(
+                        errors as Record<'enabled' | 'days' | 'points', string>,
+                    ),
+            },
+        );
+    }
 
     function visitFilters(next: Partial<{ unit_id: string; aspect: string }>) {
         const merged = { ...filters, ...next };
@@ -317,6 +345,89 @@ export default function HabitItemsIndex({
                         ) : null
                     }
                 />
+
+                {canManage ? (
+                    <form
+                        onSubmit={saveStreakConfig}
+                        className="rounded-lg border border-border bg-card p-4 shadow-xs"
+                    >
+                        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+                            <div className="space-y-2">
+                                <label className="flex cursor-pointer items-center gap-2.5 text-sm font-medium text-foreground">
+                                    <Checkbox
+                                        checked={streakForm.data.enabled}
+                                        onCheckedChange={(v) =>
+                                            streakForm.setData(
+                                                'enabled',
+                                                v === true,
+                                            )
+                                        }
+                                    />
+                                    <span>
+                                        Berikan poin kebaikan otomatis untuk
+                                        streak mutabaah
+                                    </span>
+                                </label>
+                                <p className="text-xs text-muted-foreground">
+                                    Atur sendiri jumlah hari berturut-turut
+                                    terverifikasi dan bobot poinnya.
+                                </p>
+                            </div>
+
+                            <div className="flex flex-wrap items-end gap-3">
+                                <div className="w-28 space-y-1">
+                                    <Label
+                                        htmlFor="streak-days"
+                                        className="text-xs"
+                                    >
+                                        Hari berturut
+                                    </Label>
+                                    <Input
+                                        id="streak-days"
+                                        type="number"
+                                        min={1}
+                                        max={90}
+                                        value={streakForm.data.days}
+                                        onChange={(e) =>
+                                            streakForm.setData(
+                                                'days',
+                                                e.target.value,
+                                            )
+                                        }
+                                    />
+                                </div>
+                                <div className="w-28 space-y-1">
+                                    <Label
+                                        htmlFor="streak-points"
+                                        className="text-xs"
+                                    >
+                                        Poin kebaikan
+                                    </Label>
+                                    <Input
+                                        id="streak-points"
+                                        type="number"
+                                        min={1}
+                                        max={500}
+                                        value={streakForm.data.points}
+                                        onChange={(e) =>
+                                            streakForm.setData(
+                                                'points',
+                                                e.target.value,
+                                            )
+                                        }
+                                    />
+                                </div>
+                                <Button
+                                    type="submit"
+                                    variant="outline"
+                                    disabled={streakForm.processing}
+                                >
+                                    Simpan aturan
+                                </Button>
+                            </div>
+                        </div>
+                    </form>
+                ) : null}
 
                 <div className="flex flex-wrap items-center gap-3">
                     <Select

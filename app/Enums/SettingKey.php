@@ -18,6 +18,9 @@ enum SettingKey: string
     case LogoPath = 'identity.logo_path';
     case FaviconPath = 'identity.favicon_path';
     case PrimaryColor = 'appearance.primary_color';
+    case HabitStreakEnabled = 'habits.streak_enabled';
+    case HabitStreakDays = 'habits.streak_days';
+    case HabitStreakPoints = 'habits.streak_points';
 
     public function label(): string
     {
@@ -30,6 +33,9 @@ enum SettingKey: string
             self::LogoPath => 'Logo',
             self::FaviconPath => 'Favicon',
             self::PrimaryColor => 'Warna utama',
+            self::HabitStreakEnabled => 'Aktifkan poin streak mutabaah',
+            self::HabitStreakDays => 'Jumlah hari streak mutabaah',
+            self::HabitStreakPoints => 'Poin streak mutabaah',
         };
     }
 }
