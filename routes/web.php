@@ -58,11 +58,7 @@ Route::middleware(['auth:web'])->group(function (): void {
             require __DIR__.'/behavior.php';
             require __DIR__.'/habits.php';
             require __DIR__.'/quran.php';
-
-            Route::get('laporan', ComingSoonController::class)
-                ->defaults('module', 'laporan-presensi')
-                ->middleware('permission:'.Permission::ReportsView->value)
-                ->name('reports.index');
+            require __DIR__.'/reports.php';
 
             require __DIR__.'/users.php';
             require __DIR__.'/admin-settings.php';

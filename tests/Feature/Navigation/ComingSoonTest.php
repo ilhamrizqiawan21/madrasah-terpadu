@@ -33,10 +33,10 @@ test('menu segera membuka halaman sedang disiapkan, bukan beranda', function ():
         );
 
     $this->actingAs(soonUser(RoleEnum::Admin))
-        ->get(route('admin.reports.index'))
+        ->get(route('admin.soon', ['module' => 'inventaris']))
         ->assertInertia(fn (Assert $page) => $page
             ->component('admin/coming-soon')
-            ->where('module.label', 'Laporan presensi')
+            ->where('module.label', 'Inventaris aset')
         );
 });
 

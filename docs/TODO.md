@@ -259,7 +259,7 @@ Tidak lagi diblokir (U-01 ditutup ADR-029). Sebelum dipakai klien: cocokkan nama
 
 Semua laporan: filter unit/rombel/periode, paginasi layar, ekspor PDF & Excel icon-only, hanya peran berizin. Tes per laporan: otorisasi + angka cocok dengan data uji.
 
-- [ ] **T-1301 Laporan presensi** (P0) — harian, bulanan per rombel, per siswa.
+- [x] **T-1301 Laporan presensi** (P0) — harian, bulanan per rombel, per siswa. ✅ 2026-11-27 — Bukti: `AttendanceReportService`, `ReportExportService`, `AttendanceReportController`, `admin/reports/attendance.tsx`; `tests/Feature/Reports/AttendanceReportTest.php` (otorisasi + angka harian/bulanan/siswa + ekspor PDF & XLSX ✔), `phpstan` 0 error, `tsc` & `npm run build` ✔.
 - [ ] **T-1302 Laporan keuangan** (P0) — piutang per jenis/rombel, penerimaan per metode/periode, buku kas penerimaan, kartu tagihan siswa.
 - [ ] **T-1303 Laporan BK** (P0) — catatan per periode, siswa dengan poin tertinggi, tindak lanjut terbuka, reward & voucher.
 - [ ] **T-1304 Laporan kantin** (P1) — lihat T-807 bila belum.

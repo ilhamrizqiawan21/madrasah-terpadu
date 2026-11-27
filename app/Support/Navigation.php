@@ -344,9 +344,7 @@ final class Navigation
                 'icon' => 'chart-column',
                 'items' => [
                     [
-                        'label' => 'Laporan presensi', 'route' => 'admin.reports.index', 'soon' => 'laporan-presensi', 'permission' => Permission::ReportsView->value,
-                        'description' => 'Rekap presensi harian dan bulanan per rombel dan per siswa, siap cetak dan ekspor.',
-                        'plan' => 'T-1301, Paket P-19 Laporan non-keuangan',
+                        'label' => 'Laporan presensi', 'route' => 'admin.reports.index', 'permission' => Permission::ReportsView->value, 'feature' => Feature::Attendance,
                     ],
                     [
                         'label' => 'Laporan BK', 'soon' => 'laporan-bk', 'permission' => Permission::ReportsView->value,
