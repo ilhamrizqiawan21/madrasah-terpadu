@@ -36,8 +36,10 @@ class LeaveRequestController extends Controller
         }
 
         $activeYearId = AcademicYear::query()->where('is_active', true)->value('id');
+        $search = trim((string) $request->query('search', ''));
 
         $leaves = LeaveRequest::query()
+            ->when($search !== '', fn (Builder $q) => $q->whereHas('student', fn (Builder $s) => $s->where(fn (Builder $w) => $w->whereLike('name', "%{$search}%")->orWhereLike('nis', "%{$search}%"))))
             ->with([
                 'student.unit',
                 'student.enrollments' => fn (HasMany $q) => $activeYearId !== null
@@ -88,7 +90,7 @@ class LeaveRequestController extends Controller
                     'to' => $leaves->lastItem(),
                 ],
             ],
-            'filters' => ['status' => $status],
+            'filters' => ['status' => $status, 'search' => $search],
             'canManage' => $actor->can(Permission::AttendanceManage->value),
         ]);
     }

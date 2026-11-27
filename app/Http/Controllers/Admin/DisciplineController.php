@@ -30,6 +30,7 @@ class DisciplineController extends Controller
         Gate::authorize('viewAny', DisciplineFollowup::class);
 
         $status = $request->string('status')->toString() ?: 'open';
+        $search = trim($request->string('search')->toString());
         $activeYear = AcademicYear::query()->where('is_active', true)->first();
 
         $followups = DisciplineFollowup::query()
@@ -40,6 +41,7 @@ class DisciplineController extends Controller
             ])
             ->when($activeYear !== null, fn ($q) => $q->where('academic_year_id', $activeYear->id))
             ->when($status !== 'all', fn ($q) => $q->where('status', $status))
+            ->when($search !== '', fn ($q) => $q->whereHas('student', fn ($s) => $s->where(fn ($w) => $w->whereLike('name', "%{$search}%")->orWhereLike('nis', "%{$search}%"))))
             ->orderByRaw("case when status = 'open' then 0 else 1 end")
             ->orderByDesc('triggered_at')
             ->paginate(20)
@@ -95,6 +97,7 @@ class DisciplineController extends Controller
             'units' => Unit::query()->orderBy('name')->get(['id', 'code', 'name']),
             'filters' => [
                 'status' => $status,
+                'search' => $search,
             ],
             'canManageThresholds' => $user instanceof User && $user->can('create', DisciplineThreshold::class),
             'canCompleteFollowups' => $user instanceof User && $user->can('complete', new DisciplineFollowup),

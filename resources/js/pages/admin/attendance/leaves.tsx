@@ -1,3 +1,4 @@
+import { StudentSearch } from '@/components/app/student-search';
 import { Head, router, useForm } from '@inertiajs/react';
 import { Check, Paperclip, X } from 'lucide-react';
 import type { FormEvent } from 'react';
@@ -48,7 +49,7 @@ type LeaveRow = {
 
 type Props = {
     leaves: PaginatedResource<LeaveRow>;
-    filters: { status: string };
+    filters: { status: string; search?: string };
     canManage: boolean;
 };
 
@@ -250,26 +251,29 @@ export default function AdminLeavesIndex({
                     title="Pengajuan izin & sakit"
                     description="Verifikasi pengajuan izin/sakit dari wali murid."
                     actions={
-                        <Select
-                            value={filters.status}
-                            onValueChange={changeFilter}
-                        >
-                            <SelectTrigger className="w-44">
-                                <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="pending">
-                                    Menunggu
-                                </SelectItem>
-                                <SelectItem value="approved">
-                                    Disetujui
-                                </SelectItem>
-                                <SelectItem value="rejected">
-                                    Ditolak
-                                </SelectItem>
-                                <SelectItem value="all">Semua</SelectItem>
-                            </SelectContent>
-                        </Select>
+                        <div className="flex flex-wrap items-center gap-2">
+                            <StudentSearch value={filters.search ?? ''} />
+                            <Select
+                                value={filters.status}
+                                onValueChange={changeFilter}
+                            >
+                                <SelectTrigger className="w-44">
+                                    <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="pending">
+                                        Menunggu
+                                    </SelectItem>
+                                    <SelectItem value="approved">
+                                        Disetujui
+                                    </SelectItem>
+                                    <SelectItem value="rejected">
+                                        Ditolak
+                                    </SelectItem>
+                                    <SelectItem value="all">Semua</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
                     }
                 />
 

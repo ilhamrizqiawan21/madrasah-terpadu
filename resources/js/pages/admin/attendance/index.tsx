@@ -1,3 +1,4 @@
+import { cn } from '@/lib/utils';
 import { DateInput } from '@/components/app/date-input';
 import { Head, router, useForm } from '@inertiajs/react';
 import { Pencil } from 'lucide-react';
@@ -270,13 +271,18 @@ export default function AdminAttendanceIndex({
     ];
 
     const summaryCards = [
-        { label: 'Hadir', value: daily.counts.present },
-        { label: 'Terlambat', value: daily.counts.late },
-        { label: 'Izin', value: daily.counts.excused },
-        { label: 'Sakit', value: daily.counts.sick },
-        { label: 'Alpa', value: daily.counts.absent },
-        { label: 'Belum tap', value: daily.counts.not_yet },
+        { label: 'Hadir', value: daily.counts.present, swatch: 'bg-success' },
+        { label: 'Terlambat', value: daily.counts.late, swatch: 'bg-warning' },
+        { label: 'Izin', value: daily.counts.excused, swatch: 'bg-primary' },
+        { label: 'Sakit', value: daily.counts.sick, swatch: 'bg-primary/45' },
+        { label: 'Alpa', value: daily.counts.absent, swatch: 'bg-destructive' },
+        {
+            label: 'Belum tap',
+            value: daily.counts.not_yet,
+            swatch: 'bg-muted-foreground/25',
+        },
     ];
+    const summaryTotal = summaryCards.reduce((sum, c) => sum + c.value, 0);
 
     return (
         <StaffLayout
@@ -376,20 +382,65 @@ export default function AdminAttendanceIndex({
                 </div>
 
                 {mode === 'daily' && (
-                    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-                        {summaryCards.map((item) => (
-                            <Card key={item.label} className="shadow-xs">
-                                <CardContent className="p-4">
-                                    <p className="text-xs text-muted-foreground">
-                                        {item.label}
-                                    </p>
-                                    <p className="mt-1 text-2xl font-bold tabular-nums">
-                                        {item.value}
-                                    </p>
-                                </CardContent>
-                            </Card>
-                        ))}
-                    </div>
+                    <Card className="shadow-xs">
+                        <CardContent className="space-y-3 p-4">
+                            <div className="flex items-baseline justify-between gap-3">
+                                <p className="text-sm">
+                                    <span className="text-2xl font-semibold tabular-nums">
+                                        {summaryTotal - daily.counts.not_yet}
+                                    </span>
+                                    <span className="text-muted-foreground">
+                                        {' '}
+                                        / {summaryTotal} siswa tercatat
+                                    </span>
+                                </p>
+                            </div>
+                            <div
+                                className="flex h-2.5 overflow-hidden rounded-full bg-muted"
+                                role="img"
+                                aria-label={summaryCards
+                                    .map((c) => `${c.label} ${c.value}`)
+                                    .join(', ')}
+                            >
+                                {summaryCards.map((item) =>
+                                    item.value > 0 ? (
+                                        <div
+                                            key={item.label}
+                                            className={cn(
+                                                'h-full border-r-2 border-card last:border-r-0',
+                                                item.swatch,
+                                            )}
+                                            style={{
+                                                width: `${(item.value / Math.max(summaryTotal, 1)) * 100}%`,
+                                            }}
+                                        />
+                                    ) : null,
+                                )}
+                            </div>
+                            <dl className="flex flex-wrap gap-x-5 gap-y-1.5 text-sm">
+                                {summaryCards.map((item) => (
+                                    <div
+                                        key={item.label}
+                                        className="flex items-center gap-1.5"
+                                    >
+                                        <span
+                                            className={cn(
+                                                'size-2.5 rounded-sm',
+                                                item.swatch,
+                                            )}
+                                            aria-hidden
+                                        />
+                                        <dt className="text-muted-foreground">
+                                            {item.label}
+                                        </dt>
+                                        <dd className="font-medium tabular-nums">
+                                            {item.value}
+                                        </dd>
+                                    </div>
+                                ))}
+                            </dl>
+                        </CardContent>
+                    </Card>
                 )}
 
                 {mode === 'daily' ? (

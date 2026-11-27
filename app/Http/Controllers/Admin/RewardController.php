@@ -31,6 +31,7 @@ class RewardController extends Controller
         Gate::authorize('viewAny', RewardRedemption::class);
 
         $status = $request->string('status')->toString() ?: 'pending';
+        $search = trim($request->string('search')->toString());
         $activeYear = AcademicYear::query()->where('is_active', true)->first();
 
         $redemptions = RewardRedemption::query()
@@ -43,6 +44,7 @@ class RewardController extends Controller
             ])
             ->when($activeYear !== null, fn ($q) => $q->where('academic_year_id', $activeYear->id))
             ->when($status !== 'all', fn ($q) => $q->where('status', $status))
+            ->when($search !== '', fn ($q) => $q->whereHas('student', fn ($s) => $s->where(fn ($w) => $w->whereLike('name', "%{$search}%")->orWhereLike('nis', "%{$search}%"))))
             ->orderByRaw("case when status = 'pending' then 0 else 1 end")
             ->orderByDesc('created_at')
             ->paginate(20)
@@ -111,7 +113,7 @@ class RewardController extends Controller
             'offers' => $offers,
             'students' => $students,
             'units' => Unit::query()->orderBy('name')->get(['id', 'code', 'name']),
-            'filters' => ['status' => $status],
+            'filters' => ['status' => $status, 'search' => $search],
             'canApprove' => $user instanceof User && $user->can('decide', new RewardRedemption),
             'canRequest' => $user instanceof User && $user->can('request', RewardRedemption::class),
         ]);

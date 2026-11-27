@@ -1,3 +1,4 @@
+import { StudentSearch } from '@/components/app/student-search';
 import { Head, router, useForm } from '@inertiajs/react';
 import { Check, Plus, Power, PowerOff, X } from 'lucide-react';
 import type { FormEvent, ReactNode } from 'react';
@@ -67,7 +68,7 @@ type Props = {
     offers: OfferRow[];
     students: StudentOption[];
     units: UnitOption[];
-    filters: { status: string };
+    filters: { status: string; search?: string };
     canApprove: boolean;
     canRequest: boolean;
 };
@@ -519,6 +520,7 @@ export default function RewardsIndex({
                         description="Pengajuan penukaran poin kebaikan siswa menjadi voucher kantin."
                         actions={
                             <div className="flex flex-wrap items-center gap-2">
+                                <StudentSearch value={filters.search ?? ''} />
                                 <Select
                                     value={filters.status}
                                     onValueChange={(v) => visitStatus(v)}

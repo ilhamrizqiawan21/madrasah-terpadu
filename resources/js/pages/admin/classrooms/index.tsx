@@ -53,6 +53,7 @@ type Filters = {
 
 type Props = {
     classrooms: PaginatedResource<Classroom>;
+    studentCounts: Record<number, number>;
     filters: Filters;
     unitOptions: UnitOption[];
     academicYearOptions: YearOption[];
@@ -77,6 +78,7 @@ const NO_TEACHER = 'tanpa';
 
 export default function ClassroomsIndex({
     classrooms,
+    studentCounts,
     filters,
     unitOptions,
     academicYearOptions,
@@ -349,6 +351,16 @@ export default function ClassroomsIndex({
                     <span className="text-muted-foreground">
                         Belum ada wali kelas
                     </span>
+                ),
+        },
+        {
+            key: 'students',
+            label: 'Siswa',
+            align: 'right',
+            className: 'tabular-nums',
+            render: (classroom) =>
+                studentCounts[classroom.id] ?? (
+                    <span className="text-muted-foreground">0</span>
                 ),
         },
         {

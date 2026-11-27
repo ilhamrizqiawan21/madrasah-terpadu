@@ -1,3 +1,4 @@
+import { StudentSearch } from '@/components/app/student-search';
 import { Head, router, useForm } from '@inertiajs/react';
 import { CheckCircle2, Plus, Power, PowerOff } from 'lucide-react';
 import type { FormEvent, ReactNode } from 'react';
@@ -60,7 +61,7 @@ type Props = {
     followups: PaginatedResource<FollowupRow>;
     thresholds: ThresholdRow[];
     units: UnitOption[];
-    filters: { status: string };
+    filters: { status: string; search?: string };
     canManageThresholds: boolean;
     canCompleteFollowups: boolean;
 };
@@ -384,28 +385,31 @@ export default function DisciplineIndex({
                         title="Tindak lanjut kedisiplinan"
                         description="Daftar siswa yang melewati ambang poin pelanggaran pada tahun ajaran berjalan."
                         actions={
-                            <Select
-                                value={filters.status}
-                                onValueChange={(v) => visitStatus(v)}
-                            >
-                                <SelectTrigger
-                                    className="w-[160px]"
-                                    aria-label="Filter status tindak lanjut"
+                            <div className="flex flex-wrap items-center gap-2">
+                                <StudentSearch value={filters.search ?? ''} />
+                                <Select
+                                    value={filters.status}
+                                    onValueChange={(v) => visitStatus(v)}
                                 >
-                                    <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="open">
-                                        Terbuka
-                                    </SelectItem>
-                                    <SelectItem value="done">
-                                        Selesai
-                                    </SelectItem>
-                                    <SelectItem value="all">
-                                        Semua status
-                                    </SelectItem>
-                                </SelectContent>
-                            </Select>
+                                    <SelectTrigger
+                                        className="w-[160px]"
+                                        aria-label="Filter status tindak lanjut"
+                                    >
+                                        <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="open">
+                                            Terbuka
+                                        </SelectItem>
+                                        <SelectItem value="done">
+                                            Selesai
+                                        </SelectItem>
+                                        <SelectItem value="all">
+                                            Semua status
+                                        </SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
                         }
                     />
 

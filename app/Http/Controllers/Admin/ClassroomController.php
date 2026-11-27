@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Admin;
 
+use App\Enums\StudentStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\ClassroomRequest;
 use App\Http\Requests\Admin\CopyClassroomsRequest;
@@ -11,6 +12,7 @@ use App\Http\Requests\Admin\UpdateClassroomStatusRequest;
 use App\Http\Resources\ClassroomResource;
 use App\Models\AcademicYear;
 use App\Models\Classroom;
+use App\Models\Enrollment;
 use App\Models\Unit;
 use App\Models\User;
 use App\Services\Classrooms\ClassroomService;
@@ -53,8 +55,18 @@ class ClassroomController extends Controller
             ->paginate(25)
             ->withQueryString();
 
+        // Jumlah siswa aktif per rombel di halaman ini; satu kueri agregat.
+        $studentCounts = Enrollment::query()
+            ->whereIn('classroom_id', $classrooms->getCollection()->modelKeys())
+            ->whereHas('student', fn (Builder $q) => $q->where('status', StudentStatus::Active->value))
+            ->selectRaw('classroom_id, count(*) as aggregate')
+            ->groupBy('classroom_id')
+            ->pluck('aggregate', 'classroom_id')
+            ->map(fn (mixed $count): int => (int) $count);
+
         return Inertia::render('admin/classrooms/index', [
             'classrooms' => ClassroomResource::collection($classrooms),
+            'studentCounts' => $studentCounts,
             'filters' => [
                 'unit_id' => $unitId,
                 'academic_year_id' => $yearId,
