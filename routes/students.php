@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\StudentCardController;
 use App\Http\Controllers\Admin\StudentController;
 use App\Http\Controllers\Admin\StudentImportController;
 use App\Http\Controllers\Admin\StudentMutationController;
+use App\Http\Controllers\Admin\StudentProfileController;
 use App\Http\Controllers\Admin\StudentPromotionController;
 use Illuminate\Support\Facades\Route;
 
@@ -21,6 +22,7 @@ Route::prefix('siswa')
         Route::middleware('permission:'.Permission::StudentsView->value)->group(function (): void {
             Route::get('/', 'index')->name('index');
             Route::get('{student}/foto', 'photo')->whereNumber('student')->name('photo');
+            Route::get('{student}', StudentProfileController::class)->whereNumber('student')->name('show');
         });
 
         Route::middleware('permission:'.Permission::StudentsManage->value)->group(function (): void {

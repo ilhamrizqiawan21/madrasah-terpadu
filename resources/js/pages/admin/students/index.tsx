@@ -13,6 +13,7 @@ import type { ChangeEvent, FormEvent, ReactNode } from 'react';
 import { useEffect, useRef, useState } from 'react';
 import ClassroomController from '@/actions/App/Http/Controllers/Admin/ClassroomController';
 import StudentController from '@/actions/App/Http/Controllers/Admin/StudentController';
+import StudentProfileController from '@/actions/App/Http/Controllers/Admin/StudentProfileController';
 import StudentImportController from '@/actions/App/Http/Controllers/Admin/StudentImportController';
 import { ConfirmDialog } from '@/components/app/confirm-dialog';
 import type { DataTableColumn } from '@/components/app/data-table';
@@ -438,17 +439,42 @@ export default function StudentsIndex({
             key: 'name',
             label: 'Siswa',
             render: (student) => (
-                <div className="min-w-40">
-                    <div className="font-medium text-foreground">
-                        {student.name}
-                    </div>
-                    <div className="text-xs text-muted-foreground tabular-nums">
-                        {student.gender.value}
-                        {student.birth_date
-                            ? ` · ${formatDate(student.birth_date)}`
-                            : ''}
-                    </div>
-                </div>
+                <Link
+                    href={StudentProfileController(student.id)}
+                    className="group flex min-w-44 items-center gap-3 rounded-md focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+                >
+                    {student.photo_url ? (
+                        <img
+                            src={student.photo_url}
+                            alt=""
+                            loading="lazy"
+                            className="size-8 shrink-0 rounded-full object-cover"
+                        />
+                    ) : (
+                        <span
+                            className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary"
+                            aria-hidden
+                        >
+                            {student.name
+                                .split(/\s+/)
+                                .slice(0, 2)
+                                .map((part) => part[0])
+                                .join('')
+                                .toUpperCase()}
+                        </span>
+                    )}
+                    <span className="min-w-0">
+                        <span className="block font-medium text-foreground group-hover:text-primary group-hover:underline">
+                            {student.name}
+                        </span>
+                        <span className="block text-xs text-muted-foreground tabular-nums">
+                            {student.gender.value}
+                            {student.birth_date
+                                ? ` · ${formatDate(student.birth_date)}`
+                                : ''}
+                        </span>
+                    </span>
+                </Link>
             ),
         },
         {
