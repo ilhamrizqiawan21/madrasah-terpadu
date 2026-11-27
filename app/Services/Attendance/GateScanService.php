@@ -32,6 +32,7 @@ final class GateScanService
         private readonly AttendanceClassifier $classifier,
         private readonly GuardianNotifier $notifier,
         private readonly GuardianHomeSummaryService $homeCache,
+        private readonly SchoolCalendarService $calendar,
     ) {}
 
     public function scan(
@@ -91,6 +92,7 @@ final class GateScanService
 
             $hasCheckedIn = $day !== null && $day->checked_in_at !== null;
             $hasCheckedOut = $day !== null && $day->checked_out_at !== null;
+            $effectiveHoliday = $isHoliday || $this->calendar->isHoliday($student->unit, $schoolDate);
 
             $classification = $this->classifier->classify(
                 scannedAt: $scannedAt,
@@ -99,7 +101,7 @@ final class GateScanService
                 hasCheckedInToday: $hasCheckedIn,
                 hasCheckedOutToday: $hasCheckedOut,
                 duplicateWindowSeconds: $duplicateWindow,
-                isHoliday: $isHoliday,
+                isHoliday: $effectiveHoliday,
             );
 
             $scan = GateScan::query()->create([

@@ -42,10 +42,7 @@ Route::middleware(['auth'])->group(function (): void {
 
             require __DIR__.'/students.php';
             require __DIR__.'/guardians.php';
-
-            Route::inertia('presensi', 'admin/dashboard')
-                ->middleware(['permission:'.Permission::AttendanceView->value, 'feature:'.Feature::Attendance->value])
-                ->name('attendance.index');
+            require __DIR__.'/attendance.php';
 
             Route::inertia('tagihan', 'admin/dashboard')
                 ->middleware(['permission:'.Permission::InvoicesView->value, 'feature:'.Feature::Billing->value])

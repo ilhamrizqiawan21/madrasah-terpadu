@@ -18,7 +18,7 @@ use Illuminate\Support\Carbon;
  * @property string $code
  * @property string $name
  * @property int|null $head_user_id
- * @property array{check_in_opens_at: string, late_after: string, absent_after: string, check_out_opens_at: string} $attendance_settings
+ * @property array{check_in_opens_at: string, late_after: string, absent_after: string, check_out_opens_at: string, weekend_days?: list<int>} $attendance_settings
  * @property bool $is_active
  * @property Carbon $created_at
  * @property Carbon $updated_at
