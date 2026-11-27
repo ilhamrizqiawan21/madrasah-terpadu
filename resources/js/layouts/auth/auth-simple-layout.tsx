@@ -18,7 +18,7 @@ export default function AuthSimpleLayout({
     const appName = branding?.appName ?? 'Madrasah Terpadu';
 
     return (
-        <div className="flex min-h-svh flex-col items-center justify-center gap-6 bg-background p-6 md:p-10">
+        <div className="bg-islamic-pattern-subtle flex min-h-svh flex-col items-center justify-center gap-6 bg-background p-6 md:p-10">
             <div className="w-full max-w-sm">
                 <div className="flex flex-col gap-6">
                     <div className="flex flex-col items-center gap-3 text-center">
@@ -55,7 +55,7 @@ export default function AuthSimpleLayout({
                         </div>
                     </div>
 
-                    <div className="rounded-lg border border-border bg-card p-6">
+                    <div className="rounded-lg border border-border bg-card p-6 shadow-xs">
                         {children}
                     </div>
                 </div>

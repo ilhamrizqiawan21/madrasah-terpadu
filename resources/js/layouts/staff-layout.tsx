@@ -91,7 +91,7 @@ export default function StaffLayout({
 
     return (
         <div className="min-h-screen bg-background text-foreground">
-            <header className="sticky top-0 z-20 border-b border-border bg-card">
+            <header className="sticky top-0 z-20 border-b border-primary-foreground/15 bg-primary text-primary-foreground shadow-xs">
                 <div className="mx-auto flex h-14 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6">
                     <div className="flex items-center gap-3">
                         <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
@@ -99,7 +99,7 @@ export default function StaffLayout({
                                 <Button
                                     variant="ghost"
                                     size="icon"
-                                    className="lg:hidden"
+                                    className="text-primary-foreground hover:bg-primary-foreground/15 hover:text-primary-foreground lg:hidden"
                                     aria-label="Buka menu navigasi"
                                     aria-expanded={mobileOpen}
                                 >
@@ -167,19 +167,19 @@ export default function StaffLayout({
                                 <img
                                     src={branding.logoUrl}
                                     alt={branding.appName || name}
-                                    className="size-7 rounded-md border border-border object-cover"
+                                    className="size-7 rounded-md border border-primary-foreground/25 bg-card object-cover"
                                 />
                             ) : (
-                                <span className="flex size-7 items-center justify-center rounded-md bg-primary text-xs font-semibold text-primary-foreground">
+                                <span className="flex size-7 items-center justify-center rounded-md border border-primary-foreground/20 bg-primary-foreground/15 text-xs font-semibold text-primary-foreground">
                                     MT
                                 </span>
                             )}
                             <span className="hidden text-sm leading-tight sm:block">
-                                <span className="block font-semibold">
+                                <span className="block font-semibold text-primary-foreground">
                                     {branding?.appName || name}
                                 </span>
                                 {schoolContext && (
-                                    <span className="block text-xs text-muted-foreground">
+                                    <span className="block text-xs text-primary-foreground/75">
                                         {unitLabel}
                                     </span>
                                 )}
@@ -203,8 +203,8 @@ export default function StaffLayout({
                                             className={cn(
                                                 'gap-1 text-sm',
                                                 active
-                                                    ? 'bg-muted font-semibold text-foreground'
-                                                    : 'font-medium text-muted-foreground hover:text-foreground',
+                                                    ? 'bg-primary-foreground/15 font-semibold text-primary-foreground hover:bg-primary-foreground/20 hover:text-primary-foreground'
+                                                    : 'font-medium text-primary-foreground/80 hover:bg-primary-foreground/10 hover:text-primary-foreground',
                                             )}
                                         >
                                             {group.label}
@@ -243,17 +243,29 @@ export default function StaffLayout({
                             <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
                                     <Button
-                                        variant="outline"
+                                        variant="ghost"
                                         size="sm"
-                                        className="gap-1.5 text-xs sm:text-sm"
+                                        className="gap-1.5 border border-primary-foreground/20 bg-primary-foreground/10 text-xs text-primary-foreground hover:bg-primary-foreground/20 hover:text-primary-foreground sm:text-sm"
                                     >
+                                        <span
+                                            aria-hidden
+                                            className={cn(
+                                                'size-2 rounded-full',
+                                                schoolContext.unit === 'RA'
+                                                    ? 'bg-accent-attention'
+                                                    : schoolContext.unit ===
+                                                        'TPQ'
+                                                      ? 'bg-success'
+                                                      : 'bg-primary-foreground/80',
+                                            )}
+                                        />
                                         <span>
                                             {schoolContext.unit ?? 'Unit'} ·{' '}
                                             {schoolContext.academicYear ??
                                                 'Tahun ajaran'}
                                         </span>
                                         <ChevronDown
-                                            className="size-3.5 opacity-70"
+                                            className="size-3.5 opacity-80"
                                             strokeWidth={1.75}
                                         />
                                     </Button>

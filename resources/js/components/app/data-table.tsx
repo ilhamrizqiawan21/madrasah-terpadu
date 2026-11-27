@@ -94,10 +94,10 @@ export function DataTable<TData>({
 
     return (
         <div className="space-y-3">
-            <div className="overflow-x-auto rounded-lg border border-border bg-card">
+            <div className="overflow-x-auto rounded-lg border border-border bg-card shadow-xs">
                 <table className="w-full border-collapse text-sm">
                     <thead>
-                        <tr className="border-b border-border bg-muted/50">
+                        <tr className="border-b border-border bg-primary/[0.04]">
                             {columns.map((col) => {
                                 const isSorted = sort?.key === col.key;
 
@@ -165,7 +165,7 @@ export function DataTable<TData>({
                             : data.map((row) => (
                                   <tr
                                       key={rowKey(row)}
-                                      className="transition-colors hover:bg-muted/40"
+                                      className="transition-colors hover:bg-primary/[0.03]"
                                   >
                                       {columns.map((col) => (
                                           <td

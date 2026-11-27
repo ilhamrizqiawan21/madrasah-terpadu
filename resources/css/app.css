@@ -70,7 +70,7 @@
 }
 
 :root {
-    --background: oklch(0.985 0.004 85);
+    --background: oklch(0.96 0.006 85);
     --foreground: oklch(0.22 0.02 160);
     --card: oklch(1 0 0);
     --card-foreground: oklch(0.22 0.02 160);
@@ -160,6 +160,17 @@
     body {
         @apply bg-background text-foreground;
     }
+}
+
+/* Motif geometris Islami 8-bintang halus (lokal, tanpa CDN) untuk titik fokus identitas (ADR-027). */
+.bg-islamic-pattern {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64' viewBox='0 0 64 64'%3E%3Cg fill='none' stroke='%23ffffff' stroke-opacity='0.08' stroke-width='1'%3E%3Cpath d='M32 4L40 24L60 32L40 40L32 60L24 40L4 32L24 24Z'/%3E%3Crect x='16' y='16' width='32' height='32' transform='rotate(45 32 32)'/%3E%3C/g%3E%3C/svg%3E");
+    background-size: 64px 64px;
+}
+
+.bg-islamic-pattern-subtle {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64' viewBox='0 0 64 64'%3E%3Cg fill='none' stroke='%23135B42' stroke-opacity='0.045' stroke-width='1'%3E%3Cpath d='M32 4L40 24L60 32L40 40L32 60L24 40L4 32L24 24Z'/%3E%3Crect x='16' y='16' width='32' height='32' transform='rotate(45 32 32)'/%3E%3C/g%3E%3C/svg%3E");
+    background-size: 64px 64px;
 }
 
 @layer utilities {

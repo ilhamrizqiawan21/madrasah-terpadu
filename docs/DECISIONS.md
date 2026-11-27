@@ -238,6 +238,12 @@ Akun wali dibuat lewat impor/data induk dengan password awal acak. Tidak ada hal
 **Keputusan:** kewajiban 2FA dikendalikan sakelar `sekolah.security.require_two_factor` (`REQUIRE_TWO_FACTOR` di `.env`), **bawaan `false`**. Saat `false`, `EnsureTwoFactorForPrivilegedRoles` melewatkan semua pengguna. Fitur 2FA Fortify tetap ada sebagai pilihan: akun yang mengaktifkannya tetap ditanya kode saat masuk. Tes T-104 tetap menguji jalur wajib dengan sakelar dinyalakan.
 **Akibat:** sebelum produksi pemilik menyalakan `REQUIRE_TWO_FACTOR=true` (DEPLOYMENT §2), atau mencatat ADR baru bila tetap opsional.
 
+## ADR-027 — Peningkatan identitas visual & kedalaman permukaan Tingkat 2 (Diterima, 2026-11-27; keputusan pemilik)
+
+**Konteks:** Tampilan awal terlalu datar (latar `#FBFAF7`, kartu `#FFFFFF`, dan topbar `#FFFFFF` hampir sama-sama putih tanpa kedalaman) sehingga terasa steril.
+**Keputusan:** Terapkan peningkatan visual terpusat di token dan komponen bersama tanpa melanggar antislop: (1) topbar staf memakai `bg-primary text-primary-foreground` dengan indikator unit lembut; (2) latar halaman light dihangatkan ke `oklch(0.96 0.006 85)` dengan `shadow-xs` pada kartu/tabel agar permukaan terangkat rapi; (3) motif geometris Islami SVG lokal halus (`.bg-islamic-pattern` / `.bg-islamic-pattern-subtle`) hanya di titik fokus identitas (login, banner Beranda Staf, kartu identitas anak Beranda Wali); (4) header/hover tabel ber-tint primer tipis, wadah ikon `EmptyState` memakai `bg-primary/10 text-primary`, tombol memakai `active:scale-[0.98]`; (5) Beranda Staf menampilkan ringkasan data nyata yang bisa diklik dan pintasan aksi cepat sesuai izin.
+**Akibat:** `DESIGN.md` §2–3 diperbarui; perubahan berlaku serentak di seluruh layar.
+
 ## ADR-026 — Fitur 2FA dimatikan sementara (Diterima, 2026-11-27; keputusan pemilik, melengkapi ADR-025)
 
 **Konteks:** setelah ADR-025, kewajiban 2FA sudah mati, tetapi akun yang pernah mengaktifkan 2FA tetap ditanya kode saat login. Pemilik meminta autentikasi dua faktor dinonaktifkan dulu sepenuhnya.

@@ -24,7 +24,7 @@ Arah warna: hijau tua kebiruan (identitas madrasah tanpa jatuh ke hijau neon) di
 
 | Token                            | Light                                             | Dark                                             | Dipakai untuk                                                           |
 | -------------------------------- | ------------------------------------------------- | ------------------------------------------------ | ----------------------------------------------------------------------- |
-| `--background`                   | `oklch(0.985 0.004 85)`                           | `oklch(0.17 0.01 160)`                           | latar halaman                                                           |
+| `--background`                   | `oklch(0.96 0.006 85)`                            | `oklch(0.17 0.01 160)`                           | latar halaman (hangat agar kartu putih terangkat)                       |
 | `--foreground`                   | `oklch(0.22 0.02 160)`                            | `oklch(0.95 0.01 85)`                            | teks utama                                                              |
 | `--card`                         | `oklch(1 0 0)`                                    | `oklch(0.21 0.012 160)`                          | permukaan kartu/tabel                                                   |
 | `--muted` / `--muted-foreground` | `oklch(0.955 0.006 85)` / `oklch(0.48 0.015 160)` | `oklch(0.26 0.012 160)` / `oklch(0.72 0.01 160)` | latar sekunder / teks sekunder                                          |

@@ -5,8 +5,8 @@ declare(strict_types=1);
 use App\Enums\Feature;
 use App\Enums\Permission;
 use App\Enums\Role;
+use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\SchoolContextController;
-use App\Http\Controllers\Admin\StudentController;
 use App\Http\Controllers\BrandingAssetController;
 use App\Http\Controllers\DashboardController;
 use Illuminate\Http\RedirectResponse;
@@ -26,7 +26,7 @@ Route::middleware(['auth'])->group(function (): void {
         ->name('admin.')
         ->middleware('role:'.implode('|', array_map(fn (Role $role): string => $role->value, Role::adminArea())))
         ->group(function (): void {
-            Route::inertia('/', 'admin/dashboard')->name('dashboard');
+            Route::get('/', AdminDashboardController::class)->name('dashboard');
             Route::post('context', SchoolContextController::class)->name('context.update');
 
             require __DIR__.'/students.php';
@@ -62,8 +62,7 @@ Route::middleware(['auth'])->group(function (): void {
         ->name('guardian.')
         ->middleware('role:'.Role::Guardian->value)
         ->group(function (): void {
-            Route::inertia('/', 'guardian/home')->name('home');
-            Route::get('anak/{student}/foto', [StudentController::class, 'photo'])->whereNumber('student')->name('students.photo');
+            require __DIR__.'/guardian.php';
         });
 
     Route::prefix('gerbang')
