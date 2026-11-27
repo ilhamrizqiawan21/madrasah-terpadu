@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * Ujian CBT (T-1503, ADR-020).
@@ -95,6 +96,21 @@ class Exam extends Model
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
+    }
+
+    /**
+     * @return HasMany<ExamQuestion, $this>
+     */
+    public function questions(): HasMany
+    {
+        return $this->hasMany(ExamQuestion::class)->orderBy('sort_order')->orderBy('id');
+    }
+
+    public function isLocked(): bool
+    {
+        return $this->locked_at !== null
+            || $this->status === ExamStatus::Running
+            || $this->status === ExamStatus::Finished;
     }
 
     /**

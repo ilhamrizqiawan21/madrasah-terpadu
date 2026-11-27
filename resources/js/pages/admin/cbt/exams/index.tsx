@@ -3,6 +3,7 @@ import { CalendarCheck, Plus } from 'lucide-react';
 import type { FormEvent } from 'react';
 import { useEffect, useRef, useState } from 'react';
 import CbtExamController from '@/actions/App/Http/Controllers/Admin/CbtExamController';
+import CbtQuestionController from '@/actions/App/Http/Controllers/Admin/CbtQuestionController';
 import AdminDashboardController from '@/actions/App/Http/Controllers/Admin/DashboardController';
 import type { DataTableColumn } from '@/components/app/data-table';
 import { DataTable } from '@/components/app/data-table';
@@ -357,6 +358,7 @@ export default function CbtExamsIndex({
                       render: (row: ExamRow) => (
                           <RowActions
                               itemName={row.title}
+                              viewHref={CbtQuestionController.index.url(row.id)}
                               onEdit={() => openEdit(row)}
                           >
                               {(row.status === 'draft' ||

@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Enums\Feature;
 use App\Http\Controllers\Exam\ExamAuthController;
 use App\Http\Controllers\Exam\ExamDashboardController;
+use App\Http\Controllers\Exam\ExamQuestionImageController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -20,5 +21,8 @@ Route::middleware('feature:'.Feature::Cbt->value)
         Route::middleware(['auth:student', 'exam.active'])->group(function (): void {
             Route::get('/', ExamDashboardController::class)->name('index');
             Route::post('keluar', [ExamAuthController::class, 'destroy'])->name('logout');
+            Route::get('{exam}/soal/{question}/gambar', ExamQuestionImageController::class)
+                ->whereNumber(['exam', 'question'])
+                ->name('questions.image');
         });
     });

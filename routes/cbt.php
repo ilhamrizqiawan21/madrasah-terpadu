@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Enums\Feature;
 use App\Enums\Permission;
 use App\Http\Controllers\Admin\CbtExamController;
+use App\Http\Controllers\Admin\CbtQuestionController;
 use App\Http\Controllers\Admin\CbtStudentPinController;
 use App\Http\Controllers\Admin\CbtSubjectController;
 use App\Http\Controllers\Admin\CbtTeachingAssignmentController;
@@ -31,6 +32,14 @@ Route::middleware('feature:'.Feature::Cbt->value)
             Route::post('daftar', [CbtExamController::class, 'store'])->name('exams.store');
             Route::put('daftar/{exam}', [CbtExamController::class, 'update'])->whereNumber('exam')->name('exams.update');
             Route::patch('daftar/{exam}/status', [CbtExamController::class, 'updateStatus'])->whereNumber('exam')->name('exams.status.update');
+
+            Route::get('daftar/{exam}/soal', [CbtQuestionController::class, 'index'])->whereNumber('exam')->name('questions.index');
+            Route::post('daftar/{exam}/soal', [CbtQuestionController::class, 'store'])->whereNumber('exam')->name('questions.store');
+            Route::post('daftar/{exam}/soal/impor', [CbtQuestionController::class, 'import'])->whereNumber('exam')->name('questions.import');
+            Route::put('daftar/{exam}/soal/{question}', [CbtQuestionController::class, 'update'])->whereNumber(['exam', 'question'])->name('questions.update');
+            Route::delete('daftar/{exam}/soal/{question}', [CbtQuestionController::class, 'destroy'])->whereNumber(['exam', 'question'])->name('questions.destroy');
+            Route::patch('daftar/{exam}/soal/{question}/koreksi-kunci', [CbtQuestionController::class, 'correctKey'])->whereNumber(['exam', 'question'])->name('questions.correct-key');
+            Route::get('daftar/{exam}/soal/{question}/gambar', [CbtQuestionController::class, 'image'])->whereNumber(['exam', 'question'])->name('questions.image');
         });
 
         Route::middleware('permission:'.Permission::CbtManage->value)->group(function (): void {

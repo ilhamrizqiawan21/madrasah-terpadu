@@ -339,9 +339,9 @@ Unik (`student_id`,`academic_year_id`,`aspect`).
 
 `exam_period_id null` (opsional, belum ber-FK sampai Rilis peralihan), `subject_id → subjects` (restrict), `title string(150)`, `grade string(10) null`, `classroom_ids json`, `opens_at`, `closes_at`, `duration_minutes`, `shuffle_questions bool`, `shuffle_options bool`, `weights json` (default `{mcq:2, matching:2, essay_paper:4}`), `access_token string(20) null`, `violation_limit tinyint default 3`, `device_modes json` (`lab|tablet|phone`), `show_result_to_guardian bool default false`, `status string(32)` (`draft|scheduled|running|finished`), `locked_at null`, `created_by → users` (restrict), timestamps. Ditulis lewat `ExamService`.
 
-### `exam_questions`, `exam_question_options` (T-1504)
+### `exam_questions`, `exam_question_options` (T-1504 ✅)
 
-`exam_questions`: `exam_id`, `type` (`mcq|matching|essay_paper`), `body text`, `is_rtl bool`, `image_path null`, `sort_order`, `answer_key json` (tidak pernah dikirim ke klien). `exam_question_options`: `exam_question_id`, `label`, `body text`, `sort_order`.
+`exam_questions`: `exam_id → exams` (restrict), `type string(20)` (`mcq|matching|essay_paper`), `body text`, `is_rtl bool`, `image_path null` (disk privat `local` `cbt/questions/`), `sort_order`, `answer_key json null` (disembunyikan dari `StudentExamQuestionResource`). `exam_question_options`: `exam_question_id → exam_questions` (cascade), `label string(20)`, `body text`, `sort_order`. Ditulis lewat `ExamQuestionService`.
 
 ### `exam_sessions` (T-1505)
 
