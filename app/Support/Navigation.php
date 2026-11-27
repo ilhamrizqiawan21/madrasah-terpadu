@@ -360,9 +360,7 @@ final class Navigation
                         'plan' => 'T-1306, Paket P-19 Laporan non-keuangan',
                     ],
                     [
-                        'label' => 'Laporan hafalan & PIB', 'soon' => 'laporan-hafalan', 'permission' => Permission::ReportsView->value,
-                        'description' => 'Progres hafalan per kelompok dan rombel serta setoran per guru.',
-                        'plan' => 'T-1305, Paket P-19 Laporan non-keuangan',
+                        'label' => 'Laporan hafalan & PIB', 'route' => 'admin.reports.quran.index', 'permission' => Permission::ReportsView->value, 'feature' => Feature::Quran,
                     ],
                     [
                         'label' => 'Leger hasil belajar', 'soon' => 'leger', 'permission' => Permission::ReportsView->value,
