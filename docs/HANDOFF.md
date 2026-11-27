@@ -23,7 +23,7 @@ Aturan: singkat dan faktual. Jangan menyalin isi TODO/ADR; tautkan saja. Hapus b
 
 ## Terakhir diperbarui
 
-2026-11-27 · Claude (arsitek) — beranda, navigasi ADR-028, Fase 12 ADR-029, polesan CRUD (lihat bagian "Sesi Claude"). Sebelumnya: Gemini, setelah **Paket P-19 Laporan non-keuangan & Jejak audit (Fase 13: T-1301, T-1303, T-1305, T-1306, T-1307) + T-1401 Audit keamanan selesai** (`T-1302` & `T-1304` menunggu modul uang/kantin)
+2026-11-28 · Gemini — Pemeriksaan progres & mulai Fase 6 (**P-05 Tagihan & kasir**): **T-601 Jenis tagihan** selesai dan di-commit. Sebelumnya: Claude (2026-11-27) — beranda, navigasi ADR-028, Fase 12 ADR-029, polesan CRUD.
 
 ## Keadaan sekarang
 
@@ -55,13 +55,12 @@ Aturan: singkat dan faktual. Jangan menyalin isi TODO/ADR; tautkan saja. Hapus b
 
 ## Sedang dikerjakan
 
-Tidak ada (Fase 15 Ujian CBT — Paket **P-16** & **P-17** selesai seluruhnya).
+Fase 6 — Paket **P-05 Tagihan & kasir** (Risiko Tinggi): **T-601 Jenis tagihan** selesai (menunggu tinjauan sebelum lanjut **T-602 Penerbitan tagihan**).
 
 ## Langkah berikutnya
 
-1. Lanjut paket berikutnya pada Rilis 1.0 di `docs/TODO.md`: **P-11 Buku Saku BK & reward** (`T-901` s.d. `T-906`), **P-12 Pembiasaan** (`T-1001` s.d. `T-1004`), **P-14 Hafalan & PIB** (`T-1101` s.d. `T-1108`), atau **P-21 Kerangka paritas** (`T-1601` s.d. `T-1606`).
-2. Pemilik mengonfirmasi keputusan T-204, T-205, T-206, dan T-211 di bawah.
-3. Pemilik: `git push` untuk semua commit sejak `59a0ff1`.
+1. Tinjau **T-601** lalu lanjutkan **T-602 Penerbitan tagihan (`BillingRunService`)** di Paket **P-05 Tagihan & kasir**.
+2. Jalankan migrasi `2026_11_28_000001_create_fee_types_table` pada DB lokal/staging saat fitur `billing` diaktifkan.
 
 ## Arahan pemilik yang berlaku
 

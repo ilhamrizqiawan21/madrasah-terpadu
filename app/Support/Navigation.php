@@ -251,7 +251,7 @@ final class Navigation
                         'plan' => 'Paket P-05 Tagihan & kasir, rilis peralihan uang (ADR-021)',
                     ],
                     [
-                        'label' => 'Jenis tagihan & tarif', 'soon' => 'jenis-tagihan', 'permission' => Permission::FeeTypesManage->value, 'feature' => Feature::Billing,
+                        'label' => 'Jenis tagihan & tarif', 'route' => 'admin.fee-types.index', 'permission' => Permission::FeeTypesManage->value, 'feature' => Feature::Billing,
                         'description' => 'Master SPP dan biaya lain beserta tarif per unit dan tingkat.',
                         'plan' => 'Paket P-05 Tagihan & kasir',
                     ],
