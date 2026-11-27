@@ -23,26 +23,27 @@ Aturan: singkat dan faktual. Jangan menyalin isi TODO/ADR; tautkan saja. Hapus b
 
 ## Terakhir diperbarui
 
-2026-11-27 · Gemini (eksekutor), setelah T-212
+2026-11-27 · Gemini (eksekutor), setelah T-210 (Paket P-03 selesai)
 
 ## Keadaan sekarang
 
 - **Fase 0 & 1**: semua tugas `[x]`, plus perbaikan temuan cek UI (ADR-024, commit `1cfd189`): hapus akun sendiri dihapus, passkey dimatikan, UI auth/2FA berbahasa Indonesia, tautan & logo Laravel dibuang.
 - **2FA dimatikan seluruhnya** (ADR-025 + ADR-026, commit `b17e2c7`): `REQUIRE_TWO_FACTOR` dan `TWO_FACTOR_ENABLED` bawaan `false` — tanpa tantangan kode saat login dan tanpa menu 2FA. Nyalakan keduanya sebelum produksi (DEPLOYMENT §2).
-- **Fase 2 (paket P-03)**: T-201 ✔ (`dce871b`), T-202 ✔ (`f48e553`), T-203 ✔ (`2ee9ff7`), T-204 ✔ (`7c001c4`), T-211 ✔ (`f9f1a96`), T-205 ✔ (`d34f185`), T-206 ✔ (`805bffb`), T-207 ✔ (`1acc6cc`), T-212 ✔ (Kenaikan kelas & mutasi siswa). Pemilih unit/tahun ajaran di topbar dari database (`App\Support\SchoolContext`, T-111 `992ad0d`).
+- **Fase 2 (paket P-03 Data induk) SELESAI**: T-201 ✔ (`dce871b`), T-202 ✔ (`f48e553`), T-203 ✔ (`2ee9ff7`), T-204 ✔ (`7c001c4`), T-211 ✔ (`f9f1a96`), T-205 ✔ (`d34f185`), T-206 ✔ (`805bffb`), T-207 ✔ (`1acc6cc`), T-212 ✔ (`066f693`), T-210 ✔ (`DemoSeeder`). _(T-208 & T-209 masuk paket P-13 Rilis 1.1)._
 - **Perbaikan setelah review** (`855c151`): `schoolContext` hanya dibagikan ke peran area `/admin` (`Role::adminArea()`), cache pengaturan TTL 10 menit + ditulis ulang setelah commit, pembersihan logo/favicon memakai nilai lama dari baris terkunci, tahun ajaran terpilih di luar 6 terbaru tetap dipakai, `activate` mengunci semua tahun ajaran urut id.
 - **Keputusan pemilik diterapkan** (`1e223e7`): `/` dialihkan ke `dashboard` (tamu → login, pengguna → beranda sesuai peran), halaman `welcome` dihapus; semua input jam memakai `TimeInput` 24 jam `HH.MM`.
-- `composer check` hijau setelah T-212 (363 tes, Larastan 0, `tsc`, `vp check`). CI GitHub hijau sejak ADR-023 (PHP ≥ 8.4); commit setelah `59a0ff1` belum di-push.
+- `composer check` hijau setelah T-210 (366 tes, Larastan 0, `tsc`, `vp check`). CI GitHub hijau sejak ADR-023 (PHP ≥ 8.4); commit setelah `59a0ff1` belum di-push.
 - Lingkungan lokal: `.env` memakai **MariaDB** `madrasah_terpadu` (sudah `migrate` + `ProductionSeeder`). Tes tetap SQLite in-memory.
 - Akun uji lokal: username `admin.uji` (Admin, 2FA dimatikan 2026-11-27). Kata sandi dan rahasia TOTP **tidak** dicatat di repo; buat ulang lewat resep "Cek UI lokal".
 
 ## Sedang dikerjakan
 
-Lanjut P-03: **T-210** (`DemoSeeder`) — tugas terakhir P-03.
+Tidak ada (paket P-03 selesai dan ber-commit).
 
 ## Langkah berikutnya
 
-1. Kerjakan **T-210** (`DemoSeeder`) untuk menutup P-03.
+1. Lanjut paket **P-06 Portal wali & notifikasi** (T-301 → T-305, T-401 → T-404), sesuai `docs/TODO.md` bagian "Rencana rilis & paket".
+   Catatan: worktree otomatis sub-agent dibuat dari commit lama (`992ad0d`), jadi tugas yang bergantung pada commit baru dijalankan di working tree utama secara berurutan.
    Catatan: worktree otomatis sub-agent dibuat dari commit lama (`992ad0d`), jadi tugas yang bergantung pada commit baru dijalankan di working tree utama secara berurutan.
 2. Pemilik mengonfirmasi keputusan T-204, T-205, T-206, dan T-211 di bawah.
 3. Pemilik: `git push` untuk commit sejak `59a0ff1`.
