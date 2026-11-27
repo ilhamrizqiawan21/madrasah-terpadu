@@ -95,13 +95,15 @@ Indeks: (`unit_id`,`status`), (`name`). FK `unit_id` → `units` restrict. `gend
 
 `student_id`, `classroom_id`, `academic_year_id`, timestamps. Unik (`student_id`,`academic_year_id`); indeks (`classroom_id`,`academic_year_id`). Semua FK restrict. Rombel aktif siswa = enrollment tahun ajaran aktif. Pindah rombel di tahun yang sama memperbarui baris itu dengan audit `enrollment_moved` (sebelum/sesudah rombel); baris tahun lain tidak disentuh (riwayat).
 
-### `guardians` (T-206)
+### `guardians` (T-206 ✅)
 
-`user_id → users unique`, `name`, `phone string(20)`, `relation string(10)` default (`ayah|ibu|wali`), `address null`, timestamps, `deleted_at`.
+`user_id → users unique` (restrict), `name`, `phone string(20)`, `relation string(10)` default `wali` (`ayah|ibu|wali`, enum `GuardianRelation`), `address text null`, timestamps, `deleted_at`. Indeks (`name`).
+Akun login: `users.username` = `users.phone` = `guardians.phone` (nomor HP ternormalisasi `PhoneNumber::normalize`), peran `wali`, kata sandi awal acak (`InitialPassword`) hanya di-hash; tampil sekali lewat flash `credentials` dan dicetak sebagai "surat akun wali" dari browser. Tanpa paksa ganti kata sandi (ADR-015).
+Ditulis hanya lewat `App\Services\Guardians\GuardianService` (audit `created|updated|children_linked|activated|deactivated|password_reset`; tanpa alamat dan kata sandi). Nomor HP milik akun yang sudah wali → anak ditautkan ke wali itu; milik akun staf → akun itu diberi peran `wali` dan tetap memakai kata sandinya (reset/nonaktif akun bersama hanya lewat Pengguna staf). Wali tidak dihapus: akun dinonaktifkan (`users.is_active`).
 
-### `guardian_student` (T-206)
+### `guardian_student` (T-206 ✅)
 
-`guardian_id`, `student_id`, `relation string(10)`, `is_primary bool`. Unik (`guardian_id`,`student_id`).
+`id`, `guardian_id` (restrict), `student_id` (restrict), `relation string(10)`, `is_primary bool`. Unik (`guardian_id`,`student_id`); indeks (`student_id`,`is_primary`). Tepat satu wali utama per siswa dijaga `GuardianService` dalam transaksi (baris siswa terkait dikunci): menandai utama mencabut tanda wali lain; siswa yang kehilangan wali utama mendapat wali tertua lain yang tersisa. `relation` = hubungan wali saat ditautkan. Login NIS memetakan ke wali utama (FortifyServiceProvider).
 
 ### `staff_profiles` (T-207)
 

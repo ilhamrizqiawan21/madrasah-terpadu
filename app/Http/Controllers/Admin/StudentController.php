@@ -65,7 +65,7 @@ class StudentController extends Controller
         $search = trim((string) $request->query('search', ''));
 
         $students = Student::query()
-            ->with(['enrollments.classroom', 'enrollments.academicYear'])
+            ->with(['enrollments.classroom', 'enrollments.academicYear', 'primaryGuardians'])
             ->when(
                 $unit === null,
                 fn (Builder $query) => $query->whereKey([]),
@@ -165,11 +165,13 @@ class StudentController extends Controller
     }
 
     /**
-     * Foto siswa disajikan dari disk privat, hanya untuk staf berizin lihat siswa
-     * (akses wali untuk anaknya sendiri menyusul di T-206).
+     * Foto siswa dari disk privat: staf berizin lihat siswa (rute admin) atau wali
+     * yang terhubung (rute /wali). Wali lain mendapat 404, bukan 403 (AI_RULES §5).
      */
-    public function photo(Student $student): StreamedResponse
+    public function photo(Request $request, Student $student): StreamedResponse
     {
+        abort_unless($request->user()?->can('view', $student) === true, 404);
+
         $disk = Storage::disk(StudentService::DISK);
 
         abort_if($student->photo_path === null || ! $disk->exists($student->photo_path), 404);

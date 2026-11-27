@@ -39,6 +39,11 @@ final class Navigation
                         'permission' => Permission::StudentsView->value,
                     ],
                     [
+                        'label' => 'Wali',
+                        'route' => 'admin.guardians.index',
+                        'permission' => Permission::GuardiansManage->value,
+                    ],
+                    [
                         'label' => 'Tahun ajaran',
                         'route' => 'admin.academic-years.index',
                         'permission' => Permission::AcademicYearsManage->value,

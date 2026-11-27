@@ -63,6 +63,7 @@ type Student = {
     status: { value: StudentStatus; label: string };
     classroom: { id: number; name: string } | null;
     active_classroom_id: number | null;
+    primary_guardian: { name: string; phone: string } | null;
     enrollments: { id: number; academic_year: string; classroom: string }[];
     photo_url: string | null;
 };
@@ -455,9 +456,20 @@ export default function StudentsIndex({
         {
             key: 'guardian',
             label: 'Wali',
-            render: () => (
-                <span className="text-muted-foreground">Belum ada wali</span>
-            ),
+            render: (student) =>
+                student.primary_guardian ? (
+                    <span className="whitespace-nowrap">
+                        {student.primary_guardian.name}
+                        <span className="text-muted-foreground tabular-nums">
+                            {' · '}
+                            {student.primary_guardian.phone}
+                        </span>
+                    </span>
+                ) : (
+                    <span className="text-muted-foreground">
+                        Belum ada wali
+                    </span>
+                ),
         },
         {
             key: 'status',

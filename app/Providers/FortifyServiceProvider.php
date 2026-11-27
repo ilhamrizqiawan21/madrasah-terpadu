@@ -16,7 +16,6 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\RateLimiter;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\Password;
@@ -110,21 +109,20 @@ class FortifyServiceProvider extends ServiceProvider
         return $this->resolvePrimaryGuardianByNis($identity);
     }
 
+    /**
+     * NIS dipetakan ke wali utama siswa (ARCHITECTURE §9). Akun nonaktif tetap ditolak
+     * di authenticateUsing; wali yang diarsipkan diabaikan.
+     */
     private function resolvePrimaryGuardianByNis(string $nis): ?User
     {
-        if (
-            ! Schema::hasTable('students')
-            || ! Schema::hasTable('guardians')
-            || ! Schema::hasTable('guardian_student')
-        ) {
-            return null;
-        }
-
         $userId = DB::table('students')
             ->join('guardian_student', 'guardian_student.student_id', '=', 'students.id')
             ->join('guardians', 'guardians.id', '=', 'guardian_student.guardian_id')
             ->where('students.nis', $nis)
+            ->whereNull('students.deleted_at')
+            ->whereNull('guardians.deleted_at')
             ->orderByDesc('guardian_student.is_primary')
+            ->orderBy('guardian_student.id')
             ->value('guardians.user_id');
 
         if (! is_int($userId) && ! is_string($userId)) {

@@ -23,27 +23,27 @@ Aturan: singkat dan faktual. Jangan menyalin isi TODO/ADR; tautkan saja. Hapus b
 
 ## Terakhir diperbarui
 
-2026-11-27 · Claude (eksekutor), setelah T-211 + perbaikan temuan review
+2026-11-27 · Claude (eksekutor), setelah T-206
 
 ## Keadaan sekarang
 
 - **Fase 0 & 1**: semua tugas `[x]`, plus perbaikan temuan cek UI (ADR-024, commit `1cfd189`): hapus akun sendiri dihapus, passkey dimatikan, UI auth/2FA berbahasa Indonesia, tautan & logo Laravel dibuang.
 - **2FA tidak wajib lagi** (ADR-025, commit `e475b81`): sakelar `REQUIRE_TWO_FACTOR` (bawaan `false`). Fitur 2FA tetap opsional; akun yang sudah mengaktifkannya tetap ditanya kode.
-- **Fase 2 (paket P-03)**: T-201 ✔ (`dce871b`), T-202 ✔ (`f48e553`), T-203 ✔ (`2ee9ff7`), T-204 ✔ (`7c001c4`, Rombel), T-211 ✔ (`f9f1a96`, kunci fitur; di-cherry-pick dari worktree). Pemilih unit/tahun ajaran di topbar dari database (`App\Support\SchoolContext`, T-111 `992ad0d`).
+- **Fase 2 (paket P-03)**: T-201 ✔ (`dce871b`), T-202 ✔ (`f48e553`), T-203 ✔ (`2ee9ff7`), T-204 ✔ (`7c001c4`, Rombel), T-211 ✔ (`f9f1a96`, kunci fitur; di-cherry-pick dari worktree), T-205 ✔ (`d34f185`, Siswa + enrollment), T-206 ✔ (Wali + hubungan anak, commit `feat(guardians): ...`). Pemilih unit/tahun ajaran di topbar dari database (`App\Support\SchoolContext`, T-111 `992ad0d`).
 - **Perbaikan setelah review** (`855c151`): `schoolContext` hanya dibagikan ke peran area `/admin` (`Role::adminArea()`), cache pengaturan TTL 10 menit + ditulis ulang setelah commit, pembersihan logo/favicon memakai nilai lama dari baris terkunci, tahun ajaran terpilih di luar 6 terbaru tetap dipakai, `activate` mengunci semua tahun ajaran urut id.
 - **Keputusan pemilik diterapkan** (`1e223e7`): `/` dialihkan ke `dashboard` (tamu → login, pengguna → beranda sesuai peran), halaman `welcome` dihapus; semua input jam memakai `TimeInput` 24 jam `HH.MM`.
-- `composer check` hijau di commit terakhir (272 tes, Larastan 0). CI GitHub hijau sejak ADR-023 (PHP ≥ 8.4); commit setelah `59a0ff1` belum di-push.
+- `composer check` hijau di commit terakhir (329 tes, Larastan 0). CI GitHub hijau sejak ADR-023 (PHP ≥ 8.4); commit setelah `59a0ff1` belum di-push.
 - Lingkungan lokal: `.env` memakai **MariaDB** `madrasah_terpadu` (sudah `migrate` + `ProductionSeeder`). Tes tetap SQLite in-memory.
 - Akun uji lokal: username `admin.uji` (Admin, 2FA aktif). Kata sandi dan rahasia TOTP **tidak** dicatat di repo; buat ulang lewat resep "Cek UI lokal".
 
 ## Sedang dikerjakan
 
-- **T-205 Siswa + enrollment**: dikerjakan agen lain di worktree paralel (`.claude/worktrees/...`). Jangan disentuh dari working tree utama; pemilik yang menggabungkan.
+- Tidak ada.
 
 ## Langkah berikutnya
 
-1. Setelah T-205 digabung: lanjut P-03 berurutan T-206 → T-207 → T-210 → T-212 (lihat TODO "Rencana rilis & paket").
-2. Pemilik mengonfirmasi keputusan T-204 dan T-211 di bawah.
+1. Lanjut P-03 berurutan: T-207 (Impor Excel siswa + wali; `GuardianService::create` sudah menautkan berdasarkan nomor HP) → T-210 → T-212.
+2. Pemilik mengonfirmasi keputusan T-204, T-205, T-206, dan T-211 di bawah.
 3. Pemilik: `git push` untuk commit sejak `59a0ff1`.
 
 ## Arahan pemilik yang berlaku
@@ -60,6 +60,25 @@ Aturan: singkat dan faktual. Jangan menyalin isi TODO/ADR; tautkan saja. Hapus b
 3. Tingkat (`grade`) teks bebas ≤ 10 karakter.
 4. Seorang guru boleh menjadi wali kelas beberapa rombel.
 5. Saringan hanya menampilkan unit aktif.
+
+## Keputusan T-205 yang perlu dikonfirmasi pemilik
+
+1. Kolom Rombel mengikuti tahun ajaran di topbar, tetapi form hanya mengatur rombel tahun ajaran aktif.
+2. Unit siswa tetap setelah dibuat.
+3. Rombel tidak bisa dikosongkan lagi setelah terisi di tahun ajaran aktif.
+4. NISN tepat 10 digit; NIS huruf/angka/`.-/` ≤ 20 karakter.
+5. Nonaktifkan = status `inactive`; saringan bawaan menampilkan siswa aktif.
+6. Audit siswa tidak menyimpan alamat dan jalur foto.
+
+## Keputusan T-206 yang perlu dikonfirmasi pemilik
+
+1. Nomor HP sudah dipakai akun wali → anak ditautkan ke wali itu (nama/hubungan yang diketik diabaikan, tanpa kata sandi baru). Dipakai akun staf → akun itu diberi peran `wali`, tetap memakai username & kata sandinya; reset kata sandi dan nonaktifkan akun bersama hanya lewat Pengguna staf.
+2. Surat akun wali dicetak dari browser (A5, `window.print`), bukan PDF server; kata sandi hanya ada di dialog sekali tampil, cetak ulang = reset kata sandi.
+3. Hubungan (`ayah|ibu|wali`) satu per wali, disalin ke setiap baris `guardian_student`.
+4. Wali wajib terhubung minimal 1, maksimal 10 anak. Anak baru tanpa tanda "Wali utama" otomatis menjadi utama bila siswa belum punya wali utama; mencabut tanda utama menyerahkannya ke wali lain tertua.
+5. Saringan unit = wali yang punya anak di unit itu (bawaan unit topbar); status bawaan "Akun aktif". Pemilih anak mencari siswa aktif semua unit.
+6. Foto anak untuk wali lewat `/wali/anak/{student}/foto` (`StudentPolicy::view`, wali lain 404); rute staf tidak berubah.
+7. Migration memakai timestamp `2026_11_27_100004/100005` (bukan `000005/000006`) agar berjalan setelah `students`.
 
 ## Keputusan T-211 yang perlu dikonfirmasi pemilik
 

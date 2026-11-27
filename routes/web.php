@@ -6,6 +6,7 @@ use App\Enums\Feature;
 use App\Enums\Permission;
 use App\Enums\Role;
 use App\Http\Controllers\Admin\SchoolContextController;
+use App\Http\Controllers\Admin\StudentController;
 use App\Http\Controllers\BrandingAssetController;
 use App\Http\Controllers\DashboardController;
 use Illuminate\Http\RedirectResponse;
@@ -29,6 +30,7 @@ Route::middleware(['auth'])->group(function (): void {
             Route::post('context', SchoolContextController::class)->name('context.update');
 
             require __DIR__.'/students.php';
+            require __DIR__.'/guardians.php';
 
             Route::inertia('presensi', 'admin/dashboard')
                 ->middleware(['permission:'.Permission::AttendanceView->value, 'feature:'.Feature::Attendance->value])
@@ -61,6 +63,7 @@ Route::middleware(['auth'])->group(function (): void {
         ->middleware('role:'.Role::Guardian->value)
         ->group(function (): void {
             Route::inertia('/', 'guardian/home')->name('home');
+            Route::get('anak/{student}/foto', [StudentController::class, 'photo'])->whereNumber('student')->name('students.photo');
         });
 
     Route::prefix('gerbang')

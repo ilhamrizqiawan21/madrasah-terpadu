@@ -10,7 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
- * Membutuhkan relasi `enrollments.classroom` dan `enrollments.academicYear` yang sudah dimuat.
+ * Membutuhkan relasi `enrollments.classroom`, `enrollments.academicYear`, dan `primaryGuardians` yang sudah dimuat.
  *
  * @mixin Student
  */
@@ -35,6 +35,7 @@ class StudentResource extends JsonResource
     {
         $viewed = $this->enrollments->firstWhere('academic_year_id', $this->viewedYearId);
         $active = $this->enrollments->firstWhere('academic_year_id', $this->activeYearId);
+        $guardian = $this->primaryGuardians->first();
 
         return [
             'id' => $this->id,
@@ -49,6 +50,7 @@ class StudentResource extends JsonResource
             'status' => ['value' => $this->status->value, 'label' => $this->status->label()],
             'classroom' => $viewed === null ? null : ['id' => $viewed->classroom->id, 'name' => $viewed->classroom->name],
             'active_classroom_id' => $active?->classroom_id,
+            'primary_guardian' => $guardian === null ? null : ['name' => $guardian->name, 'phone' => $guardian->phone],
             'enrollments' => $this->enrollments
                 ->sortByDesc(fn (Enrollment $enrollment): string => $enrollment->academicYear->name.$enrollment->academicYear->semester->value)
                 ->map(fn (Enrollment $enrollment): array => [

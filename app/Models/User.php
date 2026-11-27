@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -37,6 +38,7 @@ use Spatie\Permission\Traits\HasRoles;
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  * @property Carbon|null $deleted_at
+ * @property-read Guardian|null $guardian
  */
 #[Fillable(['name', 'username', 'email', 'phone', 'password', 'is_active', 'last_login_at'])]
 #[Hidden(['password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token'])]
@@ -69,5 +71,15 @@ class User extends Authenticatable implements MustVerifyEmail, PasskeyUser
         return Attribute::make(
             set: fn (?string $value): ?string => PhoneNumber::normalize($value),
         );
+    }
+
+    /**
+     * Data wali bila akun ini milik orang tua/wali murid (termasuk staf yang juga wali).
+     *
+     * @return HasOne<Guardian, $this>
+     */
+    public function guardian(): HasOne
+    {
+        return $this->hasOne(Guardian::class);
     }
 }

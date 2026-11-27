@@ -2,11 +2,10 @@
 
 declare(strict_types=1);
 
+use App\Models\Guardian;
 use App\Models\Student;
 use App\Models\User;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
 
 test('pengguna dapat login menggunakan username dan last_login_at diperbarui serta sesi diregenerasi', function (): void {
     $user = User::factory()->create([
@@ -44,31 +43,12 @@ test('pengguna dapat login menggunakan nomor HP dengan berbagai format', functio
 });
 
 test('wali dapat login menggunakan NIS yang memetakan ke wali utama siswa', function (): void {
-    // Tabel students sudah nyata sejak T-205; guardians & guardian_student menyusul di T-206.
-    Schema::create('guardians', function (Blueprint $table): void {
-        $table->id();
-        $table->foreignId('user_id');
-        $table->timestamps();
-    });
-
-    Schema::create('guardian_student', function (Blueprint $table): void {
-        $table->id();
-        $table->foreignId('guardian_id');
-        $table->foreignId('student_id');
-        $table->boolean('is_primary')->default(false);
-    });
-
     $primaryUser = User::factory()->create();
     $secondaryUser = User::factory()->create();
 
-    $studentId = Student::factory()->create(['nis' => '20260001'])->id;
-    $primaryGuardianId = DB::table('guardians')->insertGetId(['user_id' => $primaryUser->id]);
-    $secondaryGuardianId = DB::table('guardians')->insertGetId(['user_id' => $secondaryUser->id]);
-
-    DB::table('guardian_student')->insert([
-        ['guardian_id' => $secondaryGuardianId, 'student_id' => $studentId, 'is_primary' => false],
-        ['guardian_id' => $primaryGuardianId, 'student_id' => $studentId, 'is_primary' => true],
-    ]);
+    $student = Student::factory()->create(['nis' => '20260001']);
+    Guardian::factory()->for($secondaryUser)->linkedTo($student, primary: false)->create();
+    Guardian::factory()->for($primaryUser)->linkedTo($student, primary: true)->create();
 
     $response = $this->post(route('login.store'), [
         'email' => '20260001',
