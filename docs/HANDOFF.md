@@ -23,7 +23,7 @@ Aturan: singkat dan faktual. Jangan menyalin isi TODO/ADR; tautkan saja. Hapus b
 
 ## Terakhir diperbarui
 
-2026-11-27 · Gemini (eksekutor), setelah **T-1108 (Komponen MistakeCounter, Fase 11)** selesai
+2026-11-27 · Gemini (eksekutor), setelah **T-1104 (Input setoran hafalan, Fase 11)** selesai
 
 ## Keadaan sekarang
 

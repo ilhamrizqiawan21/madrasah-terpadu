@@ -300,10 +300,10 @@ Unik (`student_id`,`habit_item_id`,`log_date`). Indeks (`log_date`,`verification
 
 `rubric_versions.published_at` — versi terbit tidak dapat diubah. Kriteria: `name`, `mode` (`direct|deduction`), `weight`, `max_score`, `deduction_per_error`, `pass_threshold`. Ditulis lewat `RubricService`.
 
-### `memorization_records` (T-1104)
+### `memorization_records` (T-1104 ✅)
 
-`student_id`, `teacher_id → users`, `rubric_version_id`, `kind string` (`quran|hadith|prayer`), `type string null` (`ziyadah|murajaah`, wajib hanya untuk `quran`), `memorization_material_id null` (wajib untuk hadits/doa), `surah_from null`, `ayah_from null`, `surah_to null`, `ayah_to null` (wajib untuk `quran`), `scores json` (per kriteria),
-`final_score decimal(5,2)`, `predicate string(2)`, `passed bool`, `note null`, `recorded_on date`, timestamps. Indeks (`student_id`,`recorded_on`).
+`student_id` (`→ students`, restrict), `teacher_id → users` (restrict), `rubric_version_id` (`→ rubric_versions`, restrict), `kind string(20)` (`quran|hadith|prayer`), `type string(20) null` (`ziyadah|murajaah`, wajib hanya untuk `quran`), `memorization_material_id null` (`→ memorization_materials`, wajib untuk hadits/doa), `surah_from null`, `ayah_from null`, `surah_to null`, `ayah_to null` (wajib untuk `quran`), `scores json` (per kriteria),
+`final_score decimal(5,2)`, `predicate string(2)`, `passed bool`, `note null`, `recorded_on date`, timestamps. Indeks (`student_id`,`recorded_on`). Ditulis lewat `MemorizationService`.
 
 ### `memorized_ayahs` (T-1105) — turunan untuk progres
 

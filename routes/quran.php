@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use App\Enums\Feature;
 use App\Enums\Permission;
-use App\Http\Controllers\Admin\ComingSoonController;
+use App\Http\Controllers\Admin\MemorizationController;
 use App\Http\Controllers\Admin\MemorizationMaterialController;
 use App\Http\Controllers\Admin\MemorizationTargetController;
 use App\Http\Controllers\Admin\RubricController;
@@ -14,10 +14,12 @@ Route::prefix('hafalan')
     ->name('quran.')
     ->middleware('feature:'.Feature::Quran->value)
     ->group(function (): void {
-        Route::get('/', ComingSoonController::class)
-            ->defaults('module', 'setoran-hafalan')
+        Route::get('/', [MemorizationController::class, 'index'])
             ->middleware('permission:'.Permission::QuranView->value)
             ->name('index');
+        Route::post('/', [MemorizationController::class, 'store'])
+            ->middleware('permission:'.Permission::QuranRecord->value)
+            ->name('store');
 
         Route::prefix('materi')
             ->name('materials.')
