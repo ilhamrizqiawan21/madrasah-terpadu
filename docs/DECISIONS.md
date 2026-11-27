@@ -226,6 +226,12 @@ Akun wali dibuat lewat impor/data induk dengan password awal acak. Tidak ada hal
 **Keputusan:** versi minimum PHP = **8.4**. `composer.json` `php: ^8.4`; matriks CI 8.4 dan 8.5; dokumen deploy menyebut PHP-FPM 8.4+. Workflow bawaan starter kit `.github/workflows/tests.yml` dihapus karena menduplikasi `ci.yml` dengan PHP 8.3 dan Node 22.
 **Akibat:** server staging/produksi klien wajib PHP 8.4+ (DEPLOYMENT §1). Tidak ada dependensi yang berubah; hanya `content-hash` di `composer.lock`.
 
+## ADR-024 — Fitur bawaan starter kit yang dimatikan: hapus akun sendiri dan passkey (Diterima, 2026-11-27; keputusan pemilik)
+
+**Konteks:** cek UI Fase 1 menemukan dua fitur starter kit yang aktif tanpa pernah diputuskan: (1) setiap pengguna, termasuk wali dan admin terakhir, dapat menghapus akunnya sendiri (`DELETE /settings/profile`) tanpa audit, melewati pengaman T-114; (2) login dan konfirmasi kata sandi dengan passkey, padahal PRD menetapkan login dengan username/nomor HP/NIS (T-103).
+**Keputusan:** rute, request, dan komponen hapus akun sendiri dihapus; akun hanya dinonaktifkan oleh admin (T-114, T-206). `Features::passkeys` dimatikan di `config/fortify.php`; tombol dan pengelolaan passkey dihapus dari UI. Tabel `passkeys` dibiarkan (migrasi lama tidak diedit). Dua tes starter "user can delete their account" dihapus dan asersi passkey di `SecurityTest` dibalik, karena tes itu menjamin perilaku yang kini dilarang; penggantinya `tests/Feature/Auth/AccountLockdownTest.php`.
+**Akibat:** menyalakan kembali passkey butuh ADR baru (perlu audit login passkey + pemeriksaan `is_active` di jalur itu).
+
 ---
 
 ## Usulan terbuka (menunggu klien, lihat PRD §8)

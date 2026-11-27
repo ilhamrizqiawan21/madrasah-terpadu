@@ -14,18 +14,16 @@ test('security page is displayed', function (): void {
         'confirm' => true,
         'confirmPassword' => true,
     ]);
-    Features::passkeys([
-        'confirmPassword' => true,
-    ]);
 
     $user = User::factory()->create();
 
+    // Passkey dimatikan (ADR-024): halaman keamanan tidak menawarkannya.
     $this->actingAs($user)
         ->withSession(['auth.password_confirmed_at' => time()])
         ->get(route('security.edit'))
         ->assertInertia(fn (Assert $page) => $page
             ->component('settings/security')
-            ->where('canManagePasskeys', true)
+            ->where('canManagePasskeys', false)
             ->where('passkeys', [])
             ->where('canManageTwoFactor', true)
             ->where('twoFactorEnabled', false),
