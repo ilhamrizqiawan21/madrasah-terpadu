@@ -153,6 +153,12 @@ final class Navigation
                         'permission' => Permission::HabitsManage->value,
                         'feature' => Feature::Habits,
                     ],
+                    [
+                        'label' => 'Verifikasi pembiasaan',
+                        'route' => 'admin.habits.verify.index',
+                        'permission' => Permission::HabitsVerify->value,
+                        'feature' => Feature::Habits,
+                    ],
                 ],
             ],
             [

@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Enums\Feature;
 use App\Enums\Permission;
 use App\Http\Controllers\Admin\HabitItemController;
+use App\Http\Controllers\Admin\HabitVerificationController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('pembiasaan')
@@ -22,5 +23,15 @@ Route::prefix('pembiasaan')
                 Route::patch('{habitItem}/status', 'toggle')->whereNumber('habitItem')->name('toggle');
                 Route::post('{habitItem}/urutan', 'move')->whereNumber('habitItem')->name('move');
                 Route::delete('{habitItem}', 'destroy')->whereNumber('habitItem')->name('destroy');
+            });
+
+        Route::prefix('verifikasi')
+            ->name('verify.')
+            ->middleware('permission:'.Permission::HabitsVerify->value)
+            ->controller(HabitVerificationController::class)
+            ->group(function (): void {
+                Route::get('/', 'index')->name('index');
+                Route::post('massal', 'verifyBulk')->name('bulk');
+                Route::post('{habitLog}/tolak', 'reject')->whereNumber('habitLog')->name('reject');
             });
     });

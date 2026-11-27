@@ -23,7 +23,7 @@ Aturan: singkat dan faktual. Jangan menyalin isi TODO/ADR; tautkan saja. Hapus b
 
 ## Terakhir diperbarui
 
-2026-11-27 · Gemini (eksekutor), setelah **T-1002 (Centang pembiasaan oleh wali, Fase 10 Paket P-12)** selesai
+2026-11-27 · Gemini (eksekutor), setelah **T-1003 (Verifikasi pembiasaan oleh wali kelas, Fase 10 Paket P-12)** selesai
 
 ## Keadaan sekarang
 
