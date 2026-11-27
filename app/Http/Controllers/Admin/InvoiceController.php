@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Admin;
 
+use App\Enums\InvoiceAdjustmentType;
 use App\Enums\InvoiceStatus;
 use App\Http\Controllers\Controller;
 use App\Models\AcademicYear;
@@ -232,6 +233,8 @@ class InvoiceController extends Controller
                 ->all();
         }
 
+        $user = $request->user();
+
         return Inertia::render('admin/billing/invoice-show', [
             'invoice' => [
                 'id' => $invoice->id,
@@ -256,6 +259,11 @@ class InvoiceController extends Controller
             ],
             'adjustments' => $adjustments,
             'payments' => $payments,
+            'adjustmentTypes' => array_map(
+                static fn (InvoiceAdjustmentType $type): array => ['value' => $type->value, 'label' => $type->label()],
+                InvoiceAdjustmentType::cases(),
+            ),
+            'canAdjust' => $user instanceof User && $user->can('adjust', $invoice),
         ]);
     }
 

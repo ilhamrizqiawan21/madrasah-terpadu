@@ -23,7 +23,7 @@ Aturan: singkat dan faktual. Jangan menyalin isi TODO/ADR; tautkan saja. Hapus b
 
 ## Terakhir diperbarui
 
-2026-11-28 · Gemini — Fase 6 (**P-05 Tagihan & kasir**): **T-601**, **T-602**, dan **T-603** selesai dan di-commit. Sebelumnya: Claude (2026-11-27) — beranda, navigasi ADR-028, Fase 12 ADR-029, polesan CRUD.
+2026-11-28 · Gemini — Fase 6 (**P-05 Tagihan & kasir**): **T-601**–**T-604** selesai dan di-commit. Sebelumnya: Claude (2026-11-27) — beranda, navigasi ADR-028, Fase 12 ADR-029, polesan CRUD.
 
 ## Keadaan sekarang
 
@@ -55,11 +55,11 @@ Aturan: singkat dan faktual. Jangan menyalin isi TODO/ADR; tautkan saja. Hapus b
 
 ## Sedang dikerjakan
 
-Fase 6 — Paket **P-05 Tagihan & kasir** (Risiko Tinggi): **T-601**–**T-603** selesai (menunggu tinjauan sebelum lanjut **T-604 Penyesuaian & pembatalan tagihan**).
+Fase 6 — Paket **P-05 Tagihan & kasir** (Risiko Tinggi): **T-601**–**T-604** selesai (menunggu tinjauan sebelum lanjut **T-605 Pembayaran kasir**).
 
 ## Langkah berikutnya
 
-1. Tinjau **T-603** lalu lanjutkan **T-604 Penyesuaian & pembatalan tagihan** di Paket **P-05 Tagihan & kasir**.
+1. Tinjau **T-604** lalu lanjutkan **T-605 Pembayaran kasir (tunai/transfer, cicilan)** di Paket **P-05 Tagihan & kasir**.
 2. Jalankan migrasi `2026_11_28_000001_create_fee_types_table` dan `2026_11_28_000002_create_billing_runs_and_invoices_tables` pada DB lokal/staging saat fitur `billing` diaktifkan.
 
 ## Arahan pemilik yang berlaku

@@ -6,6 +6,7 @@ use App\Enums\Feature;
 use App\Enums\Permission;
 use App\Http\Controllers\Admin\BillingRunController;
 use App\Http\Controllers\Admin\FeeTypeController;
+use App\Http\Controllers\Admin\InvoiceAdjustmentController;
 use App\Http\Controllers\Admin\InvoiceController;
 use Illuminate\Support\Facades\Route;
 
@@ -34,5 +35,12 @@ Route::prefix('keuangan')->group(function (): void {
             Route::get('tagihan', 'index')->name('invoices.index');
             Route::get('tagihan/{invoice}', 'show')->name('invoices.show');
             Route::get('siswa/{student}/tagihan', 'studentCard')->name('students.invoices');
+        });
+
+    Route::controller(InvoiceAdjustmentController::class)
+        ->middleware(['permission:'.Permission::InvoicesAdjust->value, 'feature:'.Feature::Billing->value])
+        ->group(function (): void {
+            Route::post('tagihan/{invoice}/penyesuaian', 'store')->name('invoices.adjust');
+            Route::post('tagihan/{invoice}/batalkan', 'cancel')->name('invoices.cancel');
         });
 });

@@ -1,13 +1,26 @@
-import { Head, Link } from '@inertiajs/react';
-import { ArrowLeft, ReceiptText } from 'lucide-react';
-import type { ReactNode } from 'react';
+import { Head, Link, useForm } from '@inertiajs/react';
+import { ArrowLeft, Ban, ReceiptText, SlidersHorizontal } from 'lucide-react';
+import type { FormEvent, ReactNode } from 'react';
+import { useState } from 'react';
+import InvoiceAdjustmentController from '@/actions/App/Http/Controllers/Admin/InvoiceAdjustmentController';
 import InvoiceController from '@/actions/App/Http/Controllers/Admin/InvoiceController';
 import { DateText } from '@/components/app/date-text';
 import { EmptyState } from '@/components/app/empty-state';
+import { FormDialog } from '@/components/app/form-dialog';
 import { MoneyText } from '@/components/app/money-text';
 import { PageHeader } from '@/components/app/page-header';
 import { StatusBadge } from '@/components/app/status-badge';
+import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
 import StaffLayout from '@/layouts/staff-layout';
 
 type AdjustmentRow = {
@@ -53,13 +66,62 @@ type Props = {
     };
     adjustments: AdjustmentRow[];
     payments: PaymentRow[];
+    adjustmentTypes: { value: string; label: string }[];
+    canAdjust: boolean;
 };
 
 export default function InvoiceShowPage({
     invoice,
     adjustments,
     payments,
+    adjustmentTypes,
+    canAdjust,
 }: Props) {
+    const [adjustOpen, setAdjustOpen] = useState(false);
+    const [cancelOpen, setCancelOpen] = useState(false);
+
+    const adjustForm = useForm({
+        type: adjustmentTypes[0]?.value ?? 'discount',
+        amount: '',
+        reason: '',
+    });
+
+    const cancelForm = useForm({
+        reason: '',
+    });
+
+    function submitAdjust(e: FormEvent<HTMLFormElement>) {
+        e.preventDefault();
+        adjustForm.transform((data) => ({
+            ...data,
+            amount: Number(data.amount || 0),
+        }));
+        adjustForm.post(InvoiceAdjustmentController.store.url(invoice.id), {
+            preserveScroll: true,
+            onSuccess: () => {
+                setAdjustOpen(false);
+                adjustForm.reset();
+            },
+        });
+    }
+
+    function submitCancel(e: FormEvent<HTMLFormElement>) {
+        e.preventDefault();
+        cancelForm.post(InvoiceAdjustmentController.cancel.url(invoice.id), {
+            preserveScroll: true,
+            onSuccess: () => {
+                setCancelOpen(false);
+                cancelForm.reset();
+            },
+        });
+    }
+
+    const canBeAdjusted =
+        canAdjust && invoice.status !== 'cancelled' && invoice.remaining > 0;
+
+    const canBeCancelled =
+        canAdjust && invoice.status !== 'cancelled' && invoice.paid_total === 0;
+
     return (
         <StaffLayout
             breadcrumbs={[
@@ -78,7 +140,7 @@ export default function InvoiceShowPage({
                     title={invoice.description}
                     description={`${invoice.student_name} (${invoice.student_nis}) · ${invoice.unit_name}`}
                     actions={
-                        <div className="flex items-center gap-2">
+                        <div className="flex flex-wrap items-center gap-2">
                             <Button variant="outline" asChild>
                                 <Link href={InvoiceController.index.url()}>
                                     <ArrowLeft
@@ -101,6 +163,38 @@ export default function InvoiceShowPage({
                                     Kartu tagihan siswa
                                 </Link>
                             </Button>
+                            {canBeAdjusted && (
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    onClick={() => {
+                                        adjustForm.clearErrors();
+                                        setAdjustOpen(true);
+                                    }}
+                                >
+                                    <SlidersHorizontal
+                                        className="size-4"
+                                        strokeWidth={1.75}
+                                    />
+                                    Sesuaikan
+                                </Button>
+                            )}
+                            {canBeCancelled && (
+                                <Button
+                                    type="button"
+                                    variant="destructive"
+                                    onClick={() => {
+                                        cancelForm.clearErrors();
+                                        setCancelOpen(true);
+                                    }}
+                                >
+                                    <Ban
+                                        className="size-4"
+                                        strokeWidth={1.75}
+                                    />
+                                    Batalkan tagihan
+                                </Button>
+                            )}
                         </div>
                     }
                 />
@@ -311,6 +405,98 @@ export default function InvoiceShowPage({
                     </div>
                 </div>
             </div>
+
+            <FormDialog
+                open={adjustOpen}
+                onOpenChange={setAdjustOpen}
+                title="Sesuaikan tagihan"
+                description="Penyesuaian tercatat permanen dan mengurangi sisa tagihan."
+                onSubmit={submitAdjust}
+                processing={adjustForm.processing}
+                submitLabel="Simpan penyesuaian"
+            >
+                <div className="space-y-4">
+                    <div className="space-y-1.5">
+                        <Label htmlFor="adj-type">Jenis penyesuaian</Label>
+                        <Select
+                            value={adjustForm.data.type}
+                            onValueChange={(v) => adjustForm.setData('type', v)}
+                        >
+                            <SelectTrigger id="adj-type">
+                                <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {adjustmentTypes.map((t) => (
+                                    <SelectItem key={t.value} value={t.value}>
+                                        {t.label}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                        <InputError message={adjustForm.errors.type} />
+                    </div>
+
+                    <div className="space-y-1.5">
+                        <Label htmlFor="adj-amount">
+                            Nominal pengurangan (maks Rp{' '}
+                            {invoice.remaining.toLocaleString('id-ID')})
+                        </Label>
+                        <Input
+                            id="adj-amount"
+                            type="number"
+                            min={1}
+                            max={invoice.remaining}
+                            value={adjustForm.data.amount}
+                            onChange={(e) =>
+                                adjustForm.setData('amount', e.target.value)
+                            }
+                            className="text-right tabular-nums"
+                            required
+                        />
+                        <InputError message={adjustForm.errors.amount} />
+                    </div>
+
+                    <div className="space-y-1.5">
+                        <Label htmlFor="adj-reason">Alasan</Label>
+                        <Input
+                            id="adj-reason"
+                            value={adjustForm.data.reason}
+                            onChange={(e) =>
+                                adjustForm.setData('reason', e.target.value)
+                            }
+                            placeholder="Mis. Keringanan siswa berprestasi"
+                            maxLength={255}
+                            required
+                        />
+                        <InputError message={adjustForm.errors.reason} />
+                    </div>
+                </div>
+            </FormDialog>
+
+            <FormDialog
+                open={cancelOpen}
+                onOpenChange={setCancelOpen}
+                title="Batalkan tagihan?"
+                description="Tagihan yang dibatalkan tidak lagi dihitung sebagai piutang. Hanya berlaku untuk tagihan yang belum memiliki pembayaran."
+                onSubmit={submitCancel}
+                processing={cancelForm.processing}
+                submitLabel="Ya, batalkan tagihan"
+            >
+                <div className="space-y-1.5">
+                    <Label htmlFor="cancel-reason">Alasan pembatalan</Label>
+                    <Input
+                        id="cancel-reason"
+                        value={cancelForm.data.reason}
+                        onChange={(e) =>
+                            cancelForm.setData('reason', e.target.value)
+                        }
+                        placeholder="Mis. Tagihan ganda atau siswa mutasi"
+                        maxLength={255}
+                        required
+                    />
+                    <InputError message={cancelForm.errors.reason} />
+                </div>
+            </FormDialog>
         </StaffLayout>
     );
 }
