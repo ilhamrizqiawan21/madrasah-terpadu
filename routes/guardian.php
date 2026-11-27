@@ -23,6 +23,9 @@ Route::get('tagihan', BillingController::class)
     ->middleware('feature:'.Feature::Billing->value)
     ->name('billing');
 
-Route::get('anak/{student}/foto', [StudentController::class, 'photo'])
+Route::prefix('anak/{student}')
     ->whereNumber('student')
-    ->name('students.photo');
+    ->middleware('guardian.owns-student')
+    ->group(function (): void {
+        Route::get('foto', [StudentController::class, 'photo'])->name('students.photo');
+    });
