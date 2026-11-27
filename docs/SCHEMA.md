@@ -238,15 +238,15 @@ Indeks (`status`,`due_date`), (`student_id`,`status`). Sisa = `amount - adjustme
 
 `unit_id null` (`→ units`, restrict), `code string(30)`, `name string(180)`, `category string(20)` (`violation|achievement|good_deed`), `level string(50) null` (untuk prestasi: sekolah/kecamatan/kabupaten/...), `points smallint unsigned`, `is_active`, timestamps. Unik (`unit_id`,`code`). Ditulis lewat `PointRuleService`.
 
-### `behavior_records` (T-902)
+### `behavior_records` (T-902 ✅)
 
-`student_id`, `academic_year_id`, `point_rule_id`, `category string` (snapshot), `points smallint` (snapshot), `occurred_on date`, `note text null`, `evidence_path null`,
-`recorded_by → users`, `status string` (`active|voided`), `voided_by null`, `voided_at null`, `void_reason null`, timestamps. Indeks (`student_id`,`academic_year_id`), (`occurred_on`).
+`student_id` (`→ students`, restrict), `academic_year_id` (`→ academic_years`, restrict), `point_rule_id` (`→ point_rules`, restrict), `category string(20)` (snapshot), `points smallint unsigned` (snapshot), `occurred_on date`, `note text null`, `evidence_path string(255) null` (disk privat `local`),
+`recorded_by → users` (restrict), `status string(20)` (`active|voided`), `voided_by null` (`→ users`), `voided_at null`, `void_reason text null`, timestamps. Indeks (`student_id`,`academic_year_id`), (`occurred_on`, `status`). Ditulis lewat `BehaviorRecordService`.
 
-### `point_entries` (T-902) — append-only
+### `point_entries` (T-902 ✅) — append-only
 
-`student_id`, `academic_year_id`, `account string` (`violation|merit`), `delta int` (bertanda), `balance_after int`, `source_type`, `source_id`, `idempotency_key unique`, `created_at`.
-Indeks (`student_id`,`academic_year_id`,`account`).
+`student_id` (`→ students`, restrict), `academic_year_id` (`→ academic_years`, restrict), `account string(20)` (`violation|merit`), `delta int` (bertanda), `balance_after int`, `source_type`, `source_id`, `idempotency_key unique`, `created_at`.
+Indeks (`student_id`,`academic_year_id`,`account`). Ditulis lewat `PointLedgerService`.
 
 ### `discipline_thresholds` (T-903)
 

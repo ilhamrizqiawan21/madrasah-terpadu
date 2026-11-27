@@ -69,3 +69,24 @@ export function formatDateTime(value: string | Date): string {
 
     return `${formatDate(date)}, ${formatTime(date)}`;
 }
+
+const longDateFormatter = new Intl.DateTimeFormat('id-ID', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+    timeZone: WITA_TIMEZONE,
+});
+
+/**
+ * Format tanggal panjang dengan nama hari dalam WITA (mis. "Jumat, 27 November 2026").
+ */
+export function formatLongDate(value: string | Date): string {
+    const date = toDate(value);
+
+    if (Number.isNaN(date.getTime())) {
+        return '—';
+    }
+
+    return longDateFormatter.format(date);
+}
