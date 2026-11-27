@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Enums\Feature;
 use App\Enums\Permission;
+use App\Http\Controllers\Admin\CbtExamController;
 use App\Http\Controllers\Admin\CbtStudentPinController;
 use App\Http\Controllers\Admin\CbtSubjectController;
 use App\Http\Controllers\Admin\CbtTeachingAssignmentController;
@@ -25,6 +26,11 @@ Route::middleware('feature:'.Feature::Cbt->value)
             Route::post('pin-siswa/rombel/{classroom}/reset', [CbtStudentPinController::class, 'resetClassroom'])
                 ->whereNumber('classroom')
                 ->name('pins.reset-classroom');
+
+            Route::get('daftar', [CbtExamController::class, 'index'])->name('exams.index');
+            Route::post('daftar', [CbtExamController::class, 'store'])->name('exams.store');
+            Route::put('daftar/{exam}', [CbtExamController::class, 'update'])->whereNumber('exam')->name('exams.update');
+            Route::patch('daftar/{exam}/status', [CbtExamController::class, 'updateStatus'])->whereNumber('exam')->name('exams.status.update');
         });
 
         Route::middleware('permission:'.Permission::CbtManage->value)->group(function (): void {

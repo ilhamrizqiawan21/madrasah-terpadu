@@ -335,9 +335,9 @@ Unik (`student_id`,`academic_year_id`,`aspect`).
 
 `student_id → students` unik (restrict), `pin_hash`, `reset_by → users` (restrict), `reset_at`, timestamps. PIN 6 digit di-hash dan tidak pernah ditampilkan ulang setelah dibuat; ditulis hanya lewat `StudentExamPinService`.
 
-### `exams` (T-1503)
+### `exams` (T-1503 ✅)
 
-`exam_period_id null`, `subject_id`, `title`, `grade string(10) null`, `classroom_ids json`, `opens_at`, `closes_at`, `duration_minutes`, `shuffle_questions bool`, `shuffle_options bool`, `weights json` (default {mcq:2, matching:2, essay_paper:4}), `access_token string null`, `violation_limit tinyint default 3`, `device_modes json` (`lab|tablet|phone`), `show_result_to_guardian bool default false`, `status` (`draft|scheduled|running|finished`), `locked_at null`, `created_by`, timestamps.
+`exam_period_id null` (opsional, belum ber-FK sampai Rilis peralihan), `subject_id → subjects` (restrict), `title string(150)`, `grade string(10) null`, `classroom_ids json`, `opens_at`, `closes_at`, `duration_minutes`, `shuffle_questions bool`, `shuffle_options bool`, `weights json` (default `{mcq:2, matching:2, essay_paper:4}`), `access_token string(20) null`, `violation_limit tinyint default 3`, `device_modes json` (`lab|tablet|phone`), `show_result_to_guardian bool default false`, `status string(32)` (`draft|scheduled|running|finished`), `locked_at null`, `created_by → users` (restrict), timestamps. Ditulis lewat `ExamService`.
 
 ### `exam_questions`, `exam_question_options` (T-1504)
 

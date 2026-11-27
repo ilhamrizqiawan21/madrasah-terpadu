@@ -130,6 +130,12 @@ final class Navigation
                 'label' => 'Ujian',
                 'items' => [
                     [
+                        'label' => 'Daftar ujian',
+                        'route' => 'admin.cbt.exams.index',
+                        'permission' => Permission::CbtView->value,
+                        'feature' => Feature::Cbt,
+                    ],
+                    [
                         'label' => 'Mapel & penugasan',
                         'route' => 'admin.cbt.subjects.index',
                         'permission' => Permission::CbtView->value,
