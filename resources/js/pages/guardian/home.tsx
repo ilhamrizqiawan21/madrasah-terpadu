@@ -1,13 +1,37 @@
-import { Head, usePage } from '@inertiajs/react';
+import { Head, Link } from '@inertiajs/react';
+import { ChevronRight } from 'lucide-react';
 import { EmptyState } from '@/components/app/empty-state';
-import type { GuardianContextData } from '@/layouts/guardian-layout';
 import GuardianLayout from '@/layouts/guardian-layout';
+import { cn } from '@/lib/utils';
 
-export default function GuardianHome() {
-    const { guardianContext } = usePage<{
-        guardianContext?: GuardianContextData | null;
-    }>().props;
-    const child = guardianContext?.activeChild ?? null;
+type HomeCard = {
+    key: string;
+    priority: number;
+    title: string;
+    summary: string;
+    tone: 'default' | 'attention' | 'success' | 'warning';
+    href: string | null;
+};
+
+type Props = {
+    home: {
+        student: {
+            id: number;
+            nis: string;
+            name: string;
+            nickname: string | null;
+            unit: string;
+            classroom: string | null;
+            status_label: string;
+            photo_url: string | null;
+        };
+        cards: HomeCard[];
+    } | null;
+};
+
+export default function GuardianHome({ home }: Props) {
+    const child = home?.student ?? null;
+    const cards = home?.cards ?? [];
 
     return (
         <GuardianLayout>
@@ -43,10 +67,51 @@ export default function GuardianHome() {
                         </div>
                     </section>
 
-                    <EmptyState
-                        title="Belum ada pembaruan hari ini"
-                        description="Informasi presensi, perilaku, dan hafalan anak akan muncul di sini saat tercatat oleh sekolah."
-                    />
+                    {cards.length === 0 ? (
+                        <EmptyState
+                            title="Belum ada pembaruan hari ini"
+                            description="Informasi presensi, perilaku, dan hafalan anak akan muncul di sini saat tercatat oleh sekolah."
+                        />
+                    ) : (
+                        <div className="space-y-3">
+                            {cards.map((card) => {
+                                const content = (
+                                    <div
+                                        className={cn(
+                                            'flex items-center justify-between gap-3 rounded-lg border bg-card p-4 shadow-xs transition-colors',
+                                            card.tone === 'attention'
+                                                ? 'border-accent-attention'
+                                                : 'border-border hover:border-primary/40',
+                                        )}
+                                    >
+                                        <div className="min-w-0 space-y-0.5">
+                                            <h2 className="text-sm font-semibold text-foreground">
+                                                {card.title}
+                                            </h2>
+                                            <p className="text-sm text-muted-foreground">
+                                                {card.summary}
+                                            </p>
+                                        </div>
+                                        {card.href && (
+                                            <ChevronRight className="size-5 shrink-0 text-muted-foreground" />
+                                        )}
+                                    </div>
+                                );
+
+                                return card.href ? (
+                                    <Link
+                                        key={card.key}
+                                        href={card.href}
+                                        className="block min-h-11"
+                                    >
+                                        {content}
+                                    </Link>
+                                ) : (
+                                    <div key={card.key}>{content}</div>
+                                );
+                            })}
+                        </div>
+                    )}
                 </div>
             )}
         </GuardianLayout>
