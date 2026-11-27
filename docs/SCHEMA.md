@@ -343,13 +343,13 @@ Unik (`student_id`,`academic_year_id`,`aspect`).
 
 `exam_questions`: `exam_id → exams` (restrict), `type string(20)` (`mcq|matching|essay_paper`), `body text`, `is_rtl bool`, `image_path null` (disk privat `local` `cbt/questions/`), `sort_order`, `answer_key json null` (disembunyikan dari `StudentExamQuestionResource`). `exam_question_options`: `exam_question_id → exam_questions` (cascade), `label string(20)`, `body text`, `sort_order`. Ditulis lewat `ExamQuestionService`.
 
-### `exam_sessions` (T-1505)
+### `exam_sessions` (T-1505 ✅)
 
-`exam_id`, `student_id`, `started_at`, `deadline_at`, `extra_minutes smallint default 0`, `status` (`in_progress|locked|submitted|auto_closed|force_closed`), `device_type` (`lab|tablet|phone`), `device_token string(64)`, `shuffle_seed int`, `last_seen_at`, `takeover_count`. Unik (`exam_id`,`student_id`).
+`exam_id → exams` (restrict), `student_id → students` (restrict), `started_at`, `deadline_at`, `extra_minutes smallint default 0`, `status string(32)` (`in_progress|locked|submitted|auto_closed|force_closed`), `device_type string(20)` (`lab|tablet|phone`), `device_token string(64)`, `shuffle_seed int`, `last_seen_at`, `takeover_count`, timestamps. Unik (`exam_id`,`student_id`), indeks (`exam_id`,`status`). Ditulis lewat `ExamSessionService`.
 
-### `exam_answers` (T-1505)
+### `exam_answers` (T-1505 ✅)
 
-`exam_session_id`, `exam_question_id`, `answer json null`, `is_flagged bool`, `client_ts timestamp`, `received_at`. Unik (`exam_session_id`,`exam_question_id`); upsert idempoten.
+`exam_session_id → exam_sessions` (cascade), `exam_question_id → exam_questions` (restrict), `answer json null`, `is_flagged bool`, `client_ts timestamp`, `received_at timestamp`, timestamps. Unik (`exam_session_id`,`exam_question_id`); upsert idempoten.
 
 ### `exam_violations` (T-1508) — append-only
 

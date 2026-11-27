@@ -6,6 +6,7 @@ use App\Enums\Feature;
 use App\Http\Controllers\Exam\ExamAuthController;
 use App\Http\Controllers\Exam\ExamDashboardController;
 use App\Http\Controllers\Exam\ExamQuestionImageController;
+use App\Http\Controllers\Exam\ExamSessionController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -24,5 +25,18 @@ Route::middleware('feature:'.Feature::Cbt->value)
             Route::get('{exam}/soal/{question}/gambar', ExamQuestionImageController::class)
                 ->whereNumber(['exam', 'question'])
                 ->name('questions.image');
+
+            Route::post('{exam}/mulai', [ExamSessionController::class, 'start'])
+                ->whereNumber('exam')
+                ->name('sessions.start');
+            Route::get('{exam}/kerjakan', [ExamSessionController::class, 'show'])
+                ->whereNumber('exam')
+                ->name('sessions.show');
+            Route::post('{exam}/jawaban', [ExamSessionController::class, 'syncAnswers'])
+                ->whereNumber('exam')
+                ->name('sessions.answers');
+            Route::post('{exam}/selesai', [ExamSessionController::class, 'submit'])
+                ->whereNumber('exam')
+                ->name('sessions.submit');
         });
     });
