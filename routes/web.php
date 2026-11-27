@@ -28,9 +28,7 @@ Route::middleware(['auth'])->group(function (): void {
             Route::inertia('/', 'admin/dashboard')->name('dashboard');
             Route::post('context', SchoolContextController::class)->name('context.update');
 
-            Route::inertia('siswa', 'admin/dashboard')
-                ->middleware('permission:'.Permission::StudentsView->value)
-                ->name('students.index');
+            require __DIR__.'/students.php';
 
             Route::inertia('presensi', 'admin/dashboard')
                 ->middleware(['permission:'.Permission::AttendanceView->value, 'feature:'.Feature::Attendance->value])

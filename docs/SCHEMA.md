@@ -85,15 +85,15 @@ Maks satu aktif dijaga `AcademicYearService::activate` (lock baris + transaksi) 
 Ditulis hanya lewat `App\Services\Classrooms\ClassroomService` (audit `created|updated|activated|deactivated|copied`). Wali kelas wajib pengguna aktif berperan `guru` (`ClassroomService::homeroomCandidates()`). Rombel tidak dihapus, hanya dinonaktifkan; unit & tahun ajaran rombel tidak bisa dipindah lewat ubah.
 "Salin dari tahun lain" (`copyFromYear`): menyalin rombel **aktif** satu unit dari tahun ajaran sumber ke tujuan, melewati nama yang sudah ada (tanpa beda huruf besar/kecil), wali kelas ikut hanya bila masih guru aktif; satu entri audit `copied` berisi jumlah disalin/dilewati.
 
-### `students` (T-205)
+### `students` (T-205 ✅)
 
 `unit_id`, `nis string(20) unique`, `nisn string(20) unique nullable`, `name`, `nickname string(30) null` (dipakai di notifikasi), `gender string(1)`,
 `birth_place null`, `birth_date null`, `address text null`, `photo_path null`, `status string` (`active|graduated|moved|inactive`), timestamps, `deleted_at`.
-Indeks: (`unit_id`,`status`), (`name`).
+Indeks: (`unit_id`,`status`), (`name`). FK `unit_id` → `units` restrict. `gender` = `L|P` (enum `Gender`), `status` = enum `StudentStatus`. Foto: JPEG ≤ 300 KB, sisi terpanjang 600 px, di disk privat `local` `students/photos/<acak>.jpg`, disajikan lewat rute berizin `admin.students.photo`. Siswa tidak dihapus dari UI (status nonaktif); NIS/NISN unik termasuk baris terhapus lunak.
 
-### `enrollments` (T-205)
+### `enrollments` (T-205 ✅)
 
-`student_id`, `classroom_id`, `academic_year_id`, timestamps. Unik (`student_id`,`academic_year_id`). Rombel aktif siswa = enrollment tahun ajaran aktif.
+`student_id`, `classroom_id`, `academic_year_id`, timestamps. Unik (`student_id`,`academic_year_id`); indeks (`classroom_id`,`academic_year_id`). Semua FK restrict. Rombel aktif siswa = enrollment tahun ajaran aktif. Pindah rombel di tahun yang sama memperbarui baris itu dengan audit `enrollment_moved` (sebelum/sesudah rombel); baris tahun lain tidak disentuh (riwayat).
 
 ### `guardians` (T-206)
 

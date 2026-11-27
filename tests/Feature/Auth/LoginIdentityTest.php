@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Models\Student;
 use App\Models\User;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
@@ -43,12 +44,7 @@ test('pengguna dapat login menggunakan nomor HP dengan berbagai format', functio
 });
 
 test('wali dapat login menggunakan NIS yang memetakan ke wali utama siswa', function (): void {
-    Schema::create('students', function (Blueprint $table): void {
-        $table->id();
-        $table->string('nis', 20)->unique();
-        $table->timestamps();
-    });
-
+    // Tabel students sudah nyata sejak T-205; guardians & guardian_student menyusul di T-206.
     Schema::create('guardians', function (Blueprint $table): void {
         $table->id();
         $table->foreignId('user_id');
@@ -65,7 +61,7 @@ test('wali dapat login menggunakan NIS yang memetakan ke wali utama siswa', func
     $primaryUser = User::factory()->create();
     $secondaryUser = User::factory()->create();
 
-    $studentId = DB::table('students')->insertGetId(['nis' => '20260001']);
+    $studentId = Student::factory()->create(['nis' => '20260001'])->id;
     $primaryGuardianId = DB::table('guardians')->insertGetId(['user_id' => $primaryUser->id]);
     $secondaryGuardianId = DB::table('guardians')->insertGetId(['user_id' => $secondaryUser->id]);
 
