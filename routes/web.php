@@ -48,9 +48,7 @@ Route::middleware(['auth:web'])->group(function (): void {
                 ->middleware(['permission:'.Permission::InvoicesView->value, 'feature:'.Feature::Billing->value])
                 ->name('invoices.index');
 
-            Route::inertia('perilaku', 'admin/dashboard')
-                ->middleware(['permission:'.Permission::BehaviorView->value, 'feature:'.Feature::Behavior->value])
-                ->name('behavior.index');
+            require __DIR__.'/behavior.php';
 
             Route::inertia('hafalan', 'admin/dashboard')
                 ->middleware(['permission:'.Permission::QuranView->value, 'feature:'.Feature::Quran->value])

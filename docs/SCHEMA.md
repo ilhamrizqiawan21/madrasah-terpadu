@@ -234,9 +234,9 @@ Indeks (`status`,`due_date`), (`student_id`,`status`). Sisa = `amount - adjustme
 
 ## G. Buku Saku BK dan reward (Fase 9)
 
-### `point_rules` (T-901)
+### `point_rules` (T-901 ✅)
 
-`unit_id null`, `code string(20)`, `name`, `category string` (`violation|achievement|good_deed`), `points smallint unsigned`, `level string null` (untuk prestasi: sekolah/kecamatan/kabupaten/...), `is_active`, timestamps. Unik (`unit_id`,`code`).
+`unit_id null` (`→ units`, restrict), `code string(30)`, `name string(180)`, `category string(20)` (`violation|achievement|good_deed`), `level string(50) null` (untuk prestasi: sekolah/kecamatan/kabupaten/...), `points smallint unsigned`, `is_active`, timestamps. Unik (`unit_id`,`code`). Ditulis lewat `PointRuleService`.
 
 ### `behavior_records` (T-902)
 

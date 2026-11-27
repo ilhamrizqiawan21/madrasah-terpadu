@@ -111,6 +111,12 @@ final class Navigation
                         'permission' => Permission::BehaviorView->value,
                         'feature' => Feature::Behavior,
                     ],
+                    [
+                        'label' => 'Aturan poin',
+                        'route' => 'admin.behavior.rules.index',
+                        'permission' => Permission::PointRulesManage->value,
+                        'feature' => Feature::Behavior,
+                    ],
                 ],
             ],
             [

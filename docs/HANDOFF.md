@@ -23,7 +23,7 @@ Aturan: singkat dan faktual. Jangan menyalin isi TODO/ADR; tautkan saja. Hapus b
 
 ## Terakhir diperbarui
 
-2026-11-27 · Gemini (eksekutor), setelah **Paket P-16 & P-17 (Fase 15 Ujian CBT: T-1501 s.d. T-1511) selesai seluruhnya**
+2026-11-27 · Gemini (eksekutor), setelah **T-901 (Aturan poin, Fase 9 Paket P-11)** selesai
 
 ## Keadaan sekarang
 
