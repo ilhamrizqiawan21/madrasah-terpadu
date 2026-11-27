@@ -267,9 +267,10 @@ Akun wali dibuat lewat impor/data induk dengan password awal acak. Tidak ada hal
 - **U-01** Rumus nilai sikap (PRD §4.11). Memblokir Fase 12.
 - **U-02** Biaya admin Midtrans ditanggung siapa (PRD §4.5). Default: yayasan.
 - **U-03** Keterlambatan otomatis menjadi pelanggaran (PRD §4.7). Default: tidak.
-- **U-04** Streak mutabaah menghasilkan poin (PRD §4.9). Default: tidak.
+- **U-04** Streak mutabaah menghasilkan poin (PRD §4.9). **Diputuskan pemilik (2026-11-27): poin streak mutabaah dapat dikustomisasi oleh admin/user** (aktif/nonaktif, jumlah hari berturut-turut, dan bobot poin kebaikan melalui `SettingKey::HabitStreak*`).
 - **U-05** ADR-009 kelebihan bayar.
 - **U-06** Nama pencatat perilaku terlihat oleh wali. Default: tidak terlihat.
+- **U-13** Celah menu dari pengamatan ulang admin aplikasi lama 2026-11-27 (lihat bagian U-13). Sudah tampil di menu sebagai "Segera" (ADR-028).
 - **U-12** Fitur aplikasi lama yang belum ada di rencana (paritas, REUSE_MAP §4). Sebagian diputuskan lewat ADR-021/ADR-022; yang tersisa: format e-rapor resmi, kebutuhan akuntansi lanjutan, cakupan asrama.
 
 ### U-12 — Paritas dengan aplikasi lama (Usulan, 2026-11-27)
@@ -291,3 +292,22 @@ Akun wali dibuat lewat impor/data induk dengan password awal acak. Tidak ada hal
 | k   | PPDB, CMS, perpustakaan, armada, koperasi, helpdesk              | hampir kosong              | Tetap bukan tujuan                                                                                                                             | —                                |
 
 **Pertanyaan untuk klien:** dari (d)–(i), mana yang **wajib** saat peralihan dan mana yang boleh menyusul? Untuk akuntansi (h), apakah tetap di aplikasi lama/terpisah sementara?
+
+### U-13 — Celah menu dari pengamatan ulang aplikasi lama (Usulan, 2026-11-27)
+
+**Konteks:** pengamatan ulang menu admin `amaljayaberkah.id` (15 grup, ±130 item, hanya membaca) menemukan fitur yang belum ada di PRD/TODO maupun U-12. Atas keputusan pemilik (ADR-028) semuanya sudah tampil di sidebar sebagai item "Segera"; isinya menunggu keputusan di sini.
+
+| #   | Fitur                                                   | Usulan arsitek                                                                                                     |
+| --- | ------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| a   | Halaman publik Kebijakan Privasi & Kebijakan Pembayaran | **Wajib sebelum P-09b**: Midtrans mensyaratkan keduanya di situs merchant; aplikasi ini belum punya halaman publik |
+| b   | Katalog menu/produk kantin                              | Konfirmasi: kasir di sana memilih menu atau mengetik nominal? Menentukan rancangan kasir kantin (P-10)             |
+| c   | Ekstrakurikuler + anggota + nilai ekskul                | Ambil bila e-rapor memerlukan nilai ekskul                                                                         |
+| d   | Kelulusan & cetak SKL                                   | Ambil, kecil (status lulus sudah ada di mutasi)                                                                    |
+| e   | Presensi per mapel (per jam pelajaran)                  | Ambil setelah jadwal pelajaran (T-1602)                                                                            |
+| f   | Impor guru & staf dari Excel                            | Ambil, kecil (pola impor siswa T-207)                                                                              |
+| g   | Target capaian belajar (TP), supervisi modul ajar       | Tunda; tanyakan pemakaian nyata                                                                                    |
+| h   | Inventaris aset, ruangan & peminjaman                   | Tunda; tanyakan pemakaian nyata                                                                                    |
+| i   | Undangan rapat, buku tamu, penelusuran alumni           | Tunda; tanyakan pemakaian nyata                                                                                    |
+| j   | Leger hasil belajar                                     | Bergantung format e-rapor (U-12 g)                                                                                 |
+
+**Pertanyaan untuk klien:** urutan prioritas (a)–(j), dan apakah (g)–(i) benar dipakai di aplikasi lama.

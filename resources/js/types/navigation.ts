@@ -18,11 +18,15 @@ export type StaffNavItem = {
     route: string;
     href: string;
     permission: string;
+    /** Modul belum dibangun; membuka halaman "sedang disiapkan" (ADR-028). */
+    soon?: boolean;
 };
 
 export type StaffNavGroup = {
     key: string;
     label: string;
+    /** Nama ikon grup; dipetakan ke ikon Lucide di layout staf. */
+    icon?: string;
     items: StaffNavItem[];
 };
 

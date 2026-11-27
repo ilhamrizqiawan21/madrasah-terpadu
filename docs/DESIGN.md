@@ -57,8 +57,9 @@ Palet aktif per layar maksimal: netral + primary + satu warna status yang releva
 
 ### Staf (`staff-layout`)
 
-- Topbar: logo + nama unit aktif (kiri), **menu utama rata tengah** berupa grup dropdown (Data Induk, Presensi, Keuangan, Kesiswaan, Ibadah, Ujian, Laporan, Pengaturan), pemilih unit/tahun ajaran, akun (kanan). Sesuai standar 02.
-- Di bawah 1024 px: menu pindah ke sheet kiri dengan tombol hamburger (`aria-expanded`, Escape menutup, fokus kembali ke tombol).
+- **Sidebar kiri** (ADR-028, menggantikan menu topbar mockup 01): latar `--sidebar` = warna utama + motif halus; kepala = logo/inisial + nama aplikasi + yayasan; Beranda lalu grup berikon dari katalog server `App\Support\Navigation` (Data Induk, Akademik, Presensi, Kesiswaan, Ibadah, Ujian, Keuangan, Kantin, Sarana, Administrasi, Laporan, Pengaturan). Grup yang berisi halaman aktif terbuka otomatis; item aktif = latar + tebal + `aria-current`. Item modul belum jadi berlabel "Segera" (teks redup) dan membuka halaman "sedang disiapkan". Kaki = akun pengguna (Pengaturan akun, Keluar).
+- Ciutkan menjadi ikon di ≥ 1024 px (tombol di topbar, `Ctrl+B`, status tersimpan di cookie); grup dalam mode ikon membuka menu melayang. Di bawah 1024 px sidebar menjadi sheet kiri.
+- Topbar ramping putih: tombol sidebar, breadcrumb (judul saja di Beranda), pemilih unit/tahun ajaran (tahun dipendekkan "26/27" di < 640 px).
 - Breadcrumb di setiap halaman di bawah topbar.
 - Halaman indeks: `PageHeader` (judul, satu aksi utama di kanan, ekspor icon-only) → filter satu baris → tabel → paginasi.
 - Form tambah/ubah: `FormDialog` di tengah (standar 04). Form panjang (penerbitan tagihan, impor) boleh halaman sendiri dengan langkah.
@@ -136,6 +137,7 @@ Keyboard penuh, fokus terlihat (`ring`), urutan fokus logis, label untuk setiap 
 
 | Aturan global                              | Override                                                                        | Alasan                                                                                    |
 | ------------------------------------------ | ------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| 02: menu topbar                            | Area **staf** memakai sidebar kiri berkelompok (ADR-028)                        | ±12 grup tidak muat di topbar 1280 px; staf terbiasa sidebar di aplikasi lama             |
 | 02: sidebar dengan hamburger / menu topbar | Area **wali** memakai navigasi bawah 4 item di ponsel                           | Wali memakai HP satu tangan; 4 tujuan utama lebih cepat dijangkau ibu jari daripada sheet |
 | 02: breadcrumb di setiap halaman           | Area **wali** dan **kiosk** tanpa breadcrumb                                    | Hierarki dangkal (maks 2 level) dan layar tugas tunggal; tombol kembali di header cukup   |
 | 04: form CRUD di modal                     | Penerbitan tagihan, impor siswa, dan penilaian setoran memakai halaman bertahap | Form panjang dengan pratinjau tidak muat di modal di layar kecil                          |

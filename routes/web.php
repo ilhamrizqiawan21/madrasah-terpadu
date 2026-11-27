@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Enums\Feature;
 use App\Enums\Permission;
 use App\Enums\Role;
+use App\Http\Controllers\Admin\ComingSoonController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\SchoolContextController;
 use App\Http\Controllers\BrandingAssetController;
@@ -44,18 +45,26 @@ Route::middleware(['auth:web'])->group(function (): void {
             require __DIR__.'/guardians.php';
             require __DIR__.'/attendance.php';
 
-            Route::inertia('tagihan', 'admin/dashboard')
+            // Modul belum dibangun: nama rute lama dipertahankan, isinya halaman "sedang disiapkan" (ADR-028).
+            Route::get('segera/{module}', ComingSoonController::class)
+                ->where('module', '[a-z0-9-]+')
+                ->name('soon');
+
+            Route::get('tagihan', ComingSoonController::class)
+                ->defaults('module', 'tagihan')
                 ->middleware(['permission:'.Permission::InvoicesView->value, 'feature:'.Feature::Billing->value])
                 ->name('invoices.index');
 
             require __DIR__.'/behavior.php';
             require __DIR__.'/habits.php';
 
-            Route::inertia('hafalan', 'admin/dashboard')
+            Route::get('hafalan', ComingSoonController::class)
+                ->defaults('module', 'setoran-hafalan')
                 ->middleware(['permission:'.Permission::QuranView->value, 'feature:'.Feature::Quran->value])
                 ->name('quran.index');
 
-            Route::inertia('laporan', 'admin/dashboard')
+            Route::get('laporan', ComingSoonController::class)
+                ->defaults('module', 'laporan-presensi')
                 ->middleware('permission:'.Permission::ReportsView->value)
                 ->name('reports.index');
 

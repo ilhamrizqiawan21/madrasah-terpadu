@@ -1,10 +1,33 @@
 import { Link, router, usePage } from '@inertiajs/react';
-import { ChevronDown, Menu } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import type { LucideIcon } from 'lucide-react';
+import {
+    BookOpen,
+    CalendarCheck,
+    ChartColumn,
+    ChevronDown,
+    ChevronRight,
+    ChevronsUpDown,
+    ClipboardCheck,
+    HeartHandshake,
+    House,
+    Inbox,
+    MoonStar,
+    Package,
+    Settings,
+    Store,
+    Users,
+    Wallet,
+} from 'lucide-react';
+import { useEffect } from 'react';
 import SchoolContextController from '@/actions/App/Http/Controllers/Admin/SchoolContextController';
 import { Breadcrumbs } from '@/components/breadcrumbs';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
+import {
+    Collapsible,
+    CollapsibleContent,
+    CollapsibleTrigger,
+} from '@/components/ui/collapsible';
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -14,12 +37,23 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import {
-    Sheet,
-    SheetContent,
-    SheetHeader,
-    SheetTitle,
-    SheetTrigger,
-} from '@/components/ui/sheet';
+    Sidebar,
+    SidebarContent,
+    SidebarFooter,
+    SidebarGroup,
+    SidebarHeader,
+    SidebarInset,
+    SidebarMenu,
+    SidebarMenuButton,
+    SidebarMenuItem,
+    SidebarMenuSub,
+    SidebarMenuSubButton,
+    SidebarMenuSubItem,
+    SidebarProvider,
+    SidebarRail,
+    SidebarTrigger,
+    useSidebar,
+} from '@/components/ui/sidebar';
 import { UserMenuContent } from '@/components/user-menu-content';
 import { useInitials } from '@/hooks/use-initials';
 import { cn } from '@/lib/utils';
@@ -29,11 +63,13 @@ import type {
     BreadcrumbItem,
     SchoolContext,
     StaffNavGroup,
+    StaffNavItem,
 } from '@/types';
 
 type SharedProps = {
     name: string;
     auth: Auth;
+    sidebarOpen: boolean;
     branding?: {
         appName: string;
         foundationName: string;
@@ -44,6 +80,32 @@ type SharedProps = {
     schoolContext?: SchoolContext | null;
 };
 
+const groupIcons: Record<string, LucideIcon> = {
+    users: Users,
+    'book-open': BookOpen,
+    'calendar-check': CalendarCheck,
+    'heart-handshake': HeartHandshake,
+    'moon-star': MoonStar,
+    'clipboard-check': ClipboardCheck,
+    wallet: Wallet,
+    store: Store,
+    package: Package,
+    inbox: Inbox,
+    'chart-column': ChartColumn,
+    settings: Settings,
+};
+
+function usePathActive() {
+    const page = usePage();
+    const currentPath = page.url.split('?')[0];
+
+    return (href: string): boolean => {
+        const path = href.split('?')[0];
+
+        return currentPath === path || currentPath.startsWith(`${path}/`);
+    };
+}
+
 export default function StaffLayout({
     breadcrumbs = [],
     children,
@@ -51,34 +113,340 @@ export default function StaffLayout({
     breadcrumbs?: BreadcrumbItem[];
     children: React.ReactNode;
 }) {
-    const page = usePage<SharedProps>();
-    const { auth, name, branding, navigation = [], schoolContext } = page.props;
-    const currentPath = page.url.split('?')[0];
-    const getInitials = useInitials();
-    const [mobileOpen, setMobileOpen] = useState(false);
+    const { sidebarOpen, branding } = usePage<SharedProps>().props;
 
     useEffect(() => {
         const root = document.documentElement.style;
+
         if (branding?.primaryColor) {
             root.setProperty('--primary', branding.primaryColor);
-            root.setProperty('--sidebar-primary', branding.primaryColor);
         } else {
             root.removeProperty('--primary');
-            root.removeProperty('--sidebar-primary');
         }
     }, [branding?.primaryColor]);
 
-    const isItemActive = (href: string): boolean =>
-        currentPath === href || currentPath.startsWith(`${href}/`);
+    // Beranda tidak butuh jejak "Beranda" saja; halaman lain tetap memakai breadcrumb (DESIGN §3).
+    const showBreadcrumbs = breadcrumbs.length > 1;
 
-    const isGroupActive = (group: StaffNavGroup): boolean =>
-        group.items.some((item) => isItemActive(item.href));
+    return (
+        <SidebarProvider defaultOpen={sidebarOpen}>
+            <StaffSidebar />
+            <SidebarInset className="min-w-0 bg-background">
+                <header className="sticky top-0 z-20 flex h-14 shrink-0 items-center gap-3 border-b border-border bg-card/95 px-3 shadow-xs backdrop-blur-sm sm:px-5">
+                    <SidebarTrigger
+                        className="size-9"
+                        aria-label="Buka atau ciutkan menu"
+                    />
+                    <div className="min-w-0 flex-1 text-sm">
+                        {showBreadcrumbs ? (
+                            <div className="truncate text-muted-foreground">
+                                <Breadcrumbs breadcrumbs={breadcrumbs} />
+                            </div>
+                        ) : (
+                            <span className="font-medium text-foreground">
+                                {breadcrumbs[0]?.title ?? ''}
+                            </span>
+                        )}
+                    </div>
+                    <SchoolContextPicker />
+                </header>
 
-    const unitLabel = schoolContext?.unit
-        ? `Unit ${schoolContext.unit}`
-        : 'Belum ada unit';
-    const yearLabel =
-        schoolContext?.academicYear ?? 'Belum ada tahun ajaran aktif';
+                <main className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6">
+                    {children}
+                </main>
+            </SidebarInset>
+        </SidebarProvider>
+    );
+}
+
+function StaffSidebar() {
+    const {
+        name,
+        branding,
+        navigation = [],
+        auth,
+    } = usePage<SharedProps>().props;
+    const isActive = usePathActive();
+    const currentPath = usePage().url.split('?')[0];
+    const appName = branding?.appName || name;
+    const getInitials = useInitials();
+
+    return (
+        <Sidebar collapsible="icon" aria-label="Menu staf">
+            <SidebarHeader className="border-b border-sidebar-border">
+                <SidebarMenu>
+                    <SidebarMenuItem>
+                        <SidebarMenuButton
+                            size="lg"
+                            asChild
+                            tooltip={appName}
+                            className="hover:bg-sidebar-accent"
+                        >
+                            <Link href={dashboard()}>
+                                {branding?.logoUrl ? (
+                                    <img
+                                        src={branding.logoUrl}
+                                        alt=""
+                                        className="size-8 shrink-0 rounded-md bg-card object-contain p-0.5"
+                                    />
+                                ) : (
+                                    <span
+                                        className="flex size-8 shrink-0 items-center justify-center rounded-md bg-sidebar-primary text-xs font-semibold text-sidebar-primary-foreground"
+                                        aria-hidden
+                                    >
+                                        {getInitials(appName)}
+                                    </span>
+                                )}
+                                <span className="grid min-w-0 leading-tight">
+                                    <span className="truncate text-sm font-semibold">
+                                        {appName}
+                                    </span>
+                                    {branding?.foundationName && (
+                                        <span className="truncate text-xs text-sidebar-foreground/70">
+                                            {branding.foundationName}
+                                        </span>
+                                    )}
+                                </span>
+                            </Link>
+                        </SidebarMenuButton>
+                    </SidebarMenuItem>
+                </SidebarMenu>
+            </SidebarHeader>
+
+            <SidebarContent className="bg-islamic-pattern">
+                <SidebarGroup>
+                    <SidebarMenu>
+                        <SidebarMenuItem>
+                            <SidebarMenuButton
+                                asChild
+                                tooltip="Beranda"
+                                isActive={currentPath === dashboard().url}
+                                className={activeButtonClass}
+                            >
+                                <Link href={dashboard()}>
+                                    <House strokeWidth={1.75} />
+                                    <span>Beranda</span>
+                                </Link>
+                            </SidebarMenuButton>
+                        </SidebarMenuItem>
+                        {navigation.map((group) => (
+                            <NavGroup
+                                key={group.key}
+                                group={group}
+                                isActive={isActive}
+                            />
+                        ))}
+                    </SidebarMenu>
+                </SidebarGroup>
+            </SidebarContent>
+
+            <SidebarFooter className="border-t border-sidebar-border">
+                {auth.user && <SidebarUser user={auth.user} />}
+            </SidebarFooter>
+            <SidebarRail />
+        </Sidebar>
+    );
+}
+
+/** Penanda aktif = latar + tebal + garis kiri, tidak hanya warna (antislop R-25). */
+const activeButtonClass =
+    'relative data-[active=true]:bg-sidebar-accent data-[active=true]:font-semibold data-[active=true]:before:absolute data-[active=true]:before:inset-y-1.5 data-[active=true]:before:left-0 data-[active=true]:before:w-[3px] data-[active=true]:before:rounded-full data-[active=true]:before:bg-sidebar-primary';
+
+function NavGroup({
+    group,
+    isActive,
+}: {
+    group: StaffNavGroup;
+    isActive: (href: string) => boolean;
+}) {
+    const { state, isMobile } = useSidebar();
+    const Icon = groupIcons[group.icon ?? ''] ?? Package;
+    const groupActive = group.items.some((item) => isActive(item.href));
+
+    if (state === 'collapsed' && !isMobile) {
+        return (
+            <SidebarMenuItem>
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <SidebarMenuButton
+                            tooltip={group.label}
+                            isActive={groupActive}
+                            className={activeButtonClass}
+                        >
+                            <Icon strokeWidth={1.75} />
+                            <span>{group.label}</span>
+                        </SidebarMenuButton>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent
+                        side="right"
+                        align="start"
+                        className="min-w-56"
+                    >
+                        <DropdownMenuLabel>{group.label}</DropdownMenuLabel>
+                        {group.items.map((item) => (
+                            <DropdownMenuItem key={item.href} asChild>
+                                <Link
+                                    href={item.href}
+                                    aria-current={
+                                        isActive(item.href) ? 'page' : undefined
+                                    }
+                                    className={cn(
+                                        'flex justify-between gap-3',
+                                        isActive(item.href) && 'font-semibold',
+                                        item.soon && 'text-muted-foreground',
+                                    )}
+                                >
+                                    {item.label}
+                                    {item.soon && <SoonTag />}
+                                </Link>
+                            </DropdownMenuItem>
+                        ))}
+                    </DropdownMenuContent>
+                </DropdownMenu>
+            </SidebarMenuItem>
+        );
+    }
+
+    return (
+        <Collapsible
+            asChild
+            defaultOpen={groupActive}
+            className="group/collapsible"
+        >
+            <SidebarMenuItem>
+                <CollapsibleTrigger asChild>
+                    <SidebarMenuButton
+                        tooltip={group.label}
+                        isActive={groupActive}
+                        className={cn(
+                            activeButtonClass,
+                            'data-[active=true]:before:hidden',
+                        )}
+                    >
+                        <Icon strokeWidth={1.75} />
+                        <span>{group.label}</span>
+                        <ChevronRight
+                            className="ml-auto transition-transform duration-150 group-data-[state=open]/collapsible:rotate-90"
+                            strokeWidth={1.75}
+                        />
+                    </SidebarMenuButton>
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                    <SidebarMenuSub className="border-sidebar-border">
+                        {group.items.map((item) => (
+                            <NavLeaf
+                                key={item.href}
+                                item={item}
+                                active={isActive(item.href)}
+                            />
+                        ))}
+                    </SidebarMenuSub>
+                </CollapsibleContent>
+            </SidebarMenuItem>
+        </Collapsible>
+    );
+}
+
+function NavLeaf({ item, active }: { item: StaffNavItem; active: boolean }) {
+    const { setOpenMobile } = useSidebar();
+
+    return (
+        <SidebarMenuSubItem>
+            <SidebarMenuSubButton
+                asChild
+                isActive={active}
+                className={cn(
+                    'h-8 text-sidebar-foreground/85 hover:text-sidebar-foreground data-[active=true]:bg-sidebar-accent data-[active=true]:font-semibold data-[active=true]:text-sidebar-foreground',
+                    item.soon && 'text-sidebar-foreground/60',
+                )}
+            >
+                <Link
+                    href={item.href}
+                    aria-current={active ? 'page' : undefined}
+                    onClick={() => setOpenMobile(false)}
+                >
+                    <span className="truncate">{item.label}</span>
+                    {item.soon && <SoonTag inverted />}
+                </Link>
+            </SidebarMenuSubButton>
+        </SidebarMenuSubItem>
+    );
+}
+
+function SoonTag({ inverted = false }: { inverted?: boolean }) {
+    return (
+        <span
+            className={cn(
+                'ml-auto shrink-0 rounded px-1.5 py-px text-[10px] font-medium',
+                inverted
+                    ? 'bg-sidebar-foreground/10 text-sidebar-foreground/70'
+                    : 'bg-muted text-muted-foreground',
+            )}
+        >
+            Segera
+        </span>
+    );
+}
+
+function SidebarUser({ user }: { user: NonNullable<Auth['user']> }) {
+    const getInitials = useInitials();
+    const { isMobile, state } = useSidebar();
+
+    return (
+        <SidebarMenu>
+            <SidebarMenuItem>
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <SidebarMenuButton
+                            size="lg"
+                            tooltip={user.name}
+                            className="hover:bg-sidebar-accent data-[state=open]:bg-sidebar-accent"
+                        >
+                            <Avatar className="size-8 rounded-md">
+                                <AvatarImage src={user.avatar} alt="" />
+                                <AvatarFallback className="rounded-md bg-sidebar-primary text-xs font-semibold text-sidebar-primary-foreground">
+                                    {getInitials(user.name)}
+                                </AvatarFallback>
+                            </Avatar>
+                            <span className="grid min-w-0 flex-1 text-left leading-tight">
+                                <span className="truncate text-sm font-medium">
+                                    {user.name}
+                                </span>
+                                <span className="truncate text-xs text-sidebar-foreground/70">
+                                    Akun & keluar
+                                </span>
+                            </span>
+                            <ChevronsUpDown
+                                className="ml-auto size-4"
+                                strokeWidth={1.75}
+                            />
+                        </SidebarMenuButton>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent
+                        className="w-56"
+                        side={
+                            isMobile
+                                ? 'top'
+                                : state === 'collapsed'
+                                  ? 'right'
+                                  : 'top'
+                        }
+                        align="end"
+                    >
+                        <UserMenuContent user={user} />
+                    </DropdownMenuContent>
+                </DropdownMenu>
+            </SidebarMenuItem>
+        </SidebarMenu>
+    );
+}
+
+function SchoolContextPicker() {
+    const { schoolContext } = usePage<SharedProps>().props;
+
+    if (!schoolContext) {
+        return null;
+    }
 
     const updateContext = (payload: {
         unit?: string;
@@ -89,283 +457,76 @@ export default function StaffLayout({
         });
     };
 
+    const year = schoolContext.academicYear ?? 'Tahun ajaran';
+    // Di layar sempit "2026/2027 Ganjil" dipendekkan menjadi "26/27".
+    const shortYear = year.replace(/^20(\d{2})\/20(\d{2}).*$/, '$1/$2');
+
     return (
-        <div className="min-h-screen bg-background text-foreground">
-            <header className="sticky top-0 z-20 border-b border-primary-foreground/15 bg-primary text-primary-foreground shadow-xs">
-                <div className="mx-auto flex h-14 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6">
-                    <div className="flex items-center gap-3">
-                        <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
-                            <SheetTrigger asChild>
-                                <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="text-primary-foreground hover:bg-primary-foreground/15 hover:text-primary-foreground lg:hidden"
-                                    aria-label="Buka menu navigasi"
-                                    aria-expanded={mobileOpen}
-                                >
-                                    <Menu
-                                        className="size-5"
-                                        strokeWidth={1.75}
-                                    />
-                                </Button>
-                            </SheetTrigger>
-                            <SheetContent side="left" className="w-72 p-4">
-                                <SheetHeader className="pb-4 text-left">
-                                    <SheetTitle>{name}</SheetTitle>
-                                    {schoolContext && (
-                                        <p className="text-xs text-muted-foreground">
-                                            {unitLabel} · {yearLabel}
-                                        </p>
-                                    )}
-                                </SheetHeader>
-                                <nav
-                                    aria-label="Menu utama"
-                                    className="space-y-4"
-                                >
-                                    {navigation.map((group) => (
-                                        <div
-                                            key={group.key}
-                                            className="space-y-1"
-                                        >
-                                            <div className="px-2 text-xs font-medium text-muted-foreground">
-                                                {group.label}
-                                            </div>
-                                            {group.items.map((item) => {
-                                                const active = isItemActive(
-                                                    item.href,
-                                                );
-
-                                                return (
-                                                    <Link
-                                                        key={item.route}
-                                                        href={item.href}
-                                                        onClick={() =>
-                                                            setMobileOpen(false)
-                                                        }
-                                                        className={cn(
-                                                            'block rounded-md px-3 py-2 text-sm transition-colors',
-                                                            active
-                                                                ? 'border-l-2 border-primary bg-muted font-semibold text-foreground'
-                                                                : 'text-muted-foreground hover:bg-muted hover:text-foreground',
-                                                        )}
-                                                    >
-                                                        {item.label}
-                                                    </Link>
-                                                );
-                                            })}
-                                        </div>
-                                    ))}
-                                </nav>
-                            </SheetContent>
-                        </Sheet>
-
-                        <Link
-                            href={dashboard()}
-                            className="flex items-center gap-2.5"
-                        >
-                            {branding?.logoUrl ? (
-                                <img
-                                    src={branding.logoUrl}
-                                    alt={branding.appName || name}
-                                    className="size-7 rounded-md border border-primary-foreground/25 bg-card object-cover"
-                                />
-                            ) : (
-                                <span className="flex size-7 items-center justify-center rounded-md border border-primary-foreground/20 bg-primary-foreground/15 text-xs font-semibold text-primary-foreground">
-                                    MT
-                                </span>
-                            )}
-                            <span className="hidden text-sm leading-tight sm:block">
-                                <span className="block font-semibold text-primary-foreground">
-                                    {branding?.appName || name}
-                                </span>
-                                {schoolContext && (
-                                    <span className="block text-xs text-primary-foreground/75">
-                                        {unitLabel}
-                                    </span>
-                                )}
-                            </span>
-                        </Link>
-                    </div>
-
-                    <nav
-                        aria-label="Navigasi staf"
-                        className="hidden items-center justify-center gap-1 lg:flex"
-                    >
-                        {navigation.map((group) => {
-                            const active = isGroupActive(group);
-
-                            return (
-                                <DropdownMenu key={group.key}>
-                                    <DropdownMenuTrigger asChild>
-                                        <Button
-                                            variant="ghost"
-                                            size="sm"
-                                            className={cn(
-                                                'gap-1 text-sm',
-                                                active
-                                                    ? 'bg-primary-foreground/15 font-semibold text-primary-foreground hover:bg-primary-foreground/20 hover:text-primary-foreground'
-                                                    : 'font-medium text-primary-foreground/80 hover:bg-primary-foreground/10 hover:text-primary-foreground',
-                                            )}
-                                        >
-                                            {group.label}
-                                            <ChevronDown
-                                                className="size-4 opacity-70"
-                                                strokeWidth={1.75}
-                                            />
-                                        </Button>
-                                    </DropdownMenuTrigger>
-                                    <DropdownMenuContent align="start">
-                                        {group.items.map((item) => (
-                                            <DropdownMenuItem
-                                                key={item.route}
-                                                asChild
-                                            >
-                                                <Link
-                                                    href={item.href}
-                                                    className={cn(
-                                                        isItemActive(
-                                                            item.href,
-                                                        ) && 'font-semibold',
-                                                    )}
-                                                >
-                                                    {item.label}
-                                                </Link>
-                                            </DropdownMenuItem>
-                                        ))}
-                                    </DropdownMenuContent>
-                                </DropdownMenu>
-                            );
-                        })}
-                    </nav>
-
-                    <div className="flex items-center gap-2">
-                        {schoolContext && (
-                            <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                    <Button
-                                        variant="ghost"
-                                        size="sm"
-                                        className="gap-1.5 border border-primary-foreground/20 bg-primary-foreground/10 text-xs text-primary-foreground hover:bg-primary-foreground/20 hover:text-primary-foreground sm:text-sm"
-                                    >
-                                        <span
-                                            aria-hidden
-                                            className={cn(
-                                                'size-2 rounded-full',
-                                                schoolContext.unit === 'RA'
-                                                    ? 'bg-accent-attention'
-                                                    : schoolContext.unit ===
-                                                        'TPQ'
-                                                      ? 'bg-success'
-                                                      : 'bg-primary-foreground/80',
-                                            )}
-                                        />
-                                        <span>
-                                            {schoolContext.unit ?? 'Unit'} ·{' '}
-                                            {schoolContext.academicYear ??
-                                                'Tahun ajaran'}
-                                        </span>
-                                        <ChevronDown
-                                            className="size-3.5 opacity-80"
-                                            strokeWidth={1.75}
-                                        />
-                                    </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end">
-                                    <DropdownMenuLabel>Unit</DropdownMenuLabel>
-                                    {schoolContext.units.length === 0 && (
-                                        <DropdownMenuItem disabled>
-                                            Belum ada unit aktif
-                                        </DropdownMenuItem>
-                                    )}
-                                    {schoolContext.units.map((unit) => (
-                                        <DropdownMenuItem
-                                            key={unit}
-                                            onClick={() =>
-                                                updateContext({ unit })
-                                            }
-                                            className={cn(
-                                                schoolContext.unit === unit &&
-                                                    'font-semibold',
-                                            )}
-                                        >
-                                            Unit {unit}
-                                        </DropdownMenuItem>
-                                    ))}
-                                    <DropdownMenuSeparator />
-                                    <DropdownMenuLabel>
-                                        Tahun ajaran
-                                    </DropdownMenuLabel>
-                                    {schoolContext.academicYears.length ===
-                                        0 && (
-                                        <DropdownMenuItem disabled>
-                                            Belum ada tahun ajaran
-                                        </DropdownMenuItem>
-                                    )}
-                                    {schoolContext.academicYears.map((year) => (
-                                        <DropdownMenuItem
-                                            key={year.id}
-                                            onClick={() =>
-                                                updateContext({
-                                                    academic_year_id: year.id,
-                                                })
-                                            }
-                                            className={cn(
-                                                schoolContext.academicYearId ===
-                                                    year.id && 'font-semibold',
-                                            )}
-                                        >
-                                            {year.label}
-                                            {year.isActive && (
-                                                <span className="ml-auto pl-3 text-xs text-muted-foreground">
-                                                    aktif
-                                                </span>
-                                            )}
-                                        </DropdownMenuItem>
-                                    ))}
-                                </DropdownMenuContent>
-                            </DropdownMenu>
+        <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+                <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-9 shrink-0 gap-1.5 bg-card text-sm"
+                    aria-label={`Unit ${schoolContext.unit ?? '-'}, tahun ajaran ${year}. Ganti konteks`}
+                >
+                    <span className="font-semibold">
+                        {schoolContext.unit ?? 'Unit'}
+                    </span>
+                    <span className="text-muted-foreground">·</span>
+                    <span className="hidden sm:inline">{year}</span>
+                    <span className="sm:hidden">{shortYear}</span>
+                    <ChevronDown
+                        className="size-3.5 opacity-70"
+                        strokeWidth={1.75}
+                    />
+                </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="min-w-56">
+                <DropdownMenuLabel>Unit</DropdownMenuLabel>
+                {schoolContext.units.length === 0 && (
+                    <DropdownMenuItem disabled>
+                        Belum ada unit aktif
+                    </DropdownMenuItem>
+                )}
+                {schoolContext.units.map((unit) => (
+                    <DropdownMenuItem
+                        key={unit}
+                        onClick={() => updateContext({ unit })}
+                        className={cn(
+                            schoolContext.unit === unit && 'font-semibold',
                         )}
-
-                        <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                                <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="rounded-full"
-                                    aria-label="Menu pengguna"
-                                >
-                                    <Avatar className="size-8">
-                                        <AvatarImage
-                                            src={auth.user?.avatar}
-                                            alt={auth.user?.name}
-                                        />
-                                        <AvatarFallback className="bg-muted text-xs font-semibold text-foreground">
-                                            {getInitials(auth.user?.name ?? '')}
-                                        </AvatarFallback>
-                                    </Avatar>
-                                </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent className="w-56" align="end">
-                                {auth.user && (
-                                    <UserMenuContent user={auth.user} />
-                                )}
-                            </DropdownMenuContent>
-                        </DropdownMenu>
-                    </div>
-                </div>
-            </header>
-
-            {breadcrumbs.length > 0 && (
-                <div className="border-b border-border/70 bg-background">
-                    <div className="mx-auto flex h-10 max-w-7xl items-center px-4 text-muted-foreground sm:px-6">
-                        <Breadcrumbs breadcrumbs={breadcrumbs} />
-                    </div>
-                </div>
-            )}
-
-            <main className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6">
-                {children}
-            </main>
-        </div>
+                    >
+                        Unit {unit}
+                    </DropdownMenuItem>
+                ))}
+                <DropdownMenuSeparator />
+                <DropdownMenuLabel>Tahun ajaran</DropdownMenuLabel>
+                {schoolContext.academicYears.length === 0 && (
+                    <DropdownMenuItem disabled>
+                        Belum ada tahun ajaran
+                    </DropdownMenuItem>
+                )}
+                {schoolContext.academicYears.map((item) => (
+                    <DropdownMenuItem
+                        key={item.id}
+                        onClick={() =>
+                            updateContext({ academic_year_id: item.id })
+                        }
+                        className={cn(
+                            schoolContext.academicYearId === item.id &&
+                                'font-semibold',
+                        )}
+                    >
+                        {item.label}
+                        {item.isActive && (
+                            <span className="ml-auto pl-3 text-xs text-muted-foreground">
+                                aktif
+                            </span>
+                        )}
+                    </DropdownMenuItem>
+                ))}
+            </DropdownMenuContent>
+        </DropdownMenu>
     );
 }
