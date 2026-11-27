@@ -147,6 +147,12 @@ final class Navigation
                         'permission' => Permission::QuranView->value,
                         'feature' => Feature::Quran,
                     ],
+                    [
+                        'label' => 'Item pembiasaan',
+                        'route' => 'admin.habits.items.index',
+                        'permission' => Permission::HabitsManage->value,
+                        'feature' => Feature::Habits,
+                    ],
                 ],
             ],
             [

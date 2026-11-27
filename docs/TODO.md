@@ -223,7 +223,7 @@ Baca `PAYMENTS.md` seluruhnya sebelum mulai.
 
 ## Fase 10 — Pembiasaan (mutabaah)
 
-- [ ] **T-1001 Item pembiasaan** (P0) [UI] — Ref: PRD §4.9, ADR-019. KP: CRUD per unit oleh admin, aspek spiritual/sosial, urutan (naik/turun), aktif; seeder lima item sholat **terkunci** (tidak bisa dihapus/dinonaktifkan/diganti nama, hanya urutan; ikon gembok + tooltip "Item wajib sekolah"); item yang punya catatan hanya dinonaktifkan. Tes: urutan stabil; item terkunci ditolak di Service + Policy (bukan hanya UI).
+- [x] **T-1001 Item pembiasaan** (P0) [UI] — Ref: PRD §4.9, ADR-019. KP: CRUD per unit oleh admin, aspek spiritual/sosial, urutan (naik/turun), aktif; seeder lima item sholat **terkunci** (tidak bisa dihapus/dinonaktifkan/diganti nama, hanya urutan; ikon gembok + tooltip "Item wajib sekolah"); item yang punya catatan hanya dinonaktifkan. Tes: urutan stabil; item terkunci ditolak di Service + Policy (bukan hanya UI). ✔ (HabitItemService, HabitItemController, HabitItemSeeder, admin/habits/items.tsx, HabitItemTest 2 tes 15 asersi, PHPStan 0)
 - [ ] **T-1002 Centang oleh wali** (P0) [UI] — KP: daftar item hari ini per anak, centang/batal centang sampai diverifikasi, maks 3 hari ke belakang, simpan cepat (optimistic UI + rollback bila gagal). Tes: tidak bisa mengubah log yang sudah diverifikasi; tanggal > 3 hari ditolak.
 - [ ] **T-1003 Verifikasi oleh wali kelas** (P0) [UI] — KP: tabel rombel × item untuk satu tanggal; verifikasi massal per siswa/per item; tolak dengan catatan; notifikasi ringkas ke wali bila ada penolakan. Tes: guru rombel lain 403.
 - [ ] **T-1004 Rekap pembiasaan** (P1) [UI] — KP: persentase per siswa per aspek per bulan/semester (hanya terverifikasi); dipakai Fase 12.

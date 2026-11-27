@@ -49,6 +49,7 @@ Route::middleware(['auth:web'])->group(function (): void {
                 ->name('invoices.index');
 
             require __DIR__.'/behavior.php';
+            require __DIR__.'/habits.php';
 
             Route::inertia('hafalan', 'admin/dashboard')
                 ->middleware(['permission:'.Permission::QuranView->value, 'feature:'.Feature::Quran->value])

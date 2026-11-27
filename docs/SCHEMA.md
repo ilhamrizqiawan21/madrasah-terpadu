@@ -272,10 +272,10 @@ Unik (`student_id`,`academic_year_id`,`discipline_threshold_id`) — satu ambang
 
 ## H. Pembiasaan / mutabaah (Fase 10)
 
-### `habit_items` (T-1001)
+### `habit_items` (T-1001 ✅)
 
-`unit_id null`, `name`, `aspect string` (`spiritual|social`), `sort_order smallint`, `is_active`, `is_locked bool default false`, timestamps.
-Seeder: lima item terkunci (Sholat Subuh, Dzuhur, Ashar, Maghrib, Isya; `spiritual`, `unit_id null`). Item terkunci tidak dapat dihapus, dinonaktifkan, atau diubah nama/aspeknya (Service + Policy, ADR-019).
+`unit_id null` (`→ units`, restrict), `name string(150)`, `aspect string(20)` (`spiritual|social`), `sort_order smallint unsigned`, `is_active`, `is_locked bool default false`, timestamps.
+Seeder (`HabitItemSeeder`): lima item terkunci (Sholat Subuh, Dzuhur, Ashar, Maghrib, Isya; `spiritual`, `unit_id null`). Item terkunci tidak dapat dihapus, dinonaktifkan, atau diubah nama/aspeknya (Service + Policy, ADR-019). Ditulis lewat `HabitItemService`.
 
 ### `habit_logs` (T-1002)
 

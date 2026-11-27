@@ -23,7 +23,7 @@ Aturan: singkat dan faktual. Jangan menyalin isi TODO/ADR; tautkan saja. Hapus b
 
 ## Terakhir diperbarui
 
-2026-11-27 · Gemini (eksekutor), setelah **Fase 9 Buku Saku BK & reward (T-901 s.d. T-907) selesai seluruhnya**
+2026-11-27 · Gemini (eksekutor), setelah **T-1001 (Item pembiasaan, Fase 10 Paket P-12)** selesai
 
 ## Keadaan sekarang
 
