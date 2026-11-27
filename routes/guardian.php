@@ -10,6 +10,7 @@ use App\Http\Controllers\Guardian\BehaviorController;
 use App\Http\Controllers\Guardian\BillingController;
 use App\Http\Controllers\Guardian\ChildContextController;
 use App\Http\Controllers\Guardian\ExamResultController;
+use App\Http\Controllers\Guardian\HabitController;
 use App\Http\Controllers\Guardian\HistoryController;
 use App\Http\Controllers\Guardian\HomeController;
 use App\Http\Controllers\Guardian\LeaveRequestController;
@@ -63,5 +64,10 @@ Route::prefix('anak/{student}')
             Route::post('perilaku/tukar', [BehaviorController::class, 'requestRedemption'])
                 ->middleware('feature:'.Feature::Rewards->value)
                 ->name('students.behavior.redeem');
+        });
+
+        Route::middleware('feature:'.Feature::Habits->value)->group(function (): void {
+            Route::get('pembiasaan', [HabitController::class, 'index'])->name('students.habits.index');
+            Route::post('pembiasaan/centang', [HabitController::class, 'toggle'])->name('students.habits.toggle');
         });
     });

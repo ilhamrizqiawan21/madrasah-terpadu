@@ -277,10 +277,10 @@ Unik (`student_id`,`academic_year_id`,`discipline_threshold_id`) — satu ambang
 `unit_id null` (`→ units`, restrict), `name string(150)`, `aspect string(20)` (`spiritual|social`), `sort_order smallint unsigned`, `is_active`, `is_locked bool default false`, timestamps.
 Seeder (`HabitItemSeeder`): lima item terkunci (Sholat Subuh, Dzuhur, Ashar, Maghrib, Isya; `spiritual`, `unit_id null`). Item terkunci tidak dapat dihapus, dinonaktifkan, atau diubah nama/aspeknya (Service + Policy, ADR-019). Ditulis lewat `HabitItemService`.
 
-### `habit_logs` (T-1002)
+### `habit_logs` (T-1002 ✅)
 
-`student_id`, `habit_item_id`, `log_date date`, `done bool`, `submitted_by → users`, `submitted_at`, `verification string` (`pending|verified|rejected`), `verified_by null`, `verified_at null`, `note null`.
-Unik (`student_id`,`habit_item_id`,`log_date`). Indeks (`log_date`,`verification`).
+`student_id` (`→ students`, restrict), `habit_item_id` (`→ habit_items`, restrict), `log_date date`, `done bool`, `submitted_by → users` (restrict), `submitted_at`, `verification string(20)` (`pending|verified|rejected`), `verified_by null` (`→ users`), `verified_at null`, `note text null`, timestamps.
+Unik (`student_id`,`habit_item_id`,`log_date`). Indeks (`log_date`,`verification`). Ditulis lewat `HabitLogService`.
 
 ## I. Hafalan dan praktik ibadah (Fase 11)
 
