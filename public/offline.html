@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="id">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>Tidak ada koneksi — Madrasah Terpadu</title>
+        <style>
+            :root {
+                --bg: #f4f1ea;
+                --fg: #121e17;
+                --card: #ffffff;
+                --muted: #57605b;
+                --border: #e0ded8;
+                --primary: #135b42;
+                --primary-fg: #faf8f5;
+            }
+            @media (prefers-color-scheme: dark) {
+                :root {
+                    --bg: #131c18;
+                    --fg: #f3f1eb;
+                    --card: #1a2621;
+                    --muted: #a6b0aa;
+                    --border: #2c3c35;
+                    --primary: #4ca382;
+                    --primary-fg: #101b16;
+                }
+            }
+            * {
+                box-sizing: border-box;
+            }
+            body {
+                margin: 0;
+                min-height: 100svh;
+                display: grid;
+                place-items: center;
+                padding: 24px;
+                background: var(--bg);
+                color: var(--fg);
+                font:
+                    16px/1.5 ui-sans-serif,
+                    system-ui,
+                    -apple-system,
+                    sans-serif;
+            }
+            main {
+                width: 100%;
+                max-width: 400px;
+                background: var(--card);
+                border: 1px solid var(--border);
+                border-radius: 8px;
+                padding: 28px 24px;
+                text-align: center;
+            }
+            .mark {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                width: 44px;
+                height: 44px;
+                border-radius: 8px;
+                background: color-mix(in srgb, var(--primary) 12%, transparent);
+                color: var(--primary);
+                margin-bottom: 14px;
+            }
+            h1 {
+                margin: 0 0 8px;
+                font-size: 18px;
+                font-weight: 600;
+            }
+            p {
+                margin: 0 0 20px;
+                font-size: 14px;
+                color: var(--muted);
+            }
+            button {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                min-height: 44px;
+                padding: 0 20px;
+                border: 0;
+                border-radius: 6px;
+                background: var(--primary);
+                color: var(--primary-fg);
+                font: inherit;
+                font-size: 14px;
+                font-weight: 500;
+                cursor: pointer;
+            }
+            button:focus-visible {
+                outline: 2px solid var(--primary);
+                outline-offset: 2px;
+            }
+        </style>
+    </head>
+    <body>
+        <main>
+            <div class="mark" aria-hidden="true">
+                <svg
+                    width="22"
+                    height="22"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.75"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                >
+                    <path d="M2 2l20 20" />
+                    <path d="M8.5 16.5a5 5 0 0 1 7 0" />
+                    <path d="M5 13a10 10 0 0 1 5.17-2.69" />
+                    <path d="M19 13a10 10 0 0 0-2.04-1.56" />
+                    <path d="M2 8.82a15 15 0 0 1 4.17-2.65" />
+                    <path d="M10.66 5c4.01-.36 8.14.9 11.34 3.76" />
+                    <line x1="12" y1="20" x2="12.01" y2="20" />
+                </svg>
+            </div>
+            <h1>Tidak ada koneksi internet</h1>
+            <p>
+                Halaman tidak dapat dimuat saat perangkat offline agar data yang
+                tampil tetap akurat. Periksa jaringan Anda lalu coba lagi.
+            </p>
+            <button type="button" onclick="window.location.reload()">
+                Coba lagi
+            </button>
+        </main>
+    </body>
+</html>
