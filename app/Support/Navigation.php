@@ -232,11 +232,6 @@ final class Navigation
                     ['label' => 'Rubrik hafalan', 'route' => 'admin.quran.rubrics.index', 'permission' => Permission::QuranManage->value, 'feature' => Feature::Quran],
                     ['label' => 'Praktik ibadah (PIB)', 'route' => 'admin.quran.pib.index', 'permission' => Permission::QuranView->value, 'feature' => Feature::Quran],
                     ['label' => 'Setoran hafalan', 'route' => 'admin.quran.index', 'permission' => Permission::QuranView->value, 'feature' => Feature::Quran],
-                    [
-                        'label' => 'Praktik ibadah (PIB)', 'soon' => 'praktik-ibadah', 'permission' => Permission::QuranRecord->value,
-                        'description' => 'Penilaian praktik ibadah per bab dan materi untuk setiap rombel.',
-                        'plan' => 'T-1106, Paket P-14 Hafalan & PIB',
-                    ],
                 ],
             ],
             [

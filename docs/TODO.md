@@ -271,7 +271,7 @@ Semua laporan: filter unit/rombel/periode, paginasi layar, ekspor PDF & Excel ic
 
 ## Fase 14 — Mutu, deploy, serah terima
 
-- [ ] **T-1401 Audit keamanan** (P0) — KP: jalankan checklist AI_RULES §5 ke semua rute (`php artisan route:list` → tabel rute × middleware × tes), `composer audit`, `npm audit`; uji IDOR wali untuk setiap rute `/wali`; hasil di `docs/security-review.md`.
+- [x] **T-1401 Audit keamanan** (P0) — KP: jalankan checklist AI_RULES §5 ke semua rute (`php artisan route:list` → tabel rute × middleware × tes), `composer audit`, `npm audit`; uji IDOR wali untuk setiap rute `/wali`; hasil di `docs/security-review.md`. ✅ 2026-11-27 — Bukti: `docs/security-review.md` (227 rute diaudit), `composer audit` (0 advisory), `npm audit --omit=dev` (0 kerentanan), `tests/Feature/Security/GuardianIdorAuditTest.php` (1 tes, 30 asersi ✔).
 - [ ] **T-1402 Backup** (P0) — Dep: `spatie/laravel-backup`. KP: sesuai DEPLOYMENT §6; notifikasi gagal ke admin. Tes: perintah backup berjalan di tes dengan disk fake.
 - [ ] **T-1403 Uji pemulihan** (P0) — KP: restore ke server staging/lokal dari arsip, aplikasi berjalan, data cocok; catat tanggal di DEPLOYMENT §6.
 - [ ] **T-1404 Kesiapan produksi** (P0) — KP: `payments:check-config` lulus; `APP_DEBUG=false`; cache konfigurasi; HTTPS; worker & cron aktif; `/up` terpantau.
