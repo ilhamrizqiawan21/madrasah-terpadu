@@ -70,9 +70,10 @@ Kunci yang diizinkan = enum `App\Enums\SettingKey` (kunci lain ditolak): `identi
 `code string(10) unique` (MI/RA/TPQ, huruf besar + angka), `name string(100)`, `head_user_id → users null` (null on delete; diisi di T-209), `attendance_settings json`, `is_active bool default true`, timestamps.
 `attendance_settings` = `{check_in_opens_at, late_after, absent_after, check_out_opens_at}` format `H:i` WITA (`App\Support\AttendanceHours`); urutan wajib masuk < terlambat < alpa dan pulang > terlambat. Unit tidak dihapus, hanya dinonaktifkan. `UnitSeeder` (dipanggil `ProductionSeeder`) membuat MI/RA/TPQ dengan jam bawaan `config('sekolah.attendance.defaults')` tanpa menimpa unit yang sudah ada.
 
-### `academic_years` (T-203)
+### `academic_years` (T-203 ✅)
 
-`name string(9)` (2026/2027), `semester string(6)` (`ganjil|genap`), `starts_on date`, `ends_on date`, `is_active bool`. Unik (`name`,`semester`). Maks satu aktif (dijaga Service + tes).
+`name string(9)` (2026/2027, dua tahun berurutan), `semester string(6)` (`ganjil|genap`, enum `App\Enums\Semester`), `starts_on date`, `ends_on date` (> `starts_on`), `is_active bool default false`, timestamps. Unik (`name`,`semester`), indeks `is_active`.
+Maks satu aktif dijaga `AcademicYearService::activate` (lock baris + transaksi) + tes. Tahun ajaran aktif tidak dapat dihapus; pemeriksaan "dipakai rombel" ditambahkan di T-204.
 
 ### `school_calendar_days` (T-505)
 

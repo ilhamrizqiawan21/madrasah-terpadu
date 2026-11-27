@@ -35,6 +35,11 @@ final class Navigation
                         'route' => 'admin.students.index',
                         'permission' => Permission::StudentsView->value,
                     ],
+                    [
+                        'label' => 'Tahun ajaran',
+                        'route' => 'admin.academic-years.index',
+                        'permission' => Permission::AcademicYearsManage->value,
+                    ],
                 ],
             ],
             [
