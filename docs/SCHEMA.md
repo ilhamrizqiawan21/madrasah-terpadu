@@ -115,7 +115,9 @@ Ditulis hanya lewat `App\Services\Guardians\GuardianService` (audit `created|upd
 
 ## B. Notifikasi (Fase 4)
 
-### `notifications` (bawaan Laravel, T-402)
+### `notifications` (bawaan Laravel, T-402 ✅)
+
+`id uuid primary`, `type`, `notifiable` (morphs ke `users`), `data text`, `read_at timestamp null`, timestamps. Indeks: (`notifiable_type`,`notifiable_id`,`read_at`).
 
 ### `push_subscriptions` (dari paket webpush, T-401 ✅)
 

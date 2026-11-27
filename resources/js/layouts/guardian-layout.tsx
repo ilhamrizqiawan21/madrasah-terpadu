@@ -6,6 +6,7 @@ import BillingController from '@/actions/App/Http/Controllers/Guardian/BillingCo
 import ChildContextController from '@/actions/App/Http/Controllers/Guardian/ChildContextController';
 import HistoryController from '@/actions/App/Http/Controllers/Guardian/HistoryController';
 import HomeController from '@/actions/App/Http/Controllers/Guardian/HomeController';
+import NotificationInboxController from '@/actions/App/Http/Controllers/Guardian/NotificationInboxController';
 import { EmptyState } from '@/components/app/empty-state';
 import {
     Select,
@@ -158,7 +159,7 @@ export default function GuardianLayout({
                         </div>
 
                         <Link
-                            href={AccountController.url()}
+                            href={NotificationInboxController.index.url()}
                             aria-label="Kotak masuk notifikasi"
                             className="relative flex size-11 shrink-0 items-center justify-center rounded-md text-foreground transition-colors hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
                         >

@@ -30,13 +30,14 @@ final class GuardianContext
     {
         $guardian = $user->guardian;
         $billingEnabled = app(FeatureFlags::class)->enabled(Feature::Billing);
+        $unreadCount = $user->unreadNotifications()->count();
 
         if ($guardian === null) {
             return [
                 'children' => [],
                 'activeChild' => null,
                 'billingEnabled' => $billingEnabled,
-                'unreadNotifications' => 0,
+                'unreadNotifications' => $unreadCount,
             ];
         }
 
@@ -79,7 +80,7 @@ final class GuardianContext
             'children' => $children,
             'activeChild' => $activeChild,
             'billingEnabled' => $billingEnabled,
-            'unreadNotifications' => 0,
+            'unreadNotifications' => $unreadCount,
         ];
     }
 
