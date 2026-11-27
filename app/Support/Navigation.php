@@ -76,6 +76,12 @@ final class Navigation
                         'feature' => Feature::Attendance,
                     ],
                     [
+                        'label' => 'Pengajuan izin',
+                        'route' => 'admin.attendance.leaves.index',
+                        'permission' => Permission::AttendanceView->value,
+                        'feature' => Feature::Attendance,
+                    ],
+                    [
                         'label' => 'Kalender sekolah',
                         'route' => 'admin.attendance.calendar.index',
                         'permission' => Permission::AttendanceView->value,

@@ -9,6 +9,7 @@ use App\Http\Controllers\Guardian\BillingController;
 use App\Http\Controllers\Guardian\ChildContextController;
 use App\Http\Controllers\Guardian\HistoryController;
 use App\Http\Controllers\Guardian\HomeController;
+use App\Http\Controllers\Guardian\LeaveRequestController;
 use App\Http\Controllers\Guardian\NotificationInboxController;
 use App\Http\Controllers\Guardian\NotificationPreferenceController;
 use Illuminate\Support\Facades\Route;
@@ -40,4 +41,12 @@ Route::prefix('anak/{student}')
     ->middleware('guardian.owns-student')
     ->group(function (): void {
         Route::get('foto', [StudentController::class, 'photo'])->name('students.photo');
+
+        Route::middleware('feature:'.Feature::Attendance->value)->group(function (): void {
+            Route::get('izin', [LeaveRequestController::class, 'create'])->name('students.leave.create');
+            Route::post('izin', [LeaveRequestController::class, 'store'])->name('students.leave.store');
+            Route::get('izin/{leaveRequest}/lampiran', [LeaveRequestController::class, 'attachment'])
+                ->whereNumber('leaveRequest')
+                ->name('students.leave.attachment');
+        });
     });

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Enums\Feature;
 use App\Enums\Permission;
+use App\Http\Controllers\Admin\LeaveRequestController;
 use App\Http\Controllers\Admin\SchoolCalendarController;
 use Illuminate\Support\Facades\Route;
 
@@ -18,6 +19,23 @@ Route::prefix('presensi')
         Route::inertia('/', 'admin/dashboard')
             ->middleware('permission:'.Permission::AttendanceView->value)
             ->name('index');
+
+        Route::prefix('izin')
+            ->name('leaves.')
+            ->controller(LeaveRequestController::class)
+            ->group(function (): void {
+                Route::get('/', 'index')
+                    ->middleware('permission:'.Permission::AttendanceView->value)
+                    ->name('index');
+                Route::get('{leaveRequest}/lampiran', 'attachment')
+                    ->whereNumber('leaveRequest')
+                    ->middleware('permission:'.Permission::AttendanceView->value)
+                    ->name('attachment');
+                Route::post('{leaveRequest}/putuskan', 'decide')
+                    ->whereNumber('leaveRequest')
+                    ->middleware('permission:'.Permission::AttendanceManage->value)
+                    ->name('decide');
+            });
 
         Route::prefix('kalender')
             ->name('calendar.')
