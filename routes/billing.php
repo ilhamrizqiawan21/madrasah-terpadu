@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Enums\Feature;
 use App\Enums\Permission;
 use App\Http\Controllers\Admin\BillingRunController;
+use App\Http\Controllers\Admin\CashierController;
 use App\Http\Controllers\Admin\FeeTypeController;
 use App\Http\Controllers\Admin\InvoiceAdjustmentController;
 use App\Http\Controllers\Admin\InvoiceController;
@@ -42,5 +43,12 @@ Route::prefix('keuangan')->group(function (): void {
         ->group(function (): void {
             Route::post('tagihan/{invoice}/penyesuaian', 'store')->name('invoices.adjust');
             Route::post('tagihan/{invoice}/batalkan', 'cancel')->name('invoices.cancel');
+        });
+
+    Route::controller(CashierController::class)
+        ->middleware(['permission:'.Permission::PaymentsReceive->value, 'feature:'.Feature::Billing->value])
+        ->group(function (): void {
+            Route::get('kasir', 'index')->name('cashier.index');
+            Route::post('kasir', 'store')->name('cashier.store');
         });
 });

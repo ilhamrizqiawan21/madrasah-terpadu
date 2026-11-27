@@ -263,7 +263,7 @@ final class Navigation
                         'plan' => 'Fase 6, U-12 (b)',
                     ],
                     [
-                        'label' => 'Kasir pembayaran', 'soon' => 'kasir', 'permission' => Permission::PaymentsReceive->value, 'feature' => Feature::Billing,
+                        'label' => 'Kasir pembayaran', 'route' => 'admin.cashier.index', 'permission' => Permission::PaymentsReceive->value, 'feature' => Feature::Billing,
                         'description' => 'Penerimaan pembayaran tunai di loket beserta kuitansi.',
                         'plan' => 'Paket P-05 Tagihan & kasir',
                     ],
