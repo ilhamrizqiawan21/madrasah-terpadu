@@ -355,9 +355,10 @@ Unik (`student_id`,`academic_year_id`,`aspect`).
 
 ## L. Modul kerangka (ADR-022) — field minimal, isi menyusul
 
-### `feature_flags` (T-211)
+### `feature_flags` (T-211 ✅)
 
-`key string unique` (mis. `billing`, `midtrans`, `wallet`, `cbt`, `staff_attendance`), `enabled bool`, `updated_by → users`, timestamps. Dibaca lewat `FeatureFlags::enabled()` (cache, diinvalidasi saat diubah); menu dan middleware `feature:<key>` memakai nilai ini.
+`key string(50) unique`, `enabled bool`, `updated_by → users null` (null on delete), timestamps. Kunci yang diizinkan = enum `App\Enums\Feature`: `attendance`, `behavior`, `rewards`, `habits`, `quran`, `attitude`, `cbt`, `staff_attendance`, `lesson_schedule`, `assignments`, `report_cards`, `cash_book`, `dormitory`, `billing`, `midtrans`, `wallet`, `exam_eligibility`.
+Tanpa baris → bawaan dari enum: `billing`, `midtrans`, `wallet`, `exam_eligibility` (ADR-021) dan `dormitory` (T-1606) **nonaktif**, lainnya aktif; baris hanya ditulis untuk modul yang diubah admin. Dibaca/ditulis hanya lewat `App\Services\Features\FeatureFlags` (`enabled()`, cache `feature_flags.values` dibuang setelah commit, perubahan diaudit `feature_flags_updated` berisi modul yang berubah); menu dan middleware `feature:<key>` memakai nilai ini.
 
 ### `student_cards` — perluasan RFID (T-501, ADR-022)
 

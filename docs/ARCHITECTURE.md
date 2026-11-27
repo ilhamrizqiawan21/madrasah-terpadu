@@ -151,6 +151,7 @@ Rincian, status, dan skenario uji: `PAYMENTS.md`. Ringkasnya:
 
 - **Autentikasi**: Fortify; login dengan username / no. HP / NIS; rate limit 5/menit per identitas+IP; sesi diregenerasi; `EnsureActiveUser`; 2FA wajib untuk `admin` dan `bendahara` (T-104).
 - **Otorisasi**: middleware peran/izin **dan** policy di setiap rute. Tes per rute: tamu → login, peran salah → 403, wali membuka anak lain → 404.
+- **Kunci fitur** (T-211): middleware `feature:<key>` (`EnsureFeatureEnabled`, dipasang setelah middleware izin) → modul nonaktif 404; `Navigation` menyembunyikan item ber-`feature` yang nonaktif.
 - **IDOR wali**: semua query portal wali berawal dari `$request->user()->guardian->students()`.
 - **CSRF**: aktif kecuali `/webhooks/midtrans` (dilindungi signature + Get Status API).
 - **Header** (`SecurityHeaders`): CSP kompatibel Vite & domain Snap Midtrans, `X-Frame-Options: DENY`, `Referrer-Policy: strict-origin-when-cross-origin`, `Permissions-Policy` kamera hanya untuk `/gerbang` dan `/kantin`.

@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Enums\Feature;
 use App\Enums\Permission;
 use App\Enums\Role;
 use App\Http\Controllers\Admin\SchoolContextController;
@@ -36,19 +37,19 @@ Route::middleware(['auth'])->group(function (): void {
                 ->name('students.index');
 
             Route::inertia('presensi', 'admin/dashboard')
-                ->middleware('permission:'.Permission::AttendanceView->value)
+                ->middleware(['permission:'.Permission::AttendanceView->value, 'feature:'.Feature::Attendance->value])
                 ->name('attendance.index');
 
             Route::inertia('tagihan', 'admin/dashboard')
-                ->middleware('permission:'.Permission::InvoicesView->value)
+                ->middleware(['permission:'.Permission::InvoicesView->value, 'feature:'.Feature::Billing->value])
                 ->name('invoices.index');
 
             Route::inertia('perilaku', 'admin/dashboard')
-                ->middleware('permission:'.Permission::BehaviorView->value)
+                ->middleware(['permission:'.Permission::BehaviorView->value, 'feature:'.Feature::Behavior->value])
                 ->name('behavior.index');
 
             Route::inertia('hafalan', 'admin/dashboard')
-                ->middleware('permission:'.Permission::QuranView->value)
+                ->middleware(['permission:'.Permission::QuranView->value, 'feature:'.Feature::Quran->value])
                 ->name('quran.index');
 
             Route::inertia('laporan', 'admin/dashboard')

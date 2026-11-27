@@ -4,14 +4,17 @@ declare(strict_types=1);
 
 namespace App\Support;
 
+use App\Enums\Feature;
 use App\Enums\Permission;
 use App\Models\User;
+use App\Services\Features\FeatureFlags;
 
 final class Navigation
 {
     /**
      * Bangun grup menu navigasi staf dari izin pengguna.
-     * Menu tidak pernah menampilkan rute yang akan ditolak.
+     * Menu tidak pernah menampilkan rute yang akan ditolak, termasuk modul yang
+     * dimatikan lewat kunci fitur (T-211) karena rutenya 404.
      *
      * @return list<array{
      *     key: string,
@@ -55,6 +58,7 @@ final class Navigation
                         'label' => 'Rekap presensi',
                         'route' => 'admin.attendance.index',
                         'permission' => Permission::AttendanceView->value,
+                        'feature' => Feature::Attendance,
                     ],
                 ],
             ],
@@ -66,6 +70,7 @@ final class Navigation
                         'label' => 'Tagihan',
                         'route' => 'admin.invoices.index',
                         'permission' => Permission::InvoicesView->value,
+                        'feature' => Feature::Billing,
                     ],
                 ],
             ],
@@ -77,6 +82,7 @@ final class Navigation
                         'label' => 'Catatan perilaku',
                         'route' => 'admin.behavior.index',
                         'permission' => Permission::BehaviorView->value,
+                        'feature' => Feature::Behavior,
                     ],
                 ],
             ],
@@ -88,6 +94,7 @@ final class Navigation
                         'label' => 'Setoran hafalan',
                         'route' => 'admin.quran.index',
                         'permission' => Permission::QuranView->value,
+                        'feature' => Feature::Quran,
                     ],
                 ],
             ],
@@ -122,6 +129,11 @@ final class Navigation
                         'permission' => Permission::UnitsManage->value,
                     ],
                     [
+                        'label' => 'Kunci fitur',
+                        'route' => 'admin.settings.features.edit',
+                        'permission' => Permission::SettingsManage->value,
+                    ],
+                    [
                         'label' => 'Pengguna staf',
                         'route' => 'admin.users.index',
                         'permission' => Permission::UsersManage->value,
@@ -130,6 +142,7 @@ final class Navigation
             ],
         ];
 
+        $flags = app(FeatureFlags::class);
         $result = [];
 
         foreach ($groups as $group) {
@@ -137,6 +150,10 @@ final class Navigation
 
             foreach ($group['items'] as $item) {
                 if (! $user->can($item['permission'])) {
+                    continue;
+                }
+
+                if (isset($item['feature']) && ! $flags->enabled($item['feature'])) {
                     continue;
                 }
 

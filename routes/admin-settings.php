@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Enums\Permission;
 use App\Http\Controllers\Admin\AppearanceSettingController;
+use App\Http\Controllers\Admin\FeatureFlagController;
 use App\Http\Controllers\Admin\IdentitySettingController;
 use App\Http\Controllers\Admin\UnitController;
 use Illuminate\Support\Facades\Route;
@@ -23,6 +24,9 @@ Route::middleware('permission:'.Permission::SettingsManage->value)
         Route::get('tampilan', [AppearanceSettingController::class, 'edit'])->name('appearance.edit');
         // POST (bukan PUT) karena form mengirim berkas sebagai multipart.
         Route::post('tampilan', [AppearanceSettingController::class, 'update'])->name('appearance.update');
+
+        Route::get('kunci-fitur', [FeatureFlagController::class, 'edit'])->name('features.edit');
+        Route::put('kunci-fitur', [FeatureFlagController::class, 'update'])->name('features.update');
     });
 
 Route::middleware('permission:'.Permission::UnitsManage->value)

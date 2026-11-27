@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Middleware\EnsureActiveUser;
+use App\Http\Middleware\EnsureFeatureEnabled;
 use App\Http\Middleware\EnsureTwoFactorForPrivilegedRoles;
 use App\Http\Middleware\HandleAppearance;
 use App\Http\Middleware\HandleInertiaRequests;
@@ -27,6 +28,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'role' => RoleMiddleware::class,
             'permission' => PermissionMiddleware::class,
             'role_or_permission' => RoleOrPermissionMiddleware::class,
+            'feature' => EnsureFeatureEnabled::class,
         ]);
 
         $middleware->web(append: [
