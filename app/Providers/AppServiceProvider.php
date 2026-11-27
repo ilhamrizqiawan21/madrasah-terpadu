@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
+use App\Notifications\Channels\WhatsAppChannel;
 use App\Services\Settings\SettingsRepository;
 use App\Support\Branding;
 use Carbon\CarbonImmutable;
@@ -11,6 +12,7 @@ use Illuminate\Contracts\View\View as ViewContract;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
@@ -31,6 +33,9 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->configureDefaults();
+
+        // Kanal WhatsApp cadangan no-op (ADR-005, T-404): terdaftar tetapi tidak dipakai di via().
+        Notification::extend('whatsapp', static fn (): WhatsAppChannel => new WhatsAppChannel);
 
         // Favicon & warna utama unggahan (T-201/T-208) dipasang di root view.
         View::composer('app', function (ViewContract $view): void {
