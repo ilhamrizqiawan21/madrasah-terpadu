@@ -8,9 +8,11 @@ use App\Enums\Role;
 use App\Http\Controllers\Admin\SchoolContextController;
 use App\Http\Controllers\BrandingAssetController;
 use App\Http\Controllers\DashboardController;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Route;
 
-Route::inertia('/', 'welcome')->name('home');
+// Tidak ada halaman depan publik: tamu berakhir di login, pengguna di beranda sesuai peran.
+Route::get('/', fn (): RedirectResponse => redirect()->route('dashboard'))->name('home');
 
 Route::get('branding/{asset}', BrandingAssetController::class)
     ->whereIn('asset', ['logo', 'favicon'])

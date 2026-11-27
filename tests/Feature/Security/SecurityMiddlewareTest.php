@@ -21,7 +21,7 @@ test('pengguna yang dinonaktifkan otomatis logout pada request berikutnya', func
 });
 
 test('respons web menyertakan header keamanan dan CSP yang sesuai', function (): void {
-    $response = $this->get(route('home'));
+    $response = $this->get(route('login'));
 
     $response->assertOk()
         ->assertHeader('X-Frame-Options', 'DENY')

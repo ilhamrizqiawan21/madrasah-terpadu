@@ -125,6 +125,12 @@ test('urutan jam presensi yang tidak valid ditolak', function (array $hours, str
     'jam tidak ada' => [['late_after' => '25:00'], 'late_after'],
 ]);
 
+test('jam yang belum lengkap ditolak dengan pesan format 24 jam', function (): void {
+    $this->actingAs(unitAdmin())
+        ->post(route('admin.settings.units.store'), unitPayload(['late_after' => '25']))
+        ->assertSessionHasErrors(['late_after' => 'Batas terlambat harus berupa jam 24 jam, misalnya 07.00.']);
+});
+
 test('admin mengubah jam presensi unit dan audit menyimpan nilai sebelum dan sesudah', function (): void {
     $unit = Unit::factory()->create(['code' => 'RA']);
 

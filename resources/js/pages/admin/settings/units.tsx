@@ -10,6 +10,7 @@ import { FormDialog } from '@/components/app/form-dialog';
 import { RowActions } from '@/components/app/row-actions';
 import { SettingsShell } from '@/components/app/settings-shell';
 import { StatusBadge } from '@/components/app/status-badge';
+import { TimeInput } from '@/components/app/time-input';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -272,18 +273,12 @@ export default function UnitsSettings({ units, defaultAttendance }: Props) {
                                     >
                                         {field.label}
                                     </Label>
-                                    <Input
+                                    <TimeInput
                                         id={id}
-                                        type="time"
-                                        step={60}
                                         value={form.data[field.key]}
-                                        onChange={(event) =>
-                                            form.setData(
-                                                field.key,
-                                                event.target.value,
-                                            )
+                                        onChange={(value) =>
+                                            form.setData(field.key, value)
                                         }
-                                        className="tabular-nums"
                                         required
                                         aria-invalid={Boolean(
                                             form.errors[field.key],

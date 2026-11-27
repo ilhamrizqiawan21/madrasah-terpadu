@@ -54,7 +54,7 @@ Tidak ada (semua perubahan sudah di-commit).
 
 ## Temuan terbuka (belum ada tugasnya)
 
-- Input jam memakai `type="time"` bawaan browser: format 12/24 jam mengikuti locale browser pengguna (browser berbahasa Inggris menampilkan AM/PM). Ganti ke input teks `HH.MM` bila pemilik ingin dipaksa 24 jam.
+- ~~Input jam AM/PM~~ selesai: semua input jam memakai `TimeInput` (24 jam, `HH.MM`).
 - **Halaman `/` masih halaman sambutan Laravel** (`resources/js/pages/welcome.tsx`, rute `home`). Butuh keputusan pemilik: alihkan ke login/beranda, atau halaman depan sekolah. Dua tes memakai `route('home')` dengan status 200 (`ExampleTest`, `SecurityMiddlewareTest`).
 - Sisa starter yang tidak terpakai: `components/app-header.tsx` + `layouts/app/app-header-layout.tsx` (tidak dirender di mana pun).
 - Halaman **Pengguna staf** belum memakai `SettingsShell`, padahal ada di sub-navigasi Pengaturan (mockup menaruhnya di sana sebagai "Pengguna & peran").

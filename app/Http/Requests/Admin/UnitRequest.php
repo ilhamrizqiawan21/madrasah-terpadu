@@ -68,6 +68,7 @@ class UnitRequest extends FormRequest
     {
         return [
             'code.regex' => 'Kode unit hanya boleh berisi huruf dan angka tanpa spasi.',
+            'date_format' => ':Attribute harus berupa jam 24 jam, misalnya 07.00.',
             'late_after.after' => 'Batas terlambat harus setelah jam masuk dibuka.',
             'absent_after.after' => 'Batas alpa harus setelah batas terlambat.',
             'check_out_opens_at.after' => 'Jam pulang minimal harus setelah batas terlambat.',

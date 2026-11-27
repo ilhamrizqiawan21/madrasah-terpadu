@@ -15,3 +15,4 @@ export { NoAccessState } from './no-access-state';
 export { PageHeader } from './page-header';
 export { RowActions } from './row-actions';
 export { StatusBadge, type StatusBadgeVariant } from './status-badge';
+export { TimeInput } from './time-input';

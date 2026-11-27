@@ -13,8 +13,6 @@ void createInertiaApp({
     title: (title) => (title ? `${title} - ${appName}` : appName),
     layout: (name) => {
         switch (true) {
-            case name === 'welcome':
-                return null;
             // Halaman staf merender StaffLayout sendiri (topbar + breadcrumb).
             case name.startsWith('admin/'):
                 return null;
