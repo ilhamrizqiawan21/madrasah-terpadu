@@ -23,27 +23,28 @@ Aturan: singkat dan faktual. Jangan menyalin isi TODO/ADR; tautkan saja. Hapus b
 
 ## Terakhir diperbarui
 
-2026-11-27 · Claude (eksekutor), setelah T-204
+2026-11-27 · Claude (eksekutor), setelah T-211 + perbaikan temuan review
 
 ## Keadaan sekarang
 
 - **Fase 0 & 1**: semua tugas `[x]`, plus perbaikan temuan cek UI (ADR-024, commit `1cfd189`): hapus akun sendiri dihapus, passkey dimatikan, UI auth/2FA berbahasa Indonesia, tautan & logo Laravel dibuang.
 - **2FA tidak wajib lagi** (ADR-025, commit `e475b81`): sakelar `REQUIRE_TWO_FACTOR` (bawaan `false`). Fitur 2FA tetap opsional; akun yang sudah mengaktifkannya tetap ditanya kode.
-- **Fase 2 (paket P-03)**: T-201 ✔ (`dce871b`, termasuk Pengaturan > Tampilan untuk logo/favicon), T-202 ✔ (Unit & jam presensi, Pengaturan), T-203 ✔ (Tahun ajaran, Data Induk, pola master mockup 01), T-204 ✔ (Rombel di Data Induk: CRUD per unit + tahun ajaran, wali kelas guru aktif, salin dari tahun lain, nonaktifkan bukan hapus; tahun ajaran yang dipakai rombel tidak bisa dihapus). Pemilih unit/tahun ajaran di topbar sudah dari database (`App\Support\SchoolContext`) dan menjadi bawaan saringan Rombel. **Berikutnya T-205.**
-- `composer check` hijau di commit terakhir (249 tes, Larastan 0). CI GitHub hijau sejak ADR-023 (PHP ≥ 8.4); commit setelah `59a0ff1` belum di-push.
+- **Fase 2 (paket P-03)**: T-201 ✔ (`dce871b`), T-202 ✔ (`f48e553`), T-203 ✔ (`2ee9ff7`), T-204 ✔ (`7c001c4`, Rombel), T-211 ✔ (`f9f1a96`, kunci fitur; di-cherry-pick dari worktree). Pemilih unit/tahun ajaran di topbar dari database (`App\Support\SchoolContext`, T-111 `992ad0d`).
+- **Perbaikan setelah review** (`855c151`): `schoolContext` hanya dibagikan ke peran area `/admin` (`Role::adminArea()`), cache pengaturan TTL 10 menit + ditulis ulang setelah commit, pembersihan logo/favicon memakai nilai lama dari baris terkunci, tahun ajaran terpilih di luar 6 terbaru tetap dipakai, `activate` mengunci semua tahun ajaran urut id.
+- **Keputusan pemilik diterapkan** (`1e223e7`): `/` dialihkan ke `dashboard` (tamu → login, pengguna → beranda sesuai peran), halaman `welcome` dihapus; semua input jam memakai `TimeInput` 24 jam `HH.MM`.
+- `composer check` hijau di commit terakhir (272 tes, Larastan 0). CI GitHub hijau sejak ADR-023 (PHP ≥ 8.4); commit setelah `59a0ff1` belum di-push.
 - Lingkungan lokal: `.env` memakai **MariaDB** `madrasah_terpadu` (sudah `migrate` + `ProductionSeeder`). Tes tetap SQLite in-memory.
 - Akun uji lokal: username `admin.uji` (Admin, 2FA aktif). Kata sandi dan rahasia TOTP **tidak** dicatat di repo; buat ulang lewat resep "Cek UI lokal".
 
 ## Sedang dikerjakan
 
-Tidak ada (semua perubahan sudah di-commit).
+- **T-205 Siswa + enrollment**: dikerjakan agen lain di worktree paralel (`.claude/worktrees/...`). Jangan disentuh dari working tree utama; pemilik yang menggabungkan.
 
 ## Langkah berikutnya
 
-1. Lanjut P-03 berurutan: T-205 → T-206 → T-207 → T-210 → T-211 → T-212 (lihat TODO "Rencana rilis & paket").
-   Siswa (T-205) memakai pola mockup 01 seperti `pages/admin/classrooms/index.tsx` (saringan unit/tahun ajaran dari `SchoolContext`, cari, paginasi 25).
-   Enrollment menunjuk `classrooms`; pilihan rombel sebaiknya hanya rombel aktif (`classrooms.is_active`).
-2. Pemilik: `git push` untuk commit sejak `59a0ff1`.
+1. Setelah T-205 digabung: lanjut P-03 berurutan T-206 → T-207 → T-210 → T-212 (lihat TODO "Rencana rilis & paket").
+2. Pemilik mengonfirmasi keputusan T-204 dan T-211 di bawah.
+3. Pemilik: `git push` untuk commit sejak `59a0ff1`.
 
 ## Arahan pemilik yang berlaku
 
@@ -52,10 +53,22 @@ Tidak ada (semua perubahan sudah di-commit).
 - Pemilik memantau progres lewat `docs/TODO.md`: centang + bukti segera setelah tiap tugas.
 - Deadline klien ketat: kerjakan berurutan, satu tugas satu commit, jangan menunggu laporan akhir paket untuk commit.
 
+## Keputusan T-204 yang perlu dikonfirmasi pemilik
+
+1. Unit dan tahun ajaran rombel tetap setelah dibuat (tidak bisa diubah).
+2. Salin rombel per unit, hanya rombel aktif; wali kelas ikut disalin hanya bila masih guru aktif.
+3. Tingkat (`grade`) teks bebas ≤ 10 karakter.
+4. Seorang guru boleh menjadi wali kelas beberapa rombel.
+5. Saringan hanya menampilkan unit aktif.
+
+## Keputusan T-211 yang perlu dikonfirmasi pemilik
+
+1. `dormitory` (asrama) bawaan nonaktif.
+2. `exam_eligibility` dikelompokkan bersama modul uang (bawaan nonaktif).
+3. Rute kiosk `gerbang`/`kantin` belum memakai middleware `feature:` (area per peran). Perlu keputusan: dikunci per fitur atau tidak.
+
 ## Temuan terbuka (belum ada tugasnya)
 
-- ~~Input jam AM/PM~~ selesai: semua input jam memakai `TimeInput` (24 jam, `HH.MM`).
-- **Halaman `/` masih halaman sambutan Laravel** (`resources/js/pages/welcome.tsx`, rute `home`). Butuh keputusan pemilik: alihkan ke login/beranda, atau halaman depan sekolah. Dua tes memakai `route('home')` dengan status 200 (`ExampleTest`, `SecurityMiddlewareTest`).
 - Sisa starter yang tidak terpakai: `components/app-header.tsx` + `layouts/app/app-header-layout.tsx` (tidak dirender di mana pun).
 - Halaman **Pengguna staf** belum memakai `SettingsShell`, padahal ada di sub-navigasi Pengaturan (mockup menaruhnya di sana sebagai "Pengguna & peran").
 - Topbar staf masih memakai inisial "MT", belum logo unggahan (masuk sisa T-208).
