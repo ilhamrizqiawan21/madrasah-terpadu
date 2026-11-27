@@ -14,6 +14,7 @@ use App\Http\Controllers\Guardian\HabitController;
 use App\Http\Controllers\Guardian\HistoryController;
 use App\Http\Controllers\Guardian\HomeController;
 use App\Http\Controllers\Guardian\LeaveRequestController;
+use App\Http\Controllers\Guardian\MemorizationController;
 use App\Http\Controllers\Guardian\NotificationInboxController;
 use App\Http\Controllers\Guardian\NotificationPreferenceController;
 use Illuminate\Support\Facades\Route;
@@ -69,5 +70,9 @@ Route::prefix('anak/{student}')
         Route::middleware('feature:'.Feature::Habits->value)->group(function (): void {
             Route::get('pembiasaan', [HabitController::class, 'index'])->name('students.habits.index');
             Route::post('pembiasaan/centang', [HabitController::class, 'toggle'])->name('students.habits.toggle');
+        });
+
+        Route::middleware('feature:'.Feature::Quran->value)->group(function (): void {
+            Route::get('hafalan', MemorizationController::class)->name('students.quran.index');
         });
     });

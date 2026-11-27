@@ -8,6 +8,7 @@ use App\Domain\Quran\AyahRange;
 use App\Domain\Quran\RubricScorer;
 use App\Models\MemorizationMaterial;
 use App\Models\MemorizationRecord;
+use App\Models\MemorizedAyah;
 use App\Models\RubricVersion;
 use App\Models\Student;
 use App\Models\Surah;
@@ -153,6 +154,10 @@ class MemorizationService
                 'recorded_on' => (string) $data['recorded_on'],
             ]);
 
+            if ($kind === 'quran' && $type === 'ziyadah' && $scored['passed']) {
+                $this->recordMemorizedAyahs($student->id, $record->id, $surahFrom, $ayahFrom, $surahTo, $ayahTo);
+            }
+
             $this->audit->record(
                 action: 'memorization.recorded',
                 subject: $record,
@@ -180,5 +185,40 @@ class MemorizationService
 
             return $record;
         });
+    }
+
+    private function recordMemorizedAyahs(
+        int $studentId,
+        int $recordId,
+        int $surahFrom,
+        int $ayahFrom,
+        int $surahTo,
+        int $ayahTo,
+    ): void {
+        $surahCounts = Surah::query()
+            ->whereBetween('number', [$surahFrom, $surahTo])
+            ->pluck('ayah_count', 'number')
+            ->all();
+
+        $rows = [];
+        for ($s = $surahFrom; $s <= $surahTo; $s++) {
+            $startAyah = $s === $surahFrom ? $ayahFrom : 1;
+            $endAyah = $s === $surahTo ? $ayahTo : (int) ($surahCounts[$s] ?? 0);
+
+            for ($a = $startAyah; $a <= $endAyah; $a++) {
+                $rows[] = [
+                    'student_id' => $studentId,
+                    'surah' => $s,
+                    'ayah' => $a,
+                    'first_passed_record_id' => $recordId,
+                ];
+            }
+        }
+
+        if ($rows !== []) {
+            foreach (array_chunk($rows, 200) as $chunk) {
+                MemorizedAyah::query()->insertOrIgnore($chunk);
+            }
+        }
     }
 }
