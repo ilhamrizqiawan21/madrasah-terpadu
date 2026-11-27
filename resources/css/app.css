@@ -8,6 +8,33 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme {
+    /* Buka/tutup submenu sidebar (ADR-028): tinggi dari Radix + pudar halus, MOTION 1. */
+    --animate-collapsible-down: collapsible-down 220ms
+        cubic-bezier(0.22, 1, 0.36, 1);
+    --animate-collapsible-up: collapsible-up 160ms ease-in;
+
+    @keyframes collapsible-down {
+        from {
+            height: 0;
+            opacity: 0;
+        }
+        to {
+            height: var(--radix-collapsible-content-height);
+            opacity: 1;
+        }
+    }
+
+    @keyframes collapsible-up {
+        from {
+            height: var(--radix-collapsible-content-height);
+            opacity: 1;
+        }
+        to {
+            height: 0;
+            opacity: 0;
+        }
+    }
+
     --font-sans:
         'Plus Jakarta Sans Variable', 'Plus Jakarta Sans', ui-sans-serif,
         system-ui, sans-serif;
@@ -185,5 +212,50 @@
 @layer utilities {
     .tabular-nums {
         font-variant-numeric: tabular-nums;
+    }
+}
+
+/* Scrollbar sidebar staf: tipis, menyatu dengan latar hijau, menebal saat disorot. */
+.sidebar-scroll {
+    scrollbar-width: thin;
+    scrollbar-color: color-mix(
+            in oklch,
+            var(--sidebar-foreground) 28%,
+            transparent
+        )
+        transparent;
+    scrollbar-gutter: stable;
+}
+
+.sidebar-scroll::-webkit-scrollbar {
+    width: 10px;
+}
+
+.sidebar-scroll::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.sidebar-scroll::-webkit-scrollbar-thumb {
+    border: 3px solid transparent;
+    border-radius: 9999px;
+    background-clip: padding-box;
+    background-color: color-mix(
+        in oklch,
+        var(--sidebar-foreground) 25%,
+        transparent
+    );
+}
+
+.sidebar-scroll:hover::-webkit-scrollbar-thumb {
+    background-color: color-mix(
+        in oklch,
+        var(--sidebar-foreground) 45%,
+        transparent
+    );
+}
+
+@media (prefers-reduced-motion: reduce) {
+    [data-slot='collapsible-content'] {
+        animation: none !important;
     }
 }

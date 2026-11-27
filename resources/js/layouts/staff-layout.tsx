@@ -18,7 +18,7 @@ import {
     Users,
     Wallet,
 } from 'lucide-react';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import SchoolContextController from '@/actions/App/Http/Controllers/Admin/SchoolContextController';
 import { Breadcrumbs } from '@/components/breadcrumbs';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -170,6 +170,13 @@ function StaffSidebar() {
     const currentPath = usePage().url.split('?')[0];
     const appName = branding?.appName || name;
     const getInitials = useInitials();
+    // Akordeon: satu grup terbuka; bawaan = grup yang berisi halaman aktif.
+    const [openGroup, setOpenGroup] = useState<string | null>(
+        () =>
+            navigation.find((group) =>
+                group.items.some((item) => isActive(item.href)),
+            )?.key ?? null,
+    );
 
     return (
         <Sidebar collapsible="icon" aria-label="Menu staf">
@@ -213,7 +220,7 @@ function StaffSidebar() {
                 </SidebarMenu>
             </SidebarHeader>
 
-            <SidebarContent className="bg-islamic-pattern">
+            <SidebarContent className="bg-islamic-pattern sidebar-scroll">
                 <SidebarGroup>
                     <SidebarMenu>
                         <SidebarMenuItem>
@@ -234,6 +241,10 @@ function StaffSidebar() {
                                 key={group.key}
                                 group={group}
                                 isActive={isActive}
+                                open={openGroup === group.key}
+                                onOpenChange={(open) =>
+                                    setOpenGroup(open ? group.key : null)
+                                }
                             />
                         ))}
                     </SidebarMenu>
@@ -255,9 +266,13 @@ const activeButtonClass =
 function NavGroup({
     group,
     isActive,
+    open,
+    onOpenChange,
 }: {
     group: StaffNavGroup;
     isActive: (href: string) => boolean;
+    open: boolean;
+    onOpenChange: (open: boolean) => void;
 }) {
     const { state, isMobile } = useSidebar();
     const Icon = groupIcons[group.icon ?? ''] ?? Package;
@@ -310,7 +325,8 @@ function NavGroup({
     return (
         <Collapsible
             asChild
-            defaultOpen={groupActive}
+            open={open}
+            onOpenChange={onOpenChange}
             className="group/collapsible"
         >
             <SidebarMenuItem>
@@ -326,12 +342,12 @@ function NavGroup({
                         <Icon strokeWidth={1.75} />
                         <span>{group.label}</span>
                         <ChevronRight
-                            className="ml-auto transition-transform duration-150 group-data-[state=open]/collapsible:rotate-90"
+                            className="ml-auto transition-transform duration-200 ease-out group-data-[state=open]/collapsible:rotate-90 motion-reduce:transition-none"
                             strokeWidth={1.75}
                         />
                     </SidebarMenuButton>
                 </CollapsibleTrigger>
-                <CollapsibleContent>
+                <CollapsibleContent className="overflow-hidden data-[state=closed]:animate-collapsible-up data-[state=open]:animate-collapsible-down">
                     <SidebarMenuSub className="border-sidebar-border">
                         {group.items.map((item) => (
                             <NavLeaf
