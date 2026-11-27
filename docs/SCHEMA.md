@@ -296,9 +296,9 @@ Unik (`student_id`,`habit_item_id`,`log_date`). Indeks (`log_date`,`verification
 
 `unit_id` (`→ units`, restrict), `grade string(10)`, `academic_year_id` (`→ academic_years`, restrict), `kind string(20)` (`quran|hadith|prayer`), `title string(180)`, `ranges json null` (Qur'an: daftar {surah, ayah_from, ayah_to}), `material_ids json null` (hadits/doa), `is_active`, timestamps. Ditulis lewat `MemorizationTargetService`.
 
-### `rubrics`, `rubric_versions`, `rubric_criteria` (T-1103, port penilaian-tahfidz)
+### `rubrics`, `rubric_versions`, `rubric_criteria` (T-1103 ✅, port penilaian-tahfidz)
 
-`rubric_versions.published_at` — versi terbit tidak dapat diubah. Kriteria: `name`, `mode` (`direct|deduction`), `weight`, `max_score`, `deduction_per_error`, `pass_threshold`.
+`rubric_versions.published_at` — versi terbit tidak dapat diubah. Kriteria: `name`, `mode` (`direct|deduction`), `weight`, `max_score`, `deduction_per_error`, `pass_threshold`. Ditulis lewat `RubricService`.
 
 ### `memorization_records` (T-1104)
 

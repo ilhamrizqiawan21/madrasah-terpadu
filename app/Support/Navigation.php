@@ -229,6 +229,7 @@ final class Navigation
                     ['label' => 'Item pembiasaan', 'route' => 'admin.habits.items.index', 'permission' => Permission::HabitsManage->value, 'feature' => Feature::Habits],
                     ['label' => 'Materi hadits & doa', 'route' => 'admin.quran.materials.index', 'permission' => Permission::QuranManage->value, 'feature' => Feature::Quran],
                     ['label' => 'Target hafalan', 'route' => 'admin.quran.targets.index', 'permission' => Permission::QuranManage->value, 'feature' => Feature::Quran],
+                    ['label' => 'Rubrik hafalan', 'route' => 'admin.quran.rubrics.index', 'permission' => Permission::QuranManage->value, 'feature' => Feature::Quran],
                     [
                         'label' => 'Setoran hafalan', 'route' => 'admin.quran.index', 'soon' => 'setoran-hafalan',
                         'permission' => Permission::QuranView->value, 'feature' => Feature::Quran,

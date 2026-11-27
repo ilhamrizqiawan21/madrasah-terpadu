@@ -7,6 +7,7 @@ use App\Enums\Permission;
 use App\Http\Controllers\Admin\ComingSoonController;
 use App\Http\Controllers\Admin\MemorizationMaterialController;
 use App\Http\Controllers\Admin\MemorizationTargetController;
+use App\Http\Controllers\Admin\RubricController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('hafalan')
@@ -39,5 +40,15 @@ Route::prefix('hafalan')
                 Route::post('/', 'store')->name('store');
                 Route::put('{target}', 'update')->whereNumber('target')->name('update');
                 Route::patch('{target}/status', 'toggle')->whereNumber('target')->name('toggle');
+            });
+
+        Route::prefix('rubrik')
+            ->name('rubrics.')
+            ->middleware('permission:'.Permission::QuranManage->value)
+            ->controller(RubricController::class)
+            ->group(function (): void {
+                Route::get('/', 'index')->name('index');
+                Route::post('{version}/terbitkan', 'publish')->whereNumber('version')->name('publish');
+                Route::post('{rubric}/draf', 'createDraft')->whereNumber('rubric')->name('draft');
             });
     });
