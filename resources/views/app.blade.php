@@ -28,6 +28,16 @@
             html.dark {
                 background-color: oklch(0.17 0.01 160);
             }
+            @if ($brandingPrimaryColor ?? null)
+            :root {
+                --primary: {{ $brandingPrimaryColor }};
+                --sidebar-primary: {{ $brandingPrimaryColor }};
+            }
+            .dark {
+                --primary: color-mix(in oklch, {{ $brandingPrimaryColor }} 62%, white);
+                --sidebar-primary: color-mix(in oklch, {{ $brandingPrimaryColor }} 62%, white);
+            }
+            @endif
         </style>
 
         @if ($brandingFaviconUrl ?? null)

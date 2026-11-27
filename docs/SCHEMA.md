@@ -58,7 +58,7 @@ Tambah: `username string(50) unique nullable`, `phone string(20) unique nullable
 ### `settings` (T-201 ✅)
 
 `key string(100) unique`, `value json null`, `updated_by → users null` (null on delete), timestamps. Diakses hanya lewat `App\Services\Settings\SettingsRepository`: semua kunci dibaca sekaligus dan di-cache (`settings.values`), cache dibuang setelah commit, perubahan diaudit (`settings_updated`, hanya kunci yang berubah).
-Kunci yang diizinkan = enum `App\Enums\SettingKey` (kunci lain ditolak): `identity.app_name`, `identity.foundation_name`, `identity.address`, `identity.phone` (dinormalisasi `08…`), `identity.email`, `identity.logo_path`, `identity.favicon_path` (jalur di disk privat `local`, folder `branding/`). Tanpa baris → nilai bawaan dari `config('app.name')` / `config('sekolah.foundation_name')`.
+Kunci yang diizinkan = enum `App\Enums\SettingKey` (kunci lain ditolak): `identity.app_name`, `identity.foundation_name`, `identity.address`, `identity.phone` (dinormalisasi `08…`), `identity.email`, `identity.logo_path`, `identity.favicon_path` (jalur di disk privat `local`, folder `branding/`), `appearance.primary_color` (hex `#RRGGBB` tervalidasi kontras WCAG AA). Tanpa baris → nilai bawaan dari `config('app.name')` / `config('sekolah.foundation_name')`.
 
 ### `audit_logs` (T-105)
 

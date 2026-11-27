@@ -45,7 +45,7 @@ final class SettingsRepository
     }
 
     /**
-     * @return array{app_name: string, foundation_name: string, address: ?string, phone: ?string, email: ?string, logo_path: ?string, favicon_path: ?string}
+     * @return array{app_name: string, foundation_name: string, address: ?string, phone: ?string, email: ?string, logo_path: ?string, favicon_path: ?string, primary_color: ?string}
      */
     public function identity(): array
     {
@@ -57,6 +57,7 @@ final class SettingsRepository
             'email' => $this->stringOrNull(SettingKey::Email),
             'logo_path' => $this->stringOrNull(SettingKey::LogoPath),
             'favicon_path' => $this->stringOrNull(SettingKey::FaviconPath),
+            'primary_color' => $this->stringOrNull(SettingKey::PrimaryColor),
         ];
     }
 

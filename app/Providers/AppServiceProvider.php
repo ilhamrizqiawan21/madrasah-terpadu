@@ -32,10 +32,11 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->configureDefaults();
 
-        // Favicon unggahan (T-201) dipasang di root view; null = favicon bawaan di public/.
+        // Favicon & warna utama unggahan (T-201/T-208) dipasang di root view.
         View::composer('app', function (ViewContract $view): void {
-            $path = app(SettingsRepository::class)->identity()['favicon_path'];
-            $view->with('brandingFaviconUrl', Branding::assetUrl('favicon', $path));
+            $identity = app(SettingsRepository::class)->identity();
+            $view->with('brandingFaviconUrl', Branding::assetUrl('favicon', $identity['favicon_path']));
+            $view->with('brandingPrimaryColor', $identity['primary_color']);
         });
     }
 

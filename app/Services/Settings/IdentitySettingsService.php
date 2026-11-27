@@ -6,6 +6,7 @@ namespace App\Services\Settings;
 
 use App\Enums\SettingKey;
 use App\Models\User;
+use App\Support\ThemeColor;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -46,6 +47,8 @@ final class IdentitySettingsService
         bool $removeLogo,
         bool $removeFavicon,
         User $actor,
+        ?string $primaryColor = null,
+        bool $resetColor = false,
     ): void {
         $values = [];
         $newFiles = [];
@@ -68,6 +71,12 @@ final class IdentitySettingsService
             } elseif ($remove) {
                 $values[$key->value] = null;
             }
+        }
+
+        if ($resetColor) {
+            $values[SettingKey::PrimaryColor->value] = null;
+        } elseif ($primaryColor !== null && $primaryColor !== '') {
+            $values[SettingKey::PrimaryColor->value] = ThemeColor::normalize($primaryColor);
         }
 
         if ($values === []) {

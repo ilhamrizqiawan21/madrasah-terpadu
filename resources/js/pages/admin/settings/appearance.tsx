@@ -1,18 +1,22 @@
-import { Head, useForm } from '@inertiajs/react';
-import { Trash2, Upload } from 'lucide-react';
+import { Head, router, useForm } from '@inertiajs/react';
+import { CheckCircle2, CircleAlert, Trash2, Upload } from 'lucide-react';
 import type { ChangeEvent, FormEvent } from 'react';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import AppearanceSettingController from '@/actions/App/Http/Controllers/Admin/AppearanceSettingController';
 import { SettingsShell } from '@/components/app/settings-shell';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
+import { cn } from '@/lib/utils';
 
 type Appearance = {
     logo_url: string | null;
     favicon_url: string | null;
+    primary_color: string | null;
+    default_color: string;
 };
 
 type AppearanceForm = {
@@ -20,9 +24,13 @@ type AppearanceForm = {
     favicon: File | null;
     remove_logo: boolean;
     remove_favicon: boolean;
+    primary_color: string;
+    reset_color: boolean;
 };
 
 type AssetKey = 'logo' | 'favicon';
+
+const PRESET_COLORS = ['#135B42', '#1E40AF', '#4C2C72', '#6E3F19'];
 
 const ASSETS: Record<
     AssetKey,
@@ -52,6 +60,39 @@ const ASSETS: Record<
 
 const ASSET_KEYS: AssetKey[] = ['logo', 'favicon'];
 
+function relativeLuminance(hex: string): number {
+    const clean = hex.replace('#', '');
+    const channels = [0, 2, 4].map((offset) => {
+        const c = Number.parseInt(clean.slice(offset, offset + 2), 16) / 255;
+
+        return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
+    });
+
+    return 0.2126 * channels[0] + 0.7152 * channels[1] + 0.0722 * channels[2];
+}
+
+function contrastRatio(hexA: string, hexB: string): number {
+    const l1 = relativeLuminance(hexA);
+    const l2 = relativeLuminance(hexB);
+
+    return (Math.max(l1, l2) + 0.05) / (Math.min(l1, l2) + 0.05);
+}
+
+function isValidHex(hex: string): boolean {
+    return /^#[0-9A-Fa-f]{6}$/.test(hex.trim());
+}
+
+function passesAa(hex: string): boolean {
+    if (!isValidHex(hex)) {
+        return false;
+    }
+
+    return (
+        contrastRatio(hex, '#FAF8F5') >= 4.5 &&
+        contrastRatio(hex, '#FBFAF7') >= 4.5
+    );
+}
+
 function useObjectUrl(file: File | null): string | null {
     const [url, setUrl] = useState<string | null>(null);
 
@@ -76,11 +117,15 @@ export default function AppearanceSettings({
 }: {
     appearance: Appearance;
 }) {
+    const initialColor = appearance.primary_color ?? appearance.default_color;
+
     const form = useForm<AppearanceForm>({
         logo: null,
         favicon: null,
         remove_logo: false,
         remove_favicon: false,
+        primary_color: initialColor,
+        reset_color: false,
     });
 
     const logoInput = useRef<HTMLInputElement>(null);
@@ -100,6 +145,19 @@ export default function AppearanceSettings({
 
         return form.data[ASSETS[asset].removeField] ? null : savedUrl(asset);
     };
+
+    const colorValid = useMemo(
+        () => isValidHex(form.data.primary_color),
+        [form.data.primary_color],
+    );
+    const colorPassesAa = useMemo(
+        () => passesAa(form.data.primary_color),
+        [form.data.primary_color],
+    );
+
+    const previewHex = colorValid
+        ? form.data.primary_color.trim().toUpperCase()
+        : initialColor;
 
     const clearInputs = (): void => {
         ASSET_KEYS.forEach((asset) => {
@@ -139,6 +197,19 @@ export default function AppearanceSettings({
         }));
     };
 
+    const resetToDefault = (): void => {
+        router.post(
+            AppearanceSettingController.update.url(),
+            { reset_color: true },
+            {
+                preserveScroll: true,
+                onSuccess: () => {
+                    form.setData('primary_color', appearance.default_color);
+                },
+            },
+        );
+    };
+
     const submit = (event: FormEvent<HTMLFormElement>): void => {
         event.preventDefault();
 
@@ -147,15 +218,22 @@ export default function AppearanceSettings({
             preserveScroll: true,
             onSuccess: () => {
                 clearInputs();
-                form.reset();
+                form.setData((data) => ({
+                    ...data,
+                    logo: null,
+                    favicon: null,
+                    remove_logo: false,
+                    remove_favicon: false,
+                    reset_color: false,
+                }));
             },
             onError: () =>
                 toast.error(
-                    'Tampilan belum tersimpan. Periksa berkas yang ditandai.',
+                    'Tampilan belum tersimpan. Periksa isian yang ditandai.',
                 ),
             onNetworkError: () => {
                 toast.error(
-                    'Koneksi terputus. Berkas belum terunggah, coba lagi.',
+                    'Koneksi terputus. Perubahan belum tersimpan, coba lagi.',
                 );
 
                 return false;
@@ -166,7 +244,7 @@ export default function AppearanceSettings({
     return (
         <SettingsShell
             title="Tampilan"
-            description="Logo dan favicon. Tampil di halaman login dan tab browser."
+            description="Logo, favicon, dan warna utama. Turunan hover dan fokus dihitung otomatis."
         >
             <Head title="Tampilan" />
 
@@ -247,10 +325,125 @@ export default function AppearanceSettings({
                     );
                 })}
 
-                <div className="flex justify-end">
+                <div className="space-y-4">
+                    <div className="space-y-2">
+                        <Label htmlFor="appearance-primary-color">
+                            Warna utama
+                        </Label>
+                        <div className="flex flex-wrap items-center gap-3">
+                            {PRESET_COLORS.map((preset) => {
+                                const selected =
+                                    form.data.primary_color.toUpperCase() ===
+                                    preset;
+
+                                return (
+                                    <button
+                                        key={preset}
+                                        type="button"
+                                        aria-label={`Pilih warna ${preset}`}
+                                        aria-pressed={selected}
+                                        onClick={() =>
+                                            form.setData(
+                                                'primary_color',
+                                                preset,
+                                            )
+                                        }
+                                        style={{ backgroundColor: preset }}
+                                        className={cn(
+                                            'size-10 rounded-lg border transition-transform focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none',
+                                            selected
+                                                ? 'ring-2 ring-ring ring-offset-2 ring-offset-background'
+                                                : 'border-border hover:scale-105',
+                                        )}
+                                    />
+                                );
+                            })}
+
+                            <Input
+                                id="appearance-primary-color"
+                                value={form.data.primary_color}
+                                onChange={(event) =>
+                                    form.setData(
+                                        'primary_color',
+                                        event.target.value,
+                                    )
+                                }
+                                placeholder="#135B42"
+                                className="w-36 font-mono text-sm uppercase"
+                            />
+                        </div>
+                        <InputError message={form.errors.primary_color} />
+                    </div>
+
+                    <div
+                        className={cn(
+                            'flex items-center gap-2.5 rounded-lg border px-3.5 py-2.5 text-sm',
+                            colorPassesAa
+                                ? 'border-border bg-muted text-foreground'
+                                : 'border-destructive/40 bg-destructive/10 text-destructive',
+                        )}
+                    >
+                        {colorPassesAa ? (
+                            <CheckCircle2
+                                className="size-4 shrink-0 text-success"
+                                strokeWidth={1.75}
+                            />
+                        ) : (
+                            <CircleAlert
+                                className="size-4 shrink-0"
+                                strokeWidth={1.75}
+                            />
+                        )}
+                        <span>
+                            {colorPassesAa
+                                ? 'Kontras teks di atas warna ini memenuhi AA (terang dan gelap).'
+                                : 'Kontras warna ini terlalu rendah untuk teks WCAG AA (minimal 4,5:1).'}
+                        </span>
+                    </div>
+
+                    <div className="space-y-2">
+                        <Label>Pratinjau</Label>
+                        <div className="space-y-3 rounded-lg border border-border bg-card p-4">
+                            <div className="flex flex-wrap items-center gap-2">
+                                <span
+                                    style={{
+                                        backgroundColor: previewHex,
+                                        color: '#FAF8F5',
+                                    }}
+                                    className="inline-flex h-9 items-center rounded-md px-4 text-sm font-medium"
+                                >
+                                    Terbitkan tagihan
+                                </span>
+                                <span className="inline-flex h-9 items-center rounded-md border border-border bg-background px-4 text-sm font-medium">
+                                    Batal
+                                </span>
+                            </div>
+                            <div
+                                style={{ color: previewHex }}
+                                className="text-sm font-medium"
+                            >
+                                Lihat kuitansi
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="flex flex-wrap items-center justify-end gap-2">
+                    {appearance.primary_color !== null && (
+                        <Button
+                            type="button"
+                            variant="ghost"
+                            onClick={resetToDefault}
+                            disabled={form.processing}
+                        >
+                            Kembalikan bawaan
+                        </Button>
+                    )}
                     <Button
                         type="submit"
-                        disabled={form.processing || !form.isDirty}
+                        disabled={
+                            form.processing || !form.isDirty || !colorPassesAa
+                        }
                     >
                         {form.processing && <Spinner aria-label="Menyimpan" />}
                         Simpan

@@ -52,6 +52,7 @@ class HandleInertiaRequests extends Middleware
                     'appName' => $identity['app_name'],
                     'foundationName' => $identity['foundation_name'],
                     'logoUrl' => Branding::assetUrl('logo', $identity['logo_path']),
+                    'primaryColor' => $identity['primary_color'],
                 ];
             },
             'auth' => [

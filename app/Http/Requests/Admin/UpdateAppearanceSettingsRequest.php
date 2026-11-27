@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Http\Requests\Admin;
 
 use App\Enums\Permission;
+use App\Support\ThemeColor;
+use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\UploadedFile;
@@ -27,6 +29,26 @@ class UpdateAppearanceSettingsRequest extends FormRequest
             'favicon' => ['nullable', 'file', 'mimes:png,ico', 'max:256'],
             'remove_logo' => ['sometimes', 'boolean'],
             'remove_favicon' => ['sometimes', 'boolean'],
+            'reset_color' => ['sometimes', 'boolean'],
+            'primary_color' => [
+                'nullable',
+                'string',
+                function (string $attribute, mixed $value, Closure $fail): void {
+                    if ($this->boolean('reset_color') || $value === null || $value === '') {
+                        return;
+                    }
+
+                    if (! is_string($value) || ! ThemeColor::isValidHex($value)) {
+                        $fail('Warna utama harus berformat kode hex seperti #135B42.');
+
+                        return;
+                    }
+
+                    if (! ThemeColor::passesWcagAa($value)) {
+                        $fail('Warna utama tidak memenuhi kontras WCAG AA (minimal 4,5:1).');
+                    }
+                },
+            ],
         ];
     }
 

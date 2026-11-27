@@ -1,6 +1,6 @@
 import { Link, router, usePage } from '@inertiajs/react';
 import { ChevronDown, Menu } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import SchoolContextController from '@/actions/App/Http/Controllers/Admin/SchoolContextController';
 import { Breadcrumbs } from '@/components/breadcrumbs';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -34,6 +34,12 @@ import type {
 type SharedProps = {
     name: string;
     auth: Auth;
+    branding?: {
+        appName: string;
+        foundationName: string;
+        logoUrl: string | null;
+        primaryColor?: string | null;
+    };
     navigation?: StaffNavGroup[];
     schoolContext?: SchoolContext | null;
 };
@@ -46,10 +52,21 @@ export default function StaffLayout({
     children: React.ReactNode;
 }) {
     const page = usePage<SharedProps>();
-    const { auth, name, navigation = [], schoolContext } = page.props;
+    const { auth, name, branding, navigation = [], schoolContext } = page.props;
     const currentPath = page.url.split('?')[0];
     const getInitials = useInitials();
     const [mobileOpen, setMobileOpen] = useState(false);
+
+    useEffect(() => {
+        const root = document.documentElement.style;
+        if (branding?.primaryColor) {
+            root.setProperty('--primary', branding.primaryColor);
+            root.setProperty('--sidebar-primary', branding.primaryColor);
+        } else {
+            root.removeProperty('--primary');
+            root.removeProperty('--sidebar-primary');
+        }
+    }, [branding?.primaryColor]);
 
     const isItemActive = (href: string): boolean =>
         currentPath === href || currentPath.startsWith(`${href}/`);
@@ -146,12 +163,20 @@ export default function StaffLayout({
                             href={dashboard()}
                             className="flex items-center gap-2.5"
                         >
-                            <span className="flex size-7 items-center justify-center rounded-md bg-primary text-xs font-semibold text-primary-foreground">
-                                MT
-                            </span>
+                            {branding?.logoUrl ? (
+                                <img
+                                    src={branding.logoUrl}
+                                    alt={branding.appName || name}
+                                    className="size-7 rounded-md border border-border object-cover"
+                                />
+                            ) : (
+                                <span className="flex size-7 items-center justify-center rounded-md bg-primary text-xs font-semibold text-primary-foreground">
+                                    MT
+                                </span>
+                            )}
                             <span className="hidden text-sm leading-tight sm:block">
                                 <span className="block font-semibold">
-                                    {name}
+                                    {branding?.appName || name}
                                 </span>
                                 {schoolContext && (
                                     <span className="block text-xs text-muted-foreground">

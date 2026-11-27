@@ -17,6 +17,7 @@ enum SettingKey: string
     case Email = 'identity.email';
     case LogoPath = 'identity.logo_path';
     case FaviconPath = 'identity.favicon_path';
+    case PrimaryColor = 'appearance.primary_color';
 
     public function label(): string
     {
@@ -28,6 +29,7 @@ enum SettingKey: string
             self::Email => 'Email',
             self::LogoPath => 'Logo',
             self::FaviconPath => 'Favicon',
+            self::PrimaryColor => 'Warna utama',
         };
     }
 }
