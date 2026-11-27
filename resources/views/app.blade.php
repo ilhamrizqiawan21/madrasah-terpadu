@@ -47,6 +47,8 @@
             <link rel="icon" href="/favicon.svg" type="image/svg+xml">
         @endif
         <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+        <link rel="manifest" href="/manifest.webmanifest">
+        <meta name="theme-color" content="{{ $brandingPrimaryColor ?? '#135B42' }}">
 
         @viteReactRefresh
         @vite(['resources/css/app.css', 'resources/js/app.tsx', "resources/js/pages/{$page['component']}.tsx"])

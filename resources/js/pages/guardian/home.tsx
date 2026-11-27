@@ -1,7 +1,16 @@
 import { Head, Link } from '@inertiajs/react';
-import { ChevronRight } from 'lucide-react';
+import { ChevronRight, Download, X } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { EmptyState } from '@/components/app/empty-state';
+import { Button } from '@/components/ui/button';
 import GuardianLayout from '@/layouts/guardian-layout';
+import type { BeforeInstallPromptEvent } from '@/lib/pwa';
+import {
+    dismissInstallBanner,
+    isInstallBannerDismissed,
+    isIosSafari,
+    isStandaloneMode,
+} from '@/lib/pwa';
 import { cn } from '@/lib/utils';
 
 type HomeCard = {
@@ -32,6 +41,48 @@ type Props = {
 export default function GuardianHome({ home }: Props) {
     const child = home?.student ?? null;
     const cards = home?.cards ?? [];
+
+    const [installPrompt, setInstallPrompt] =
+        useState<BeforeInstallPromptEvent | null>(null);
+    const [showIosHint, setShowIosHint] = useState(false);
+
+    useEffect(() => {
+        if (isStandaloneMode() || isInstallBannerDismissed()) {
+            return;
+        }
+
+        if (isIosSafari()) {
+            setShowIosHint(true);
+
+            return;
+        }
+
+        const handler = (event: Event): void => {
+            event.preventDefault();
+            setInstallPrompt(event as BeforeInstallPromptEvent);
+        };
+
+        window.addEventListener('beforeinstallprompt', handler);
+
+        return () => window.removeEventListener('beforeinstallprompt', handler);
+    }, []);
+
+    const handleInstall = async (): Promise<void> => {
+        if (!installPrompt) {
+            return;
+        }
+
+        await installPrompt.prompt();
+        await installPrompt.userChoice;
+        dismissInstallBanner();
+        setInstallPrompt(null);
+    };
+
+    const handleDismiss = (): void => {
+        dismissInstallBanner();
+        setInstallPrompt(null);
+        setShowIosHint(false);
+    };
 
     return (
         <GuardianLayout>
@@ -66,6 +117,50 @@ export default function GuardianHome({ home }: Props) {
                             </div>
                         </div>
                     </section>
+
+                    {(installPrompt !== null || showIosHint) && (
+                        <section className="flex items-start justify-between gap-3 rounded-lg border border-border bg-card p-4 shadow-xs">
+                            <div className="space-y-1 text-sm">
+                                <h2 className="font-semibold text-foreground">
+                                    Pasang aplikasi di layar utama
+                                </h2>
+                                {installPrompt ? (
+                                    <>
+                                        <p className="text-muted-foreground">
+                                            Buka portal wali lebih cepat seperti
+                                            aplikasi di HP Anda.
+                                        </p>
+                                        <div className="pt-1">
+                                            <Button
+                                                type="button"
+                                                size="sm"
+                                                onClick={() => {
+                                                    void handleInstall();
+                                                }}
+                                            >
+                                                <Download className="size-4" />
+                                                Pasang aplikasi
+                                            </Button>
+                                        </div>
+                                    </>
+                                ) : (
+                                    <p className="text-muted-foreground">
+                                        Ketuk tombol Bagikan di Safari lalu
+                                        pilih Tambahkan ke Layar Utama.
+                                    </p>
+                                )}
+                            </div>
+                            <Button
+                                type="button"
+                                variant="ghost"
+                                size="icon"
+                                aria-label="Tutup ajakan pasang aplikasi"
+                                onClick={handleDismiss}
+                            >
+                                <X className="size-4" />
+                            </Button>
+                        </section>
+                    )}
 
                     {cards.length === 0 ? (
                         <EmptyState

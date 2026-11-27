@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\SchoolContextController;
 use App\Http\Controllers\BrandingAssetController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\PwaController;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Route;
 
@@ -18,6 +19,9 @@ Route::get('/', fn (): RedirectResponse => redirect()->route('dashboard'))->name
 Route::get('branding/{asset}', BrandingAssetController::class)
     ->whereIn('asset', ['logo', 'favicon'])
     ->name('branding.show');
+
+Route::get('manifest.webmanifest', [PwaController::class, 'manifest'])->name('pwa.manifest');
+Route::get('sw.js', [PwaController::class, 'serviceWorker'])->name('pwa.sw');
 
 Route::middleware(['auth'])->group(function (): void {
     Route::get('dashboard', DashboardController::class)->name('dashboard');

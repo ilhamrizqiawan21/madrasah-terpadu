@@ -6,6 +6,7 @@ import { initializeTheme } from '@/hooks/use-appearance';
 import AppLayout from '@/layouts/app-layout';
 import AuthLayout from '@/layouts/auth-layout';
 import SettingsLayout from '@/layouts/settings/layout';
+import { registerServiceWorker } from '@/lib/pwa';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
@@ -13,8 +14,9 @@ void createInertiaApp({
     title: (title) => (title ? `${title} - ${appName}` : appName),
     layout: (name) => {
         switch (true) {
-            // Halaman staf merender StaffLayout sendiri (topbar + breadcrumb).
+            // Halaman staf & wali merender layout sendiri.
             case name.startsWith('admin/'):
+            case name.startsWith('guardian/'):
                 return null;
             case name.startsWith('auth/'):
                 return AuthLayout;
@@ -40,3 +42,4 @@ void createInertiaApp({
 
 // This will set light / dark mode on load...
 initializeTheme();
+registerServiceWorker();
