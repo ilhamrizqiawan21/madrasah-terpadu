@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace App\Services\Cbt;
 
 use App\Enums\ExamQuestionType;
+use App\Jobs\ScoreExamSession;
 use App\Models\Exam;
 use App\Models\ExamQuestion;
+use App\Models\ExamSession;
 use App\Models\User;
 use App\Services\Audit\AuditLogger;
 use Illuminate\Http\UploadedFile;
@@ -148,6 +150,15 @@ final class ExamQuestionService
                 after: ['answer_key' => $answerKey, 'reason' => trim($reason)],
                 userId: $actor->id,
             );
+
+            $scoredSessionIds = ExamSession::query()
+                ->where('exam_id', $question->exam_id)
+                ->whereHas('result')
+                ->pluck('id');
+
+            foreach ($scoredSessionIds as $sessionId) {
+                ScoreExamSession::dispatch((int) $sessionId)->afterCommit();
+            }
 
             return $question;
         });

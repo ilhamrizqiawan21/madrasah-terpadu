@@ -11,6 +11,7 @@ use App\Enums\ExamSessionStatus;
 use App\Enums\ExamStatus;
 use App\Exceptions\Cbt\DeviceTakeoverException;
 use App\Exceptions\Cbt\ExamAccessException;
+use App\Jobs\ScoreExamSession;
 use App\Models\AcademicYear;
 use App\Models\Exam;
 use App\Models\ExamAnswer;
@@ -184,6 +185,8 @@ final class ExamSessionService
                 'status' => ExamSessionStatus::Submitted,
                 'last_seen_at' => CarbonImmutable::now(),
             ])->save();
+
+            ScoreExamSession::dispatch($session->id)->afterCommit();
 
             return $session;
         });

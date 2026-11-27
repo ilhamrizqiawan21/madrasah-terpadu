@@ -359,9 +359,9 @@ Unik (`student_id`,`academic_year_id`,`aspect`).
 
 `exam_session_id`, `exam_question_id`, `score tinyint`, `scored_by → users`, timestamps. Unik (`exam_session_id`,`exam_question_id`).
 
-### `exam_results` (T-1506)
+### `exam_results` (T-1506 ✅)
 
-`exam_session_id` unik, `auto_points`, `essay_points null`, `max_points`, `score tinyint null`, `status` (`awaiting_essay|final`), `computed_at`.
+`exam_session_id → exam_sessions` unik (cascade), `auto_points unsignedInteger`, `essay_points unsignedInteger null`, `max_points unsignedInteger`, `score unsignedTinyInteger null`, `status string(20)` (`awaiting_essay|final`), `computed_at timestamp`, timestamps. Dihitung oleh `ExamScorer` dan ditulis lewat `ExamScoringService`.
 
 ## L. Modul kerangka (ADR-022) — field minimal, isi menyusul
 

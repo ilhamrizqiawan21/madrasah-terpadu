@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Jobs\CloseExpiredExamSessions;
 use App\Jobs\MarkDailyAbsences;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
@@ -13,5 +14,10 @@ Artisan::command('inspire', function () {
 
 Schedule::job(new MarkDailyAbsences)
     ->everyFifteenMinutes()
+    ->timezone('Asia/Makassar')
+    ->withoutOverlapping();
+
+Schedule::job(new CloseExpiredExamSessions)
+    ->everyMinute()
     ->timezone('Asia/Makassar')
     ->withoutOverlapping();

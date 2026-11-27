@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 /**
  * Sesi ujian siswa (T-1505, ADR-020).
@@ -86,5 +87,13 @@ class ExamSession extends Model
     public function answers(): HasMany
     {
         return $this->hasMany(ExamAnswer::class);
+    }
+
+    /**
+     * @return HasOne<ExamResult, $this>
+     */
+    public function result(): HasOne
+    {
+        return $this->hasOne(ExamResult::class);
     }
 }
