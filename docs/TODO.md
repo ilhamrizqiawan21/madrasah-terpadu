@@ -19,20 +19,20 @@ Jalur **A** = Claude (risiko tinggi: uang, Midtrans, ledger, sesi ujian). Jalur 
 
 #### Rilis 1.0 — kerangka lengkap tanpa uang (minggu ini)
 
-| Paket                         | Jalur | Risiko | Tugas                            | Catatan                                                                              |
-| ----------------------------- | ----- | ------ | -------------------------------- | ------------------------------------------------------------------------------------ |
-| P-01 Cangkang aplikasi        | B     | S      | T-110, T-111, T-113              | Selesai                                                                              |
-| P-02 Kit CRUD + pengguna staf | B     | S      | T-112, T-114                     | Selesai (2026-11-27). Contoh baku kit CRUD: `pages/admin/users/index.tsx`            |
-| P-03 Data induk               | B     | R      | T-201–T-207, T-210, T-211, T-212 | Termasuk kunci fitur, kenaikan kelas & mutasi                                        |
-| P-06 Portal wali & notifikasi | B     | S      | T-301–T-305, T-401–T-404         | Kartu tagihan di beranda wali disembunyikan saat `billing` nonaktif                  |
-| P-07 Presensi gerbang + RFID  | C     | S      | T-501–T-509                      | T-501/T-502 menerima UID RFID (ADR-022)                                              |
-| P-16 CBT inti                 | A     | T      | T-1501–T-1506                    | Jalur A mulai dari sini; tanpa periode ujian selama masa paralel                     |
+| Paket                         | Jalur | Risiko | Tugas                            | Catatan                                                                                                    |
+| ----------------------------- | ----- | ------ | -------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| P-01 Cangkang aplikasi        | B     | S      | T-110, T-111, T-113              | Selesai                                                                                                    |
+| P-02 Kit CRUD + pengguna staf | B     | S      | T-112, T-114                     | Selesai (2026-11-27). Contoh baku kit CRUD: `pages/admin/users/index.tsx`                                  |
+| P-03 Data induk               | B     | R      | T-201–T-207, T-210, T-211, T-212 | Termasuk kunci fitur, kenaikan kelas & mutasi                                                              |
+| P-06 Portal wali & notifikasi | B     | S      | T-301–T-305, T-401–T-404         | Kartu tagihan di beranda wali disembunyikan saat `billing` nonaktif                                        |
+| P-07 Presensi gerbang + RFID  | C     | S      | T-501–T-509                      | T-501/T-502 menerima UID RFID (ADR-022)                                                                    |
+| P-16 CBT inti                 | A     | T      | T-1501–T-1506                    | Jalur A mulai dari sini; tanpa periode ujian selama masa paralel                                           |
 | P-11 Buku Saku BK & reward    | B     | S      | T-901–T-906                      | Selesai (2026-11-27). Reward menerbitkan voucher kantin: simpan voucher, pemakaian menunggu `wallet` aktif |
-| P-12 Pembiasaan               | C     | R      | T-1001–T-1004                    |                                                                                      |
-| P-14 Hafalan & PIB            | C     | S      | T-1101–T-1108                    |                                                                                      |
-| P-17 CBT pengawasan & hasil   | A     | S      | T-1507–T-1511                    |                                                                                      |
-| P-21 Kerangka paritas         | B     | R      | T-1601–T-1606                    | [KERANGKA], semua di balik kunci fitur                                               |
-| P-09a Staging                 | A + B | T      | T-1402, deploy staging           | DemoSeeder; semua modul uang nonaktif                                                |
+| P-12 Pembiasaan               | C     | R      | T-1001–T-1004                    |                                                                                                            |
+| P-14 Hafalan & PIB            | C     | S      | T-1101–T-1108                    |                                                                                                            |
+| P-17 CBT pengawasan & hasil   | A     | S      | T-1507–T-1511                    |                                                                                                            |
+| P-21 Kerangka paritas         | B     | R      | T-1601–T-1606                    | [KERANGKA], semua di balik kunci fitur                                                                     |
+| P-09a Staging                 | A + B | T      | T-1402, deploy staging           | DemoSeeder; semua modul uang nonaktif                                                                      |
 
 #### Rilis 1.1 — pelengkap
 
@@ -217,7 +217,7 @@ Baca `PAYMENTS.md` seluruhnya sebelum mulai.
 - [x] **T-904 Penawaran reward, penukaran, voucher** (P0) [mysql] [UI] — Ref: PRD §4.8. KP: master penawaran (biaya poin, nilai voucher, masa berlaku, stok); wali/BK mengajukan; BK menyetujui → kurangi poin kebaikan (entri), kurangi stok, terbitkan `canteen_vouchers`; tolak dengan catatan; poin tidak cukup → ditolak; notifikasi. Tes: persetujuan ganda bersamaan → satu voucher; stok habis ditolak. ✔ (RewardOfferService, RewardRedemptionService, RewardController, admin/behavior/rewards.tsx, RewardRedemptionTest 2 tes 15 asersi, PHPStan 0)
 - [x] **T-905 Pemberitahuan penawaran tersedia** (P1) — KP: setelah entri poin kebaikan, bila saldo ≥ biaya penawaran aktif yang belum pernah diberitahukan → notifikasi sekali (`reward_offer_notices`). Tes: tidak berulang. ✔ (RewardOfferNoticeService, RewardOfferAvailableNotification, RewardOfferNoticeTest 1 tes 5 asersi, PHPStan 0)
 - [x] **T-906 Buku saku di portal wali** (P0) [UI] — KP: ringkasan poin pelanggaran & kebaikan tahun ini, riwayat catatan, tindak lanjut yang melibatkan wali, penawaran reward + tombol ajukan, voucher aktif. Tes: hanya anak sendiri. ✔ (Guardian\BehaviorController, guardian/behavior.tsx, GuardianBehaviorTest 1 tes 27 asersi, PHPStan 0)
-- [ ] **T-907 Catatan dari daftar keterlambatan** (P1) — Ref: U-03. KP: dari rekap presensi "terlambat hari ini", BK memilih siswa dan membuat catatan pelanggaran sekaligus (aturan terpilih). Otomatisasi penuh hanya bila U-03 diputuskan "ya".
+- [x] **T-907 Catatan dari daftar keterlambatan** (P1) — Ref: U-03. KP: dari rekap presensi "terlambat hari ini", BK memilih siswa dan membuat catatan pelanggaran sekaligus (aturan terpilih). Otomatisasi penuh hanya bila U-03 diputuskan "ya". ✔ (LateBehaviorController, admin/behavior/late.tsx, LateAttendanceBehaviorTest 1 tes 16 asersi, PHPStan 0)
 
 ---
 

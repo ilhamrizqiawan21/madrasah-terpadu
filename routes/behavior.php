@@ -6,6 +6,7 @@ use App\Enums\Feature;
 use App\Enums\Permission;
 use App\Http\Controllers\Admin\BehaviorRecordController;
 use App\Http\Controllers\Admin\DisciplineController;
+use App\Http\Controllers\Admin\LateBehaviorController;
 use App\Http\Controllers\Admin\PointRuleController;
 use App\Http\Controllers\Admin\RewardController;
 use Illuminate\Support\Facades\Route;
@@ -31,6 +32,10 @@ Route::prefix('perilaku')
                     ->middleware('permission:'.Permission::BehaviorView->value)
                     ->name('evidence');
             });
+
+        Route::get('keterlambatan', [LateBehaviorController::class, 'index'])
+            ->middleware('permission:'.Permission::BehaviorRecord->value)
+            ->name('late.index');
 
         Route::prefix('aturan')
             ->name('rules.')
