@@ -123,9 +123,9 @@ Ditulis hanya lewat `App\Services\Guardians\GuardianService` (audit `created|upd
 
 Dipublish dari `laravel-notification-channels/webpush`; relasi polimorfik `subscribable` ke `users` (`HasPushSubscriptions`). Endpoint 404/410 dihapus otomatis oleh `WebPushChannel`.
 
-### `notification_preferences` (T-403)
+### `notification_preferences` (T-403 ✅)
 
-`user_id`, `category string(20)`, `enabled bool`. Unik (`user_id`,`category`). Tidak ada baris = aktif.
+`user_id → users` (restrict), `category string(20)`, `enabled bool default true`, timestamps. Unik (`user_id`,`category`). Tidak ada baris = aktif. Kategori `billing` & `account` selalu aktif (`NotificationPreferenceService`).
 
 ## C. Presensi (Fase 5)
 

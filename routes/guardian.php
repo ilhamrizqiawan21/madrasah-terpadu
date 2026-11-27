@@ -10,6 +10,7 @@ use App\Http\Controllers\Guardian\ChildContextController;
 use App\Http\Controllers\Guardian\HistoryController;
 use App\Http\Controllers\Guardian\HomeController;
 use App\Http\Controllers\Guardian\NotificationInboxController;
+use App\Http\Controllers\Guardian\NotificationPreferenceController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -19,6 +20,7 @@ Route::get('/', HomeController::class)->name('home');
 Route::post('anak', ChildContextController::class)->name('child.update');
 Route::get('riwayat', HistoryController::class)->name('history');
 Route::get('akun', AccountController::class)->name('account');
+Route::put('akun/notifikasi', [NotificationPreferenceController::class, 'update'])->name('notifications.preferences.update');
 
 Route::prefix('notifikasi')
     ->name('notifications.')

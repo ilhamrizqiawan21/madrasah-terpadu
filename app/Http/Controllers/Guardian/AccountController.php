@@ -6,12 +6,15 @@ namespace App\Http\Controllers\Guardian;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Services\Notifications\NotificationPreferenceService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class AccountController extends Controller
 {
+    public function __construct(private readonly NotificationPreferenceService $preferences) {}
+
     public function __invoke(Request $request): Response
     {
         $user = $request->user();
@@ -25,6 +28,8 @@ class AccountController extends Controller
                 'phone' => $guardian->phone ?? $user->phone,
                 'relation' => $guardian?->relation->label() ?? null,
             ],
+            'preferences' => $this->preferences->forUser($user),
+            'vapidPublicKey' => config('webpush.vapid.public_key'),
         ]);
     }
 }
