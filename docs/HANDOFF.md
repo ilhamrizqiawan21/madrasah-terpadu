@@ -29,8 +29,8 @@ Aturan: singkat dan faktual. Jangan menyalin isi TODO/ADR; tautkan saja. Hapus b
 
 - **Fase 0 & 1**: semua tugas `[x]`, plus perbaikan temuan cek UI (ADR-024, commit `1cfd189`): hapus akun sendiri dihapus, passkey dimatikan, UI auth/2FA berbahasa Indonesia, tautan & logo Laravel dibuang.
 - **2FA tidak wajib lagi** (ADR-025, commit `e475b81`): sakelar `REQUIRE_TWO_FACTOR` (bawaan `false`). Fitur 2FA tetap opsional; akun yang sudah mengaktifkannya tetap ditanya kode.
-- **Fase 2 (paket P-03)**: T-201 selesai (commit `dce871b`, termasuk halaman Pengaturan > Tampilan untuk logo/favicon). **Berikutnya T-202.**
-- `composer check` hijau di commit terakhir (187 tes, Larastan 0). CI GitHub hijau sejak ADR-023 (PHP ≥ 8.4); commit setelah `59a0ff1` belum di-push.
+- **Fase 2 (paket P-03)**: T-201 ✔ (`dce871b`, termasuk Pengaturan > Tampilan untuk logo/favicon), T-202 ✔ (Unit & jam presensi). **Berikutnya T-203.**
+- `composer check` hijau di commit terakhir (205 tes, Larastan 0). CI GitHub hijau sejak ADR-023 (PHP ≥ 8.4); commit setelah `59a0ff1` belum di-push.
 - Lingkungan lokal: `.env` memakai **MariaDB** `madrasah_terpadu` (sudah `migrate` + `ProductionSeeder`). Tes tetap SQLite in-memory.
 - Akun uji lokal: username `admin.uji` (Admin, 2FA aktif). Kata sandi dan rahasia TOTP **tidak** dicatat di repo; buat ulang lewat resep "Cek UI lokal".
 
@@ -40,8 +40,9 @@ Tidak ada (semua perubahan sudah di-commit).
 
 ## Langkah berikutnya
 
-1. Lanjut P-03 berurutan: **T-202** → T-203 → T-204 → T-205 → T-206 → T-207 → T-210 → T-211 → T-212 (lihat TODO "Rencana rilis & paket").
-   Unit & tahun ajaran masuk sub-navigasi Pengaturan (mockup 12: "Unit & jam presensi"); pakai `SettingsShell`.
+1. Lanjut P-03 berurutan: **T-203** → T-204 → T-205 → T-206 → T-207 → T-210 → T-211 → T-212 (lihat TODO "Rencana rilis & paket").
+   Tahun ajaran masuk sub-navigasi Pengaturan; pakai `SettingsShell` (`wide` + `actions` untuk halaman bertabel, contoh: `pages/admin/settings/units.tsx`).
+   **Setelah T-203:** sambungkan pemilih unit & tahun ajaran di topbar ke tabel `units`/`academic_years` (kini daftar tetap di `HandleInertiaRequests::share` + validasi `in:` di `SchoolContextController`); perbarui tes `StaffNavigationTest` 'pemilih unit...' agar menyiapkan data lewat factory.
 2. Pemilik: `git push` untuk commit sejak `59a0ff1`.
 
 ## Arahan pemilik yang berlaku
@@ -53,6 +54,7 @@ Tidak ada (semua perubahan sudah di-commit).
 
 ## Temuan terbuka (belum ada tugasnya)
 
+- Input jam memakai `type="time"` bawaan browser: format 12/24 jam mengikuti locale browser pengguna (browser berbahasa Inggris menampilkan AM/PM). Ganti ke input teks `HH.MM` bila pemilik ingin dipaksa 24 jam.
 - **Halaman `/` masih halaman sambutan Laravel** (`resources/js/pages/welcome.tsx`, rute `home`). Butuh keputusan pemilik: alihkan ke login/beranda, atau halaman depan sekolah. Dua tes memakai `route('home')` dengan status 200 (`ExampleTest`, `SecurityMiddlewareTest`).
 - Sisa starter yang tidak terpakai: `components/app-header.tsx` + `layouts/app/app-header-layout.tsx` (tidak dirender di mana pun).
 - Halaman **Pengguna staf** belum memakai `SettingsShell`, padahal ada di sub-navigasi Pengaturan (mockup menaruhnya di sana sebagai "Pengguna & peran").

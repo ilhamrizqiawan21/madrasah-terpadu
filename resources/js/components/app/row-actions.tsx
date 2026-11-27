@@ -34,6 +34,10 @@ export function RowActions({
     itemName,
     children,
 }: RowActionsProps) {
+    // Nama item membuat tombol ikon di tiap baris bisa dibedakan oleh pembaca layar.
+    const labelFor = (action: string): string =>
+        itemName ? `${action} ${itemName}` : action;
+
     const [confirmOpen, setConfirmOpen] = useState(false);
 
     const resolvedDeleteDescription =
@@ -52,7 +56,7 @@ export function RowActions({
                                 variant="ghost"
                                 size="icon"
                                 asChild
-                                aria-label="Lihat"
+                                aria-label={labelFor('Lihat')}
                             >
                                 <Link href={viewHref}>
                                     <Eye
@@ -74,7 +78,7 @@ export function RowActions({
                                 variant="ghost"
                                 size="icon"
                                 onClick={onView}
-                                aria-label="Lihat"
+                                aria-label={labelFor('Lihat')}
                             >
                                 <Eye className="size-4" strokeWidth={1.75} />
                             </Button>
@@ -91,7 +95,7 @@ export function RowActions({
                                 variant="ghost"
                                 size="icon"
                                 onClick={onEdit}
-                                aria-label="Ubah"
+                                aria-label={labelFor('Ubah')}
                             >
                                 <Pencil className="size-4" strokeWidth={1.75} />
                             </Button>
@@ -110,7 +114,7 @@ export function RowActions({
                                 variant="ghost"
                                 size="icon"
                                 onClick={() => setConfirmOpen(true)}
-                                aria-label="Hapus"
+                                aria-label={labelFor('Hapus')}
                                 className="text-destructive hover:bg-destructive/10 hover:text-destructive"
                             >
                                 <Trash2 className="size-4" strokeWidth={1.75} />

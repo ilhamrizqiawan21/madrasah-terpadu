@@ -1,5 +1,6 @@
 import { Link, usePage } from '@inertiajs/react';
 import type { ReactNode } from 'react';
+import { useEffect, useRef } from 'react';
 import StaffLayout from '@/layouts/staff-layout';
 import { cn } from '@/lib/utils';
 import type { StaffNavGroup } from '@/types';
@@ -7,6 +8,9 @@ import type { StaffNavGroup } from '@/types';
 type SettingsShellProps = {
     title: string;
     description: string;
+    actions?: ReactNode;
+    /** Untuk bagian berisi tabel; form tetap memakai lebar baca yang sempit. */
+    wide?: boolean;
     children: ReactNode;
 };
 
@@ -18,6 +22,8 @@ type SettingsShellProps = {
 export function SettingsShell({
     title,
     description,
+    actions,
+    wide = false,
     children,
 }: SettingsShellProps) {
     const page = usePage<{ navigation?: StaffNavGroup[] }>();
@@ -26,6 +32,15 @@ export function SettingsShell({
         page.props.navigation?.find((group) => group.key === 'pengaturan')
             ?.items ?? [];
     const current = items.find((item) => item.href === currentPath);
+    const activeLink = useRef<HTMLAnchorElement>(null);
+
+    // Di layar sempit sub-navigasi menjadi baris gulir; pastikan bagian aktif terlihat.
+    useEffect(() => {
+        activeLink.current?.scrollIntoView({
+            block: 'nearest',
+            inline: 'nearest',
+        });
+    }, [currentPath]);
 
     return (
         <StaffLayout
@@ -48,6 +63,9 @@ export function SettingsShell({
                                 return (
                                     <li key={item.route} className="shrink-0">
                                         <Link
+                                            ref={
+                                                active ? activeLink : undefined
+                                            }
                                             href={item.href}
                                             aria-current={
                                                 active ? 'page' : undefined
@@ -69,18 +87,28 @@ export function SettingsShell({
 
                     <section
                         aria-labelledby="settings-section-title"
-                        className="max-w-2xl min-w-0"
+                        className={cn(
+                            'min-w-0',
+                            wide ? 'max-w-5xl' : 'max-w-2xl',
+                        )}
                     >
-                        <header className="space-y-1 border-b border-border pb-4">
-                            <h2
-                                id="settings-section-title"
-                                className="text-lg font-semibold text-foreground"
-                            >
-                                {title}
-                            </h2>
-                            <p className="text-sm text-muted-foreground">
-                                {description}
-                            </p>
+                        <header className="flex flex-col gap-3 border-b border-border pb-4 sm:flex-row sm:items-start sm:justify-between">
+                            <div className="space-y-1">
+                                <h2
+                                    id="settings-section-title"
+                                    className="text-lg font-semibold text-foreground"
+                                >
+                                    {title}
+                                </h2>
+                                <p className="text-sm text-muted-foreground">
+                                    {description}
+                                </p>
+                            </div>
+                            {actions && (
+                                <div className="flex shrink-0 gap-2">
+                                    {actions}
+                                </div>
+                            )}
                         </header>
                         <div className="pt-6">{children}</div>
                     </section>

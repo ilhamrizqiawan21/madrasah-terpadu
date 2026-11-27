@@ -65,9 +65,10 @@ Kunci yang diizinkan = enum `App\Enums\SettingKey` (kunci lain ditolak): `identi
 `user_id → users null`, `action string(32)` (`created|updated|deleted|reversed|login_failed|...`), `subject_type string`, `subject_id bigint null`,
 `before json null`, `after json null`, `ip string(45) null`, `user_agent string(255) null`, `created_at`. Indeks: (`subject_type`,`subject_id`), (`user_id`,`created_at`).
 
-### `units` (T-202)
+### `units` (T-202 ✅)
 
-`code string(10) unique` (MI/RA/TPQ), `name`, `head_user_id → users null`, `attendance_settings json` (jam masuk/terlambat/pulang/alpa), `is_active`, timestamps.
+`code string(10) unique` (MI/RA/TPQ, huruf besar + angka), `name string(100)`, `head_user_id → users null` (null on delete; diisi di T-209), `attendance_settings json`, `is_active bool default true`, timestamps.
+`attendance_settings` = `{check_in_opens_at, late_after, absent_after, check_out_opens_at}` format `H:i` WITA (`App\Support\AttendanceHours`); urutan wajib masuk < terlambat < alpa dan pulang > terlambat. Unit tidak dihapus, hanya dinonaktifkan. `UnitSeeder` (dipanggil `ProductionSeeder`) membuat MI/RA/TPQ dengan jam bawaan `config('sekolah.attendance.defaults')` tanpa menimpa unit yang sudah ada.
 
 ### `academic_years` (T-203)
 

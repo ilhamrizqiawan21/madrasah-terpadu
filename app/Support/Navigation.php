@@ -107,6 +107,11 @@ final class Navigation
                         'permission' => Permission::SettingsManage->value,
                     ],
                     [
+                        'label' => 'Unit & jam presensi',
+                        'route' => 'admin.settings.units.index',
+                        'permission' => Permission::UnitsManage->value,
+                    ],
+                    [
                         'label' => 'Pengguna staf',
                         'route' => 'admin.users.index',
                         'permission' => Permission::UsersManage->value,
