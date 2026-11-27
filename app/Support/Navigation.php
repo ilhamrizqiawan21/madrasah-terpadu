@@ -227,6 +227,7 @@ final class Navigation
                     ['label' => 'Verifikasi pembiasaan', 'route' => 'admin.habits.verify.index', 'permission' => Permission::HabitsVerify->value, 'feature' => Feature::Habits],
                     ['label' => 'Rekap pembiasaan', 'route' => 'admin.habits.recap.index', 'permission' => Permission::HabitsVerify->value, 'feature' => Feature::Habits],
                     ['label' => 'Item pembiasaan', 'route' => 'admin.habits.items.index', 'permission' => Permission::HabitsManage->value, 'feature' => Feature::Habits],
+                    ['label' => 'Materi hadits & doa', 'route' => 'admin.quran.materials.index', 'permission' => Permission::QuranManage->value, 'feature' => Feature::Quran],
                     [
                         'label' => 'Setoran hafalan', 'route' => 'admin.quran.index', 'soon' => 'setoran-hafalan',
                         'permission' => Permission::QuranView->value, 'feature' => Feature::Quran,

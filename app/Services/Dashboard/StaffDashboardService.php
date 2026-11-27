@@ -5,6 +5,11 @@ declare(strict_types=1);
 namespace App\Services\Dashboard;
 
 use App\Domain\Attendance\AttendanceClassifier;
+use Illuminate\Support\Facades\Cache;
+use App\Services\Features\FeatureFlags;
+use App\Models\RewardRedemption;
+use App\Models\DisciplineFollowup;
+use App\Enums\Feature;
 use App\Enums\ExamResultStatus;
 use App\Enums\ExamStatus;
 use App\Enums\LeaveRequestStatus;
@@ -42,10 +47,15 @@ final class StaffDashboardService
 
     private const TREND_DAYS = 7;
 
+    private const ATTENTION_TTL_SECONDS = 60;
+
     /** Rentang kalender yang ditelusuri untuk mengumpulkan TREND_DAYS hari sekolah (libur panjang dilewati). */
     private const TREND_LOOKBACK_DAYS = 20;
 
-    public function __construct(private readonly SchoolCalendarService $calendar) {}
+    public function __construct(
+        private readonly SchoolCalendarService $calendar,
+        private readonly FeatureFlags $features,
+    ) {}
 
     /**
      * Presensi hari ini. Wali kelas (guru tanpa izin lihat seluruh unit) hanya melihat rombel yang ia walikan.
@@ -391,6 +401,80 @@ final class StaffDashboardService
         }
 
         return $trend;
+    }
+
+    /**
+     * Hal yang menunggu tindakan pengguna ini, untuk lonceng topbar staf (ADR-028).
+     * Hanya hitungan nyata yang lebih dari 0; di-cache 60 detik per pengguna & konteks.
+     *
+     * @return list<array{key: string, label: string, count: int, href: string}>
+     */
+    public function attention(User $user, ?Unit $unit, ?int $yearId): array
+    {
+        $cacheKey = sprintf('staff.attention.%d.%s.%s', $user->id, $unit->id ?? 'all', $yearId ?? 'none');
+
+        /** @var list<array{key: string, label: string, count: int, href: string}> */
+        return Cache::remember($cacheKey, self::ATTENTION_TTL_SECONDS, function () use ($user, $unit, $yearId): array {
+            $homeroomOnly = $this->isHomeroomOnly($user);
+            $inUnit = fn (Builder $q) => $unit !== null ? $q->where('unit_id', $unit->id) : $q;
+            // Wali kelas hanya diminta menindak siswa rombel yang ia walikan.
+            $inHomeroom = fn (Builder $q) => $q->whereHas('enrollments', fn (Builder $e) => $e
+                ->where('academic_year_id', $yearId)
+                ->whereHas('classroom', fn (Builder $c) => $c->where('homeroom_teacher_id', $user->id)));
+
+            $items = [];
+
+            if ($this->features->enabled(Feature::Attendance) && $user->can(Permission::AttendanceManage->value)) {
+                $items[] = [
+                    'key' => 'leaves',
+                    'label' => 'pengajuan izin menunggu keputusan',
+                    'count' => LeaveRequest::query()
+                        ->where('status', LeaveRequestStatus::Pending->value)
+                        ->whereHas('student', fn (Builder $s) => $homeroomOnly ? $inHomeroom($inUnit($s)) : $inUnit($s))
+                        ->count(),
+                    'href' => route('admin.attendance.leaves.index', absolute: false),
+                ];
+            }
+
+            if ($this->features->enabled(Feature::Habits) && $user->can(Permission::HabitsVerify->value)) {
+                $items[] = [
+                    'key' => 'habits',
+                    'label' => 'siswa dengan pembiasaan belum diverifikasi',
+                    'count' => Student::query()
+                        ->where('status', StudentStatus::Active->value)
+                        ->tap(fn (Builder $q) => $homeroomOnly ? $inHomeroom($inUnit($q)) : $inUnit($q))
+                        ->whereHas('habitLogs', fn (Builder $h) => $h->where('verification', 'pending')->where('done', true))
+                        ->count(),
+                    'href' => route('admin.habits.verify.index', absolute: false),
+                ];
+            }
+
+            if ($this->features->enabled(Feature::Behavior) && $user->can(Permission::ThresholdsManage->value)) {
+                $items[] = [
+                    'key' => 'followups',
+                    'label' => 'tindak lanjut BK masih terbuka',
+                    'count' => DisciplineFollowup::query()
+                        ->where('status', 'open')
+                        ->whereHas('student', $inUnit)
+                        ->count(),
+                    'href' => route('admin.behavior.discipline.index', absolute: false),
+                ];
+            }
+
+            if ($this->features->enabled(Feature::Rewards) && $user->can(Permission::RewardsApprove->value)) {
+                $items[] = [
+                    'key' => 'rewards',
+                    'label' => 'pengajuan reward menunggu persetujuan',
+                    'count' => RewardRedemption::query()
+                        ->where('status', 'pending')
+                        ->whereHas('student', $inUnit)
+                        ->count(),
+                    'href' => route('admin.behavior.rewards.index', absolute: false),
+                ];
+            }
+
+            return array_values(array_filter($items, fn (array $item): bool => $item['count'] > 0));
+        });
     }
 
     private function isHomeroomOnly(User $user): bool

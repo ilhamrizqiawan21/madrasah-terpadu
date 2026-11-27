@@ -288,9 +288,9 @@ Unik (`student_id`,`habit_item_id`,`log_date`). Indeks (`log_date`,`verification
 
 `number tinyint unique` (1–114), `name_latin`, `name_arabic`, `ayah_count smallint`, `juz_start tinyint`. Total 6.236 ayat.
 
-### `memorization_materials` (T-1107, ADR-017) — master hadits & doa
+### `memorization_materials` (T-1107 ✅, ADR-017) — master hadits & doa
 
-`unit_id null`, `kind string` (`hadith|prayer`), `title`, `arabic_text text null`, `translation text null`, `source string null`, `sort_order`, `is_active`, timestamps. Materi yang punya setoran hanya dinonaktifkan.
+`unit_id null` (`→ units`, restrict), `kind string(20)` (`hadith|prayer`), `title string(180)`, `arabic_text text null`, `translation text null`, `source string(150) null`, `sort_order smallint unsigned`, `is_active`, timestamps. Materi yang punya setoran hanya dinonaktifkan. Ditulis lewat `MemorizationMaterialService`.
 
 ### `memorization_targets` (T-1102)
 

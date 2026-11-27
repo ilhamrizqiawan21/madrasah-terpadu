@@ -57,11 +57,7 @@ Route::middleware(['auth:web'])->group(function (): void {
 
             require __DIR__.'/behavior.php';
             require __DIR__.'/habits.php';
-
-            Route::get('hafalan', ComingSoonController::class)
-                ->defaults('module', 'setoran-hafalan')
-                ->middleware(['permission:'.Permission::QuranView->value, 'feature:'.Feature::Quran->value])
-                ->name('quran.index');
+            require __DIR__.'/quran.php';
 
             Route::get('laporan', ComingSoonController::class)
                 ->defaults('module', 'laporan-presensi')
