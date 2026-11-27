@@ -245,10 +245,8 @@ final class Navigation
                 'icon' => 'wallet',
                 'items' => [
                     [
-                        'label' => 'Tagihan', 'route' => 'admin.invoices.index', 'soon' => 'tagihan',
+                        'label' => 'Tagihan', 'route' => 'admin.invoices.index',
                         'permission' => Permission::InvoicesView->value, 'feature' => Feature::Billing,
-                        'description' => 'Penerbitan tagihan per rombel, cicilan, dan status lunas per siswa.',
-                        'plan' => 'Paket P-05 Tagihan & kasir, rilis peralihan uang (ADR-021)',
                     ],
                     [
                         'label' => 'Terbitkan tagihan', 'route' => 'admin.billing-runs.create',

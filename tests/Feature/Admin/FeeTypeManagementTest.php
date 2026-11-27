@@ -7,13 +7,11 @@ use App\Enums\FeeRecurrence;
 use App\Enums\Role as RoleEnum;
 use App\Models\AuditLog;
 use App\Models\FeeType;
+use App\Models\Invoice;
 use App\Models\Unit;
 use App\Models\User;
 use App\Services\Features\FeatureFlags;
 use Database\Seeders\RolesAndPermissionsSeeder;
-use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
 use Inertia\Testing\AssertableInertia as Assert;
 
 beforeEach(function (): void {
@@ -181,12 +179,7 @@ test('jenis tagihan yang belum dipakai dapat dihapus sedangkan yang sudah ada ta
     expect(FeeType::query()->find($unused->id))->toBeNull();
     expect(AuditLog::query()->where('action', 'fee_type.deleted')->where('subject_id', $unused->id)->exists())->toBeTrue();
 
-    Schema::create('invoices', function (Blueprint $table): void {
-        $table->id();
-        $table->unsignedBigInteger('fee_type_id');
-    });
-
-    DB::table('invoices')->insert(['fee_type_id' => $used->id]);
+    Invoice::factory()->create(['fee_type_id' => $used->id]);
 
     $this->actingAs($admin)
         ->delete(route('admin.fee-types.destroy', $used))

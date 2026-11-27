@@ -3,7 +3,6 @@
 declare(strict_types=1);
 
 use App\Enums\Feature;
-use App\Enums\Permission;
 use App\Enums\Role;
 use App\Http\Controllers\Admin\ComingSoonController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
@@ -49,11 +48,6 @@ Route::middleware(['auth:web'])->group(function (): void {
             Route::get('segera/{module}', ComingSoonController::class)
                 ->where('module', '[a-z0-9-]+')
                 ->name('soon');
-
-            Route::get('tagihan', ComingSoonController::class)
-                ->defaults('module', 'tagihan')
-                ->middleware(['permission:'.Permission::InvoicesView->value, 'feature:'.Feature::Billing->value])
-                ->name('invoices.index');
 
             require __DIR__.'/behavior.php';
             require __DIR__.'/habits.php';
