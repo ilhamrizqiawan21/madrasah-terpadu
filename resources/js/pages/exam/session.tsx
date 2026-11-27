@@ -85,6 +85,13 @@ export default function ExamSessionPage({
         'saved',
     );
     const [takeoverMessage, setTakeoverMessage] = useState<string | null>(null);
+    const [lockedMessage, setLockedMessage] = useState<string | null>(null);
+    const [needsFullscreen, setNeedsFullscreen] = useState<boolean>(
+        session.device_type === 'lab' &&
+            typeof document !== 'undefined' &&
+            document.fullscreenEnabled &&
+            !document.fullscreenElement,
+    );
     const [submitOpen, setSubmitOpen] = useState(false);
     const [submitting, setSubmitting] = useState(false);
 
@@ -95,6 +102,94 @@ export default function ExamSessionPage({
 
         return () => window.clearInterval(interval);
     }, []);
+
+    useEffect(() => {
+        const sendViolation = async (
+            kind: 'tab_hidden' | 'fullscreen_exit' | 'copy_paste',
+        ): Promise<void> => {
+            try {
+                const csrf =
+                    document
+                        .querySelector('meta[name="csrf-token"]')
+                        ?.getAttribute('content') ?? '';
+                const res = await fetch(
+                    ExamSessionController.recordViolation.url(exam.id),
+                    {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            Accept: 'application/json',
+                            'X-CSRF-TOKEN': csrf,
+                        },
+                        body: JSON.stringify({
+                            device_token: session.device_token,
+                            kind,
+                        }),
+                    },
+                );
+
+                if (res.status === 409) {
+                    setTakeoverMessage(
+                        'Sesi ujian ini dibuka dari perangkat lain.',
+                    );
+
+                    return;
+                }
+
+                if (res.ok) {
+                    const data = (await res.json()) as { locked?: boolean };
+                    if (data.locked) {
+                        setLockedMessage(
+                            'Sesi ujian Anda terkunci karena melebihi batas pelanggaran. Hubungi pengawas.',
+                        );
+                    }
+                }
+            } catch {
+                // Abaikan gagal jaringan sesaat saat mencatat pelanggaran.
+            }
+        };
+
+        const onVisibility = (): void => {
+            if (document.hidden) {
+                void sendViolation('tab_hidden');
+            }
+        };
+
+        const onFullscreen = (): void => {
+            if (session.device_type === 'lab' && !document.fullscreenElement) {
+                setNeedsFullscreen(true);
+                void sendViolation('fullscreen_exit');
+            } else {
+                setNeedsFullscreen(false);
+            }
+        };
+
+        const onCopyPaste = (event: ClipboardEvent): void => {
+            event.preventDefault();
+            void sendViolation('copy_paste');
+        };
+
+        document.addEventListener('visibilitychange', onVisibility);
+        document.addEventListener('fullscreenchange', onFullscreen);
+        document.addEventListener('copy', onCopyPaste);
+        document.addEventListener('paste', onCopyPaste);
+
+        return () => {
+            document.removeEventListener('visibilitychange', onVisibility);
+            document.removeEventListener('fullscreenchange', onFullscreen);
+            document.removeEventListener('copy', onCopyPaste);
+            document.removeEventListener('paste', onCopyPaste);
+        };
+    }, [exam.id, session.device_token, session.device_type]);
+
+    const enterFullscreen = async (): Promise<void> => {
+        try {
+            await document.documentElement.requestFullscreen();
+            setNeedsFullscreen(false);
+        } catch {
+            // Browser menolak layar penuh otomatis.
+        }
+    };
 
     const syncBatch = async (
         nextAnswers: Record<number, SavedAnswer>,
@@ -232,6 +327,28 @@ export default function ExamSessionPage({
                 {takeoverMessage && (
                     <div className="rounded-md border border-destructive/30 bg-destructive/10 p-4 text-sm text-destructive">
                         {takeoverMessage}
+                    </div>
+                )}
+
+                {lockedMessage && (
+                    <div className="rounded-md border border-destructive/30 bg-destructive/10 p-4 text-sm text-destructive">
+                        {lockedMessage}
+                    </div>
+                )}
+
+                {needsFullscreen && !lockedMessage && (
+                    <div className="flex flex-wrap items-center justify-between gap-3 rounded-md border border-warning/40 bg-warning/15 p-4 text-sm">
+                        <span>
+                            Mode lab mewajibkan layar penuh selama ujian
+                            berlangsung.
+                        </span>
+                        <Button
+                            type="button"
+                            size="sm"
+                            onClick={() => void enterFullscreen()}
+                        >
+                            Masuk layar penuh
+                        </Button>
                     </div>
                 )}
 

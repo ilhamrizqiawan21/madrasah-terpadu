@@ -98,6 +98,14 @@ class ExamSession extends Model
     }
 
     /**
+     * @return HasMany<ExamViolation, $this>
+     */
+    public function violations(): HasMany
+    {
+        return $this->hasMany(ExamViolation::class);
+    }
+
+    /**
      * @return HasOne<ExamResult, $this>
      */
     public function result(): HasOne

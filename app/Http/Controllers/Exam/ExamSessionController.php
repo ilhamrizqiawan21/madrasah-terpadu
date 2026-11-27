@@ -6,9 +6,11 @@ namespace App\Http\Controllers\Exam;
 
 use App\Domain\Exam\SessionClock;
 use App\Enums\ExamSessionStatus;
+use App\Enums\ExamViolationKind;
 use App\Exceptions\Cbt\DeviceTakeoverException;
 use App\Exceptions\Cbt\ExamAccessException;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Exam\RecordExamViolationRequest;
 use App\Http\Requests\Exam\StartExamSessionRequest;
 use App\Http\Requests\Exam\SyncExamAnswersRequest;
 use App\Http\Resources\StudentExamQuestionResource;
@@ -16,6 +18,7 @@ use App\Models\Exam;
 use App\Models\ExamSession;
 use App\Models\Student;
 use App\Services\Cbt\ExamSessionService;
+use App\Services\Cbt\ExamViolationService;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -26,7 +29,10 @@ use Inertia\Response;
 
 class ExamSessionController extends Controller
 {
-    public function __construct(private readonly ExamSessionService $service) {}
+    public function __construct(
+        private readonly ExamSessionService $service,
+        private readonly ExamViolationService $violationService,
+    ) {}
 
     public function start(StartExamSessionRequest $request, Exam $exam): RedirectResponse
     {
@@ -116,6 +122,27 @@ class ExamSessionController extends Controller
             return response()->json(['message' => $e->getMessage()], 409);
         } catch (ExamAccessException $e) {
             return response()->json(['message' => $e->getMessage()], 422);
+        }
+
+        return response()->json($result);
+    }
+
+    public function recordViolation(RecordExamViolationRequest $request, Exam $exam): JsonResponse
+    {
+        $student = $this->student();
+        $session = ExamSession::query()
+            ->where('exam_id', $exam->id)
+            ->where('student_id', $student->id)
+            ->firstOrFail();
+
+        try {
+            $result = $this->violationService->record(
+                $session,
+                (string) $request->validated('device_token'),
+                ExamViolationKind::from((string) $request->validated('kind')),
+            );
+        } catch (DeviceTakeoverException $e) {
+            return response()->json(['message' => $e->getMessage()], 409);
         }
 
         return response()->json($result);

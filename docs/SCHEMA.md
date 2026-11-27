@@ -351,9 +351,9 @@ Unik (`student_id`,`academic_year_id`,`aspect`).
 
 `exam_session_id → exam_sessions` (cascade), `exam_question_id → exam_questions` (restrict), `answer json null`, `is_flagged bool`, `client_ts timestamp`, `received_at timestamp`, timestamps. Unik (`exam_session_id`,`exam_question_id`); upsert idempoten.
 
-### `exam_violations` (T-1508) — append-only
+### `exam_violations` (T-1508 ✅) — append-only
 
-`exam_session_id`, `kind` (`tab_hidden|fullscreen_exit|copy_paste|takeover`), `occurred_at`, `counted bool` (false untuk mode `phone`).
+`exam_session_id → exam_sessions` (cascade), `kind string(32)` (`tab_hidden|fullscreen_exit|copy_paste|takeover`), `occurred_at timestamp`, `counted bool` (false untuk mode `phone` dan `takeover`). Indeks (`exam_session_id`,`counted`). Ditulis lewat `ExamViolationService`.
 
 ### `exam_essay_scores` (T-1507 ✅)
 

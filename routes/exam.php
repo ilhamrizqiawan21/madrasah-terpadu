@@ -35,6 +35,9 @@ Route::middleware('feature:'.Feature::Cbt->value)
             Route::post('{exam}/jawaban', [ExamSessionController::class, 'syncAnswers'])
                 ->whereNumber('exam')
                 ->name('sessions.answers');
+            Route::post('{exam}/pelanggaran', [ExamSessionController::class, 'recordViolation'])
+                ->whereNumber('exam')
+                ->name('sessions.violations');
             Route::post('{exam}/selesai', [ExamSessionController::class, 'submit'])
                 ->whereNumber('exam')
                 ->name('sessions.submit');
