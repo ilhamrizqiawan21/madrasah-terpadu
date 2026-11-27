@@ -70,3 +70,11 @@ test('item menu menandai modul yang belum dibangun dan setiap grup punya ikon', 
         ->and($items->firstWhere('label', 'Ekstrakurikuler')['soon'])->toBeTrue()
         ->and($items->pluck('href')->duplicates())->toBeEmpty();
 });
+
+test('label menu tidak ganda dalam satu grup', function (): void {
+    foreach (Navigation::forUser(soonUser(RoleEnum::Admin)) as $group) {
+        $labels = array_column($group['items'], 'label');
+
+        expect(array_unique($labels))->toHaveCount(count($labels));
+    }
+});

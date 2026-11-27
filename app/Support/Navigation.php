@@ -236,16 +236,6 @@ final class Navigation
                         'plan' => 'T-1104–T-1105, Paket P-14 Hafalan & PIB',
                     ],
                     [
-                        'label' => 'Target hafalan', 'soon' => 'target-hafalan', 'permission' => Permission::QuranManage->value,
-                        'description' => 'Target hafalan Al-Qur\'an per unit, tingkat, dan tahun ajaran.',
-                        'plan' => 'T-1102, Paket P-14 Hafalan & PIB',
-                    ],
-                    [
-                        'label' => 'Materi hadits & doa', 'soon' => 'materi-hafalan', 'permission' => Permission::QuranManage->value,
-                        'description' => 'Daftar hadits dan doa hafalan beserta teks Arab, terjemahan, dan sumber.',
-                        'plan' => 'T-1107, Paket P-14 Hafalan & PIB',
-                    ],
-                    [
                         'label' => 'Praktik ibadah (PIB)', 'soon' => 'praktik-ibadah', 'permission' => Permission::QuranRecord->value,
                         'description' => 'Penilaian praktik ibadah per bab dan materi untuk setiap rombel.',
                         'plan' => 'T-1106, Paket P-14 Hafalan & PIB',
