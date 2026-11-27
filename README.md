@@ -8,7 +8,7 @@ pembiasaan harian, setoran hafalan, dan nilai sikap.
 
 ## Stack
 
-PHP 8.3+ · Laravel 13 · Inertia 3 · React 19 + TypeScript · Tailwind CSS 4 · shadcn/ui · Fortify · Wayfinder · spatie/laravel-permission · MySQL/MariaDB · Pest 4 · Larastan · Pint · Vite+.
+PHP 8.4+ · Laravel 13 · Inertia 3 · React 19 + TypeScript · Tailwind CSS 4 · shadcn/ui · Fortify · Wayfinder · spatie/laravel-permission · MySQL/MariaDB · Pest 4 · Larastan · Pint · Vite+.
 
 ## Mulai cepat
 

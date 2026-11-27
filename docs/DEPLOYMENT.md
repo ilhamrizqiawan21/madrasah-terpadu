@@ -4,7 +4,7 @@ Target: satu VPS Linux (Ubuntu 24.04 LTS / Debian 12), 2 vCPU, 2–4 GB RAM, SSD
 
 ## 1. Kebutuhan
 
-- Nginx, PHP-FPM 8.3+ (`bcmath intl gd zip pdo_mysql mbstring xml curl openssl`), Composer 2, Node 24 (hanya untuk build; boleh build di CI lalu unggah `public/build`).
+- Nginx, PHP-FPM 8.4+ (`bcmath intl gd zip pdo_mysql mbstring xml curl openssl`), Composer 2, Node 24 (hanya untuk build; boleh build di CI lalu unggah `public/build`).
 - MariaDB 10.11+ / MySQL 8: database dan user khusus aplikasi ini, hanya hak atas database itu.
 - Supervisor (worker antrean), cron (scheduler), Certbot (HTTPS), `unzip`, `git`.
 

@@ -7,7 +7,7 @@ Tanda ✅ = sudah ada di fondasi (Fase 0).
 
 | Lapisan      | Pilihan                                                          | Catatan                                                                        |
 | ------------ | ---------------------------------------------------------------- | ------------------------------------------------------------------------------ |
-| Runtime      | PHP 8.3+ (lokal 8.5), Node 24+                                   | Produksi: ekstensi `bcmath`, `intl`, `gd`, `zip`, `pdo_mysql`                  |
+| Runtime      | PHP 8.4+ (lokal 8.5), Node 24+                                   | Produksi: ekstensi `bcmath`, `intl`, `gd`, `zip`, `pdo_mysql`                  |
 | Backend      | Laravel 13 ✅                                                    | Starter kit resmi React (`laravel/react-starter-kit`, cabang `main`)           |
 | Auth         | Laravel Fortify ✅                                               | Login, reset, 2FA, passkey. Registrasi publik **dimatikan** di T-101           |
 | Bridge       | Inertia 3 ✅                                                     | Tanpa REST API terpisah untuk UI. JSON hanya untuk webhook, scan, POS, push    |

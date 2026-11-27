@@ -220,6 +220,12 @@ Akun wali dibuat lewat impor/data induk dengan password awal acak. Tidak ada hal
 - **Diambil penuh** (bukan kerangka): kartu **RFID** sebagai token presensi (ADR-008 diperluas: token kartu boleh UID RFID; QR tetap didukung), diskon & beasiswa berulang per siswa, unggah bukti transfer (keduanya bagian Rilis peralihan), kenaikan kelas & mutasi siswa.
 - Tetap bukan tujuan: PPDB, CMS website, perpustakaan, armada, koperasi, helpdesk, payroll, dana BOS, ZIS.
 
+## ADR-023 — Versi minimum PHP 8.4 (Diterima, 2026-11-27; keputusan pemilik)
+
+**Konteks:** `composer.json` menyatakan `php: ^8.3`, tetapi `composer.lock` mengunci Symfony 8.1 (dependensi Laravel 13) yang butuh PHP ≥ 8.4.1. Akibatnya CI job PHP 8.3 gagal di `composer install` sejak awal, dan server PHP 8.3 tidak akan bisa memasang aplikasi.
+**Keputusan:** versi minimum PHP = **8.4**. `composer.json` `php: ^8.4`; matriks CI 8.4 dan 8.5; dokumen deploy menyebut PHP-FPM 8.4+. Workflow bawaan starter kit `.github/workflows/tests.yml` dihapus karena menduplikasi `ci.yml` dengan PHP 8.3 dan Node 22.
+**Akibat:** server staging/produksi klien wajib PHP 8.4+ (DEPLOYMENT §1). Tidak ada dependensi yang berubah; hanya `content-hash` di `composer.lock`.
+
 ---
 
 ## Usulan terbuka (menunggu klien, lihat PRD §8)
