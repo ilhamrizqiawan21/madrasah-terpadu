@@ -32,6 +32,8 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  * @property-read Exam $exam
  * @property-read Student $student
  * @property-read Collection<int, ExamAnswer> $answers
+ * @property-read int|null $answers_count
+ * @property-read int|null $counted_violations_count
  */
 class ExamSession extends Model
 {

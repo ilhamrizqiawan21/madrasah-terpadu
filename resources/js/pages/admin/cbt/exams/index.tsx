@@ -1,9 +1,10 @@
 import { Head, Link, router, useForm } from '@inertiajs/react';
-import { CalendarCheck, FileCheck2, Plus } from 'lucide-react';
+import { CalendarCheck, FileCheck2, Monitor, Plus } from 'lucide-react';
 import type { FormEvent } from 'react';
 import { useEffect, useRef, useState } from 'react';
 import CbtEssayScoreController from '@/actions/App/Http/Controllers/Admin/CbtEssayScoreController';
 import CbtExamController from '@/actions/App/Http/Controllers/Admin/CbtExamController';
+import CbtMonitorController from '@/actions/App/Http/Controllers/Admin/CbtMonitorController';
 import CbtQuestionController from '@/actions/App/Http/Controllers/Admin/CbtQuestionController';
 import AdminDashboardController from '@/actions/App/Http/Controllers/Admin/DashboardController';
 import type { DataTableColumn } from '@/components/app/data-table';
@@ -383,6 +384,30 @@ export default function CbtExamsIndex({
                                       </Button>
                                   </TooltipTrigger>
                                   <TooltipContent>Nilai essay</TooltipContent>
+                              </Tooltip>
+                              <Tooltip>
+                                  <TooltipTrigger asChild>
+                                      <Button
+                                          variant="ghost"
+                                          size="icon"
+                                          asChild
+                                          aria-label={`Monitor pengawas ${row.title}`}
+                                      >
+                                          <Link
+                                              href={CbtMonitorController.index.url(
+                                                  row.id,
+                                              )}
+                                          >
+                                              <Monitor
+                                                  className="size-4"
+                                                  strokeWidth={1.75}
+                                              />
+                                          </Link>
+                                      </Button>
+                                  </TooltipTrigger>
+                                  <TooltipContent>
+                                      Monitor pengawas
+                                  </TooltipContent>
                               </Tooltip>
                               {(row.status === 'draft' ||
                                   row.status === 'scheduled') && (
