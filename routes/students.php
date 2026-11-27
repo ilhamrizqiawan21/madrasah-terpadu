@@ -28,6 +28,9 @@ Route::prefix('siswa')
             Route::put('{student}', 'update')->whereNumber('student')->name('update');
             Route::patch('{student}/status', 'updateStatus')->whereNumber('student')->name('status.update');
 
+            Route::post('kartu/cetak', [StudentCardController::class, 'printClassroom'])
+                ->name('cards.print-classroom');
+
             Route::prefix('{student}/kartu')
                 ->whereNumber('student')
                 ->name('cards.')
@@ -35,6 +38,7 @@ Route::prefix('siswa')
                 ->group(function (): void {
                     Route::post('qr', 'issueQr')->name('qr.issue');
                     Route::post('rfid', 'registerRfid')->name('rfid.register');
+                    Route::post('cetak', 'printSingle')->name('print');
                     Route::delete('/', 'revoke')->name('revoke');
                 });
         });

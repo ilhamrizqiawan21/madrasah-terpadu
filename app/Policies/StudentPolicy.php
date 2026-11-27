@@ -27,4 +27,9 @@ class StudentPolicy
     {
         return $user->can(Permission::StudentsManage->value);
     }
+
+    public function create(User $user): bool
+    {
+        return $user->can(Permission::StudentsManage->value);
+    }
 }
