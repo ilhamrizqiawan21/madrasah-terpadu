@@ -12,6 +12,9 @@ return [
 
     'foundation_name' => 'Yayasan Amal Jaya Berkah',
 
+    // Aplikasi lama yang masih memegang keuangan selama masa paralel (ADR-021); kosong = tanpa tautan.
+    'legacy_finance_url' => env('LEGACY_FINANCE_URL', ''),
+
     'security' => [
         // Wajib 2FA untuk Admin & Bendahara (T-104). Dimatikan sementara atas
         // keputusan pemilik (ADR-025); nyalakan sebelum produksi.

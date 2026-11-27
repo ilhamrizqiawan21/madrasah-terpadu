@@ -118,6 +118,15 @@ type Props = {
     } | null;
     queue: { pending_jobs: number; failed_jobs: number } | null;
     heldModules: string[];
+    foundation: {
+        legacy_url: string;
+        modules: {
+            key: string;
+            label: string;
+            detail: string;
+            status: 'held' | 'deferred' | 'out_of_scope' | 'planned';
+        }[];
+    } | null;
     security: {
         failed_logins_24h: number;
         recent_logins: { name: string; at: string }[];
@@ -196,6 +205,7 @@ export default function AdminDashboard({
     dataGaps,
     queue,
     heldModules,
+    foundation,
     security,
     units,
     recentMutations,
@@ -314,6 +324,8 @@ export default function AdminDashboard({
                         </div>
                     )}
                 </section>
+
+                {foundation && <FoundationRow foundation={foundation} />}
 
                 {(hasMain || hasSide) && (
                     <div
@@ -1094,6 +1106,95 @@ function MutationsPanel({ mutations }: { mutations: MutationSummary[] }) {
                 </ul>
             )}
         </DashboardPanel>
+    );
+}
+
+const FOUNDATION_STATUS: Record<
+    NonNullable<Props['foundation']>['modules'][number]['status'],
+    { label: string; note: string }
+> = {
+    held: {
+        label: 'Masih di aplikasi lama',
+        note: 'Pindah saat peralihan keuangan',
+    },
+    deferred: {
+        label: 'Masih di aplikasi lama',
+        note: 'Akuntansi yayasan, menunggu keputusan klien',
+    },
+    planned: { label: 'Belum aktif', note: 'Kerangka direncanakan' },
+    out_of_scope: {
+        label: 'Di luar cakupan',
+        note: 'Butuh kesepakatan terpisah',
+    },
+};
+
+/**
+ * Baris kartu yayasan dengan susunan sama seperti dasbor aplikasi lama. Isinya jujur:
+ * modul yang belum dikelola aplikasi ini menunjukkan statusnya, bukan angka (ADR-021, U-12).
+ */
+function FoundationRow({
+    foundation,
+}: {
+    foundation: NonNullable<Props['foundation']>;
+}) {
+    return (
+        <section aria-labelledby="foundation-title" className="space-y-3">
+            <div className="flex flex-wrap items-end justify-between gap-2">
+                <div>
+                    <h2 id="foundation-title" className="text-sm font-semibold">
+                        Keuangan & layanan yayasan
+                    </h2>
+                    <p className="text-xs text-muted-foreground">
+                        Selama masa paralel, angka keuangan dikelola aplikasi
+                        lama.
+                    </p>
+                </div>
+                {foundation.legacy_url !== '' && (
+                    <Button size="sm" variant="outline" asChild>
+                        <a
+                            href={foundation.legacy_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            Buka dasbor keuangan lama
+                        </a>
+                    </Button>
+                )}
+            </div>
+            <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                {foundation.modules.map((module) => {
+                    const status = FOUNDATION_STATUS[module.status];
+
+                    return (
+                        <li
+                            key={module.key}
+                            className="flex flex-col rounded-xl border border-dashed border-border bg-card/60 px-4 py-3"
+                        >
+                            <p className="text-sm font-semibold">
+                                {module.label}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                                {module.detail}
+                            </p>
+                            <div className="mt-3 flex items-center gap-2">
+                                <StatusBadge
+                                    variant={
+                                        module.status === 'out_of_scope'
+                                            ? 'muted'
+                                            : 'default'
+                                    }
+                                >
+                                    {status.label}
+                                </StatusBadge>
+                            </div>
+                            <p className="mt-1.5 text-[11px] text-muted-foreground">
+                                {status.note}
+                            </p>
+                        </li>
+                    );
+                })}
+            </ul>
+        </section>
     );
 }
 

@@ -72,6 +72,20 @@ class DashboardController extends Controller
             'dataGaps' => $canManageStudents ? $this->dashboard->dataGaps($unit, $yearId) : null,
             'queue' => $isAdmin ? $this->dashboard->queueHealth() : null,
             'heldModules' => $isAdmin ? $this->dashboard->heldModules() : [],
+            // Susunan kartu dasbor yayasan aplikasi lama; isi jujur: modul yang belum ada diberi status, bukan angka (ADR-021, U-12).
+            'foundation' => ($isAdmin || $user->hasRole(Role::Treasurer->value)) ? [
+                'legacy_url' => (string) config('sekolah.legacy_finance_url'),
+                'modules' => [
+                    ['key' => 'cash-in', 'label' => 'Kas masuk', 'detail' => 'SPP, BOS termin, penerimaan lain', 'status' => 'held'],
+                    ['key' => 'cash-out', 'label' => 'Kas keluar', 'detail' => 'Operasional, gaji, belanja BOS', 'status' => 'deferred'],
+                    ['key' => 'receivables', 'label' => 'Piutang SPP', 'detail' => 'Tunggakan dan capaian tagihan', 'status' => 'held'],
+                    ['key' => 'wallet', 'label' => 'Dompet siswa', 'detail' => 'Saldo dan isi saldo kantin', 'status' => 'held'],
+                    ['key' => 'bos', 'label' => 'Dana BOS & RKAS', 'detail' => 'Saldo, termin, SPJ BKU', 'status' => 'deferred'],
+                    ['key' => 'zis', 'label' => 'Kas ZIS', 'detail' => 'Zakat, infaq, penyaluran', 'status' => 'deferred'],
+                    ['key' => 'ppdb', 'label' => 'Penerimaan PPDB', 'detail' => 'Pendaftar dan konversi', 'status' => 'out_of_scope'],
+                    ['key' => 'dormitory', 'label' => 'Hunian asrama', 'detail' => 'Kamar dan keterisian', 'status' => 'planned'],
+                ],
+            ] : null,
             'security' => $isAdmin ? $this->dashboard->security() : null,
             'units' => $isAdmin && $attendanceOn ? $this->dashboard->unitComparison($yearId) : null,
             'recentMutations' => $canManageStudents ? $this->recentMutations($unit) : [],
