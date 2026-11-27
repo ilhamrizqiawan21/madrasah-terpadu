@@ -117,7 +117,9 @@ Ditulis hanya lewat `App\Services\Guardians\GuardianService` (audit `created|upd
 
 ### `notifications` (bawaan Laravel, T-402)
 
-### `push_subscriptions` (dari paket webpush, T-401)
+### `push_subscriptions` (dari paket webpush, T-401 ✅)
+
+Dipublish dari `laravel-notification-channels/webpush`; relasi polimorfik `subscribable` ke `users` (`HasPushSubscriptions`). Endpoint 404/410 dihapus otomatis oleh `WebPushChannel`.
 
 ### `notification_preferences` (T-403)
 

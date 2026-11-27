@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\SchoolContextController;
 use App\Http\Controllers\BrandingAssetController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\PushSubscriptionController;
 use App\Http\Controllers\PwaController;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Route;
@@ -25,6 +26,11 @@ Route::get('sw.js', [PwaController::class, 'serviceWorker'])->name('pwa.sw');
 
 Route::middleware(['auth'])->group(function (): void {
     Route::get('dashboard', DashboardController::class)->name('dashboard');
+
+    Route::middleware('throttle:30,1')->group(function (): void {
+        Route::post('push/subscriptions', [PushSubscriptionController::class, 'store'])->name('push.subscriptions.store');
+        Route::delete('push/subscriptions', [PushSubscriptionController::class, 'destroy'])->name('push.subscriptions.destroy');
+    });
 
     Route::prefix('admin')
         ->name('admin.')
