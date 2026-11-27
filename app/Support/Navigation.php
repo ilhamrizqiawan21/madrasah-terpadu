@@ -230,6 +230,7 @@ final class Navigation
                     ['label' => 'Materi hadits & doa', 'route' => 'admin.quran.materials.index', 'permission' => Permission::QuranManage->value, 'feature' => Feature::Quran],
                     ['label' => 'Target hafalan', 'route' => 'admin.quran.targets.index', 'permission' => Permission::QuranManage->value, 'feature' => Feature::Quran],
                     ['label' => 'Rubrik hafalan', 'route' => 'admin.quran.rubrics.index', 'permission' => Permission::QuranManage->value, 'feature' => Feature::Quran],
+                    ['label' => 'Praktik ibadah (PIB)', 'route' => 'admin.quran.pib.index', 'permission' => Permission::QuranView->value, 'feature' => Feature::Quran],
                     ['label' => 'Setoran hafalan', 'route' => 'admin.quran.index', 'permission' => Permission::QuranView->value, 'feature' => Feature::Quran],
                     [
                         'label' => 'Praktik ibadah (PIB)', 'soon' => 'praktik-ibadah', 'permission' => Permission::QuranRecord->value,
@@ -396,6 +397,7 @@ final class Navigation
                     ['label' => 'Identitas sekolah', 'route' => 'admin.settings.identity.edit', 'permission' => Permission::SettingsManage->value],
                     ['label' => 'Tampilan', 'route' => 'admin.settings.appearance.edit', 'permission' => Permission::SettingsManage->value],
                     ['label' => 'Unit & jam presensi', 'route' => 'admin.settings.units.index', 'permission' => Permission::UnitsManage->value],
+                    ['label' => 'Penilaian karakter', 'route' => 'admin.settings.character.edit', 'permission' => Permission::SettingsManage->value, 'feature' => Feature::Attitude],
                     ['label' => 'Kunci fitur', 'route' => 'admin.settings.features.edit', 'permission' => Permission::SettingsManage->value],
                     ['label' => 'Pengguna staf', 'route' => 'admin.users.index', 'permission' => Permission::UsersManage->value],
                     [

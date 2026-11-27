@@ -23,7 +23,7 @@ Aturan: singkat dan faktual. Jangan menyalin isi TODO/ADR; tautkan saja. Hapus b
 
 ## Terakhir diperbarui
 
-2026-11-27 · Gemini (eksekutor), setelah **T-1105 (Progres hafalan & portal wali, Fase 11)** selesai
+2026-11-27 · Gemini (eksekutor), setelah **Paket P-14 (Fase 11 Setoran hafalan & PIB: T-1101 s.d. T-1108) selesai seluruhnya**
 
 ## Keadaan sekarang
 

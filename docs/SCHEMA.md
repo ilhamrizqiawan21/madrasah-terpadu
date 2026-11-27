@@ -309,9 +309,9 @@ Unik (`student_id`,`habit_item_id`,`log_date`). Indeks (`log_date`,`verification
 
 `student_id` (`→ students`, restrict), `surah tinyint unsigned`, `ayah smallint unsigned`, `first_passed_record_id` (`→ memorization_records`, restrict). Unik (`student_id`,`surah`,`ayah`). Ditulis lewat `MemorizationService`.
 
-### `pib_chapters`, `pib_subchapters`, `pib_materials`, `pib_scores` (T-1106, port pib-laravel)
+### `pib_chapters`, `pib_subchapters`, `pib_materials`, `pib_scores` (T-1106 ✅, port pib-laravel)
 
-`pib_scores`: `student_id`, `pib_material_id`, `academic_year_id`, `mistakes tinyint` (0–90), `score tinyint` (= 90 − mistakes, dihitung di Domain), `assessed_by`, timestamps. Unik (`student_id`,`pib_material_id`,`academic_year_id`).
+`pib_scores`: `student_id`, `pib_material_id`, `academic_year_id`, `mistakes tinyint` (0–90), `score tinyint` (= 90 − mistakes, dihitung di Domain `PibScore`), `assessed_by`, timestamps. Unik (`student_id`,`pib_material_id`,`academic_year_id`). Ditulis lewat `PibAssessmentService`.
 
 ## J. Penilaian karakter (Fase 12, ADR-029)
 

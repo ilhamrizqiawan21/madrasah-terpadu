@@ -7,6 +7,7 @@ use App\Enums\Permission;
 use App\Http\Controllers\Admin\MemorizationController;
 use App\Http\Controllers\Admin\MemorizationMaterialController;
 use App\Http\Controllers\Admin\MemorizationTargetController;
+use App\Http\Controllers\Admin\PibController;
 use App\Http\Controllers\Admin\RubricController;
 use Illuminate\Support\Facades\Route;
 
@@ -52,5 +53,26 @@ Route::prefix('hafalan')
                 Route::get('/', 'index')->name('index');
                 Route::post('{version}/terbitkan', 'publish')->whereNumber('version')->name('publish');
                 Route::post('{rubric}/draf', 'createDraft')->whereNumber('rubric')->name('draft');
+            });
+
+        Route::prefix('pib')
+            ->name('pib.')
+            ->controller(PibController::class)
+            ->group(function (): void {
+                Route::get('/', 'index')
+                    ->middleware('permission:'.Permission::QuranView->value)
+                    ->name('index');
+                Route::post('bab', 'storeChapter')
+                    ->middleware('permission:'.Permission::QuranManage->value)
+                    ->name('chapters.store');
+                Route::post('subbab', 'storeSubchapter')
+                    ->middleware('permission:'.Permission::QuranManage->value)
+                    ->name('subchapters.store');
+                Route::post('materi', 'storeMaterial')
+                    ->middleware('permission:'.Permission::QuranManage->value)
+                    ->name('materials.store');
+                Route::post('nilai', 'storeScore')
+                    ->middleware('permission:'.Permission::QuranRecord->value)
+                    ->name('scores.store');
             });
     });
