@@ -13,7 +13,7 @@ class UpdateFeatureFlagsRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()?->can(Permission::SettingsManage->value) === true;
+        return $this->user('web')?->can(Permission::SettingsManage->value) === true;
     }
 
     /**

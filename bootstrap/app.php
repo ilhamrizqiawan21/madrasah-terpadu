@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\EnsureActiveStudent;
 use App\Http\Middleware\EnsureActiveUser;
 use App\Http\Middleware\EnsureFeatureEnabled;
 use App\Http\Middleware\EnsureGuardianOwnsStudent;
@@ -31,7 +32,16 @@ return Application::configure(basePath: dirname(__DIR__))
             'role_or_permission' => RoleOrPermissionMiddleware::class,
             'feature' => EnsureFeatureEnabled::class,
             'guardian.owns-student' => EnsureGuardianOwnsStudent::class,
+            'exam.active' => EnsureActiveStudent::class,
         ]);
+
+        $middleware->redirectGuestsTo(function (Request $request): string {
+            if ($request->is('ujian') || $request->is('ujian/*')) {
+                return route('exam.login');
+            }
+
+            return route('login');
+        });
 
         $middleware->web(append: [
             SecurityHeaders::class,

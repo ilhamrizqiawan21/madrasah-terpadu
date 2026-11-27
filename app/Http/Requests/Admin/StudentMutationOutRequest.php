@@ -14,7 +14,7 @@ class StudentMutationOutRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()?->can(Permission::StudentsManage->value) === true;
+        return $this->user('web')?->can(Permission::StudentsManage->value) === true;
     }
 
     protected function prepareForValidation(): void

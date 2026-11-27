@@ -331,9 +331,9 @@ Unik (`student_id`,`academic_year_id`,`aspect`).
 
 `user_id → users` (guru aktif, restrict), `subject_id → subjects` (restrict), `classroom_id → classrooms` (restrict), `academic_year_id → academic_years` (restrict), timestamps. Unik (`user_id`,`subject_id`,`classroom_id`,`academic_year_id`), indeks (`academic_year_id`,`classroom_id`). Ditulis lewat `TeachingAssignmentService`.
 
-### `student_exam_pins` (T-1502)
+### `student_exam_pins` (T-1502 ✅)
 
-`student_id` unik, `pin_hash`, `reset_by → users`, `reset_at`. PIN tidak pernah ditampilkan ulang setelah dibuat.
+`student_id → students` unik (restrict), `pin_hash`, `reset_by → users` (restrict), `reset_at`, timestamps. PIN 6 digit di-hash dan tidak pernah ditampilkan ulang setelah dibuat; ditulis hanya lewat `StudentExamPinService`.
 
 ### `exams` (T-1503)
 

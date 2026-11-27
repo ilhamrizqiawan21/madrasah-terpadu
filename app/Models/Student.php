@@ -8,6 +8,8 @@ use App\Enums\Gender;
 use App\Enums\StudentStatus;
 use Carbon\CarbonImmutable;
 use Database\Factories\StudentFactory;
+use Illuminate\Auth\Authenticatable;
+use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -47,12 +49,32 @@ use Illuminate\Support\Carbon;
     'unit_id', 'nis', 'nisn', 'name', 'nickname', 'gender',
     'birth_place', 'birth_date', 'address', 'photo_path', 'status',
 ])]
-class Student extends Model
+class Student extends Model implements AuthenticatableContract
 {
+    use Authenticatable;
+
     /** @use HasFactory<StudentFactory> */
     use HasFactory;
 
     use SoftDeletes;
+
+    /**
+     * @return HasOne<StudentExamPin, $this>
+     */
+    public function examPin(): HasOne
+    {
+        return $this->hasOne(StudentExamPin::class);
+    }
+
+    public function getAuthPassword(): string
+    {
+        return $this->examPin->pin_hash ?? '';
+    }
+
+    public function getRememberTokenName(): string
+    {
+        return '';
+    }
 
     /**
      * @return array<string, string>

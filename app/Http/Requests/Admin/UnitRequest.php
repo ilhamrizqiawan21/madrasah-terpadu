@@ -15,7 +15,7 @@ class UnitRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()?->can(Permission::UnitsManage->value) === true;
+        return $this->user('web')?->can(Permission::UnitsManage->value) === true;
     }
 
     protected function prepareForValidation(): void

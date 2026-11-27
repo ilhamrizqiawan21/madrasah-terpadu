@@ -17,7 +17,7 @@ class StudentImportRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        $user = $this->user();
+        $user = $this->user('web');
 
         return $user !== null
             && $user->can(Permission::StudentsManage->value)

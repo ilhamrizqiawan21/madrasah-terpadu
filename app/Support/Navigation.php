@@ -135,6 +135,12 @@ final class Navigation
                         'permission' => Permission::CbtView->value,
                         'feature' => Feature::Cbt,
                     ],
+                    [
+                        'label' => 'PIN ujian siswa',
+                        'route' => 'admin.cbt.pins.index',
+                        'permission' => Permission::CbtView->value,
+                        'feature' => Feature::Cbt,
+                    ],
                 ],
             ],
             [

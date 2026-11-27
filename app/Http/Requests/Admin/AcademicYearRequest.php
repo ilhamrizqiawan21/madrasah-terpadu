@@ -16,7 +16,7 @@ class AcademicYearRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()?->can(Permission::AcademicYearsManage->value) === true;
+        return $this->user('web')?->can(Permission::AcademicYearsManage->value) === true;
     }
 
     /**

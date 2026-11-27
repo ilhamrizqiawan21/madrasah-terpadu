@@ -23,7 +23,7 @@ Aturan: singkat dan faktual. Jangan menyalin isi TODO/ADR; tautkan saja. Hapus b
 
 ## Terakhir diperbarui
 
-2026-11-27 · Gemini (eksekutor), setelah **T-1501 (Mapel & penugasan guru — Paket P-16 CBT inti)** selesai dan ber-commit
+2026-11-28 · Gemini (eksekutor), setelah **T-1502 (Login siswa NIS + PIN — Paket P-16 CBT inti)** selesai dan ber-commit
 
 ## Keadaan sekarang
 
@@ -34,7 +34,7 @@ Aturan: singkat dan faktual. Jangan menyalin isi TODO/ADR; tautkan saja. Hapus b
 - **Peningkatan visual Tingkat 2 (ADR-027, commit `1c5e693`)**: topbar `--primary` hijau madrasah, latar hangat `oklch(0.96 0.006 85)` + `shadow-xs`, motif geometris Islami SVG lokal halus, tabel & tombol interaktif, serta Beranda Staf interaktif dengan data nyata.
 - **Fase 3 & 4 (Portal wali, PWA, Notifikasi) SELESAI SELURUHNYA**: T-301 ✔ (`eac3672`), T-302 ✔ (`f5727e3`), T-303 ✔ (`ddd01b4`), T-304 ✔ (`ef8ef1b`), T-305 ✔ (`78f4f3d`), T-401 ✔ (`c1a3744`), T-402 ✔ (`43e0d43`), T-403 ✔ (`e8beee1`), T-404 ✔ (`f3f259e`), T-405 ✔ (`5ac2cce`).
 - **Paket P-07 — Fase 5 (Presensi gerbang + RFID) SELESAI SELURUHNYA**: T-501 ✔ (`bd611b4`), T-502 ✔ (`7c2fb93`), T-503 ✔ (`417469c`), T-504 ✔ (`2f351d2`), T-505 ✔ (`4398cab`), T-506 ✔ (`65babf7`), T-507 ✔ (`9ac58ea`), T-508 ✔ (`68fde07`), T-509 ✔ (portal presensi wali).
-- **Paket P-16 — Fase 15 (CBT inti)**: T-1501 ✔ (Mapel & penugasan guru: `subjects`, `teaching_assignments`, izin `cbt.view`/`cbt.teach`/`cbt.manage`, menu Ujian di balik fitur `cbt`, `composer check` hijau 452 tes / Larastan 0).
+- **Paket P-16 — Fase 15 (CBT inti)**: T-1501 ✔ (`0ca124c`), T-1502 ✔ (guard `student` terpisah, `student_exam_pins`, reset PIN per siswa/rombel + cetak, rate limit per NIS, `composer check` hijau 458 tes / Larastan 0).
 - **Perbaikan setelah review** (`855c151`): `schoolContext` hanya dibagikan ke peran area `/admin` (`Role::adminArea()`), cache pengaturan TTL 10 menit + ditulis ulang setelah commit, pembersihan logo/favicon memakai nilai lama dari baris terkunci, tahun ajaran terpilih di luar 6 terbaru tetap dipakai, `activate` mengunci semua tahun ajaran urut id.
 - **Keputusan pemilik diterapkan** (`1e223e7`): `/` dialihkan ke `dashboard` (tamu → login, pengguna → beranda sesuai peran), halaman `welcome` dihapus; semua input jam memakai `TimeInput` 24 jam `HH.MM`.
 - `composer check` hijau setelah T-509. CI GitHub hijau sejak ADR-023 (PHP ≥ 8.4); commit setelah `59a0ff1` belum di-push.
@@ -43,11 +43,11 @@ Aturan: singkat dan faktual. Jangan menyalin isi TODO/ADR; tautkan saja. Hapus b
 
 ## Sedang dikerjakan
 
-Paket **P-16 CBT inti** (risiko tinggi — tinjau per tugas sesuai `AI_RULES.md` §2). `T-1501` selesai; menunggu tinjauan/arahan untuk lanjut ke `T-1502 Login siswa NIS + PIN`.
+Paket **P-16 CBT inti** (risiko tinggi — tinjau per tugas sesuai `AI_RULES.md` §2). `T-1502` selesai; menunggu tinjauan/arahan untuk lanjut ke `T-1503 Ujian`.
 
 ## Langkah berikutnya
 
-1. Tinjau `T-1501` lalu lanjut ke `T-1502` (`T-1502` s.d. `T-1506` pada Paket **P-16 CBT inti**), atau lanjut **P-11 Buku Saku BK & reward** (`T-901` s.d. `T-906`).
+1. Tinjau `T-1502` lalu lanjut ke `T-1503` (`T-1503` s.d. `T-1506` pada Paket **P-16 CBT inti**).
 2. Pemilik mengonfirmasi keputusan T-204, T-205, T-206, dan T-211 di bawah.
 3. Pemilik: `git push` untuk semua commit sejak `59a0ff1`.
 

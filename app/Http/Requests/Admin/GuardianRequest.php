@@ -20,7 +20,7 @@ class GuardianRequest extends FormRequest
 
     public function authorize(): bool
     {
-        return $this->user()?->can(Permission::GuardiansManage->value) === true;
+        return $this->user('web')?->can(Permission::GuardiansManage->value) === true;
     }
 
     protected function prepareForValidation(): void

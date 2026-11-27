@@ -25,7 +25,7 @@ Route::get('branding/{asset}', BrandingAssetController::class)
 Route::get('manifest.webmanifest', [PwaController::class, 'manifest'])->name('pwa.manifest');
 Route::get('sw.js', [PwaController::class, 'serviceWorker'])->name('pwa.sw');
 
-Route::middleware(['auth'])->group(function (): void {
+Route::middleware(['auth:web'])->group(function (): void {
     Route::get('dashboard', DashboardController::class)->name('dashboard');
 
     Route::middleware('throttle:30,1')->group(function (): void {
@@ -100,4 +100,5 @@ Route::middleware(['auth'])->group(function (): void {
         });
 });
 
+require __DIR__.'/exam.php';
 require __DIR__.'/settings.php';

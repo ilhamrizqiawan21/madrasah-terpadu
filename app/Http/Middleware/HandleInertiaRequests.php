@@ -57,15 +57,15 @@ class HandleInertiaRequests extends Middleware
                 ];
             },
             'auth' => [
-                'user' => $request->user(),
+                'user' => $request->user('web'),
             ],
-            'navigation' => fn (): array => Navigation::forUser($request->user()),
+            'navigation' => fn (): array => Navigation::forUser($request->user('web')),
             // Hanya staf yang boleh masuk grup /admin yang memakai pemilih unit/tahun ajaran.
-            'schoolContext' => fn (): ?array => $request->user()?->hasAnyRole(array_map(fn (Role $role): string => $role->value, Role::adminArea()))
+            'schoolContext' => fn (): ?array => $request->user('web')?->hasAnyRole(array_map(fn (Role $role): string => $role->value, Role::adminArea()))
                 ? SchoolContext::resolve($request->session())
                 : null,
-            'guardianContext' => fn (): ?array => $request->user()?->hasRole(Role::Guardian->value)
-                ? GuardianContext::resolve($request->user(), $request->session())
+            'guardianContext' => fn (): ?array => $request->user('web')?->hasRole(Role::Guardian->value)
+                ? GuardianContext::resolve($request->user('web'), $request->session())
                 : null,
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
         ];

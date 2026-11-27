@@ -134,8 +134,8 @@ class StudentController extends Controller
             ])->values(),
             'statusOptions' => StudentStatus::options(),
             // Impor bisa membuat akun wali (T-207), jadi tombolnya butuh kedua izin.
-            'canImport' => $request->user()?->can(Permission::StudentsManage->value) === true
-                && $request->user()->can(Permission::GuardiansManage->value),
+            'canImport' => $request->user('web')?->can(Permission::StudentsManage->value) === true
+                && $request->user('web')->can(Permission::GuardiansManage->value),
         ]);
     }
 
@@ -174,7 +174,7 @@ class StudentController extends Controller
      */
     public function photo(Request $request, Student $student): StreamedResponse
     {
-        abort_unless($request->user()?->can('view', $student) === true, 404);
+        abort_unless($request->user('web')?->can('view', $student) === true, 404);
 
         $disk = Storage::disk(StudentService::DISK);
 

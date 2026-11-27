@@ -12,7 +12,7 @@ class UpdateGuardianStatusRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()?->can(Permission::GuardiansManage->value) === true;
+        return $this->user('web')?->can(Permission::GuardiansManage->value) === true;
     }
 
     /**

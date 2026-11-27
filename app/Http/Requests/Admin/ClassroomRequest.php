@@ -16,7 +16,7 @@ class ClassroomRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()?->can(Permission::ClassroomsManage->value) === true;
+        return $this->user('web')?->can(Permission::ClassroomsManage->value) === true;
     }
 
     protected function prepareForValidation(): void
