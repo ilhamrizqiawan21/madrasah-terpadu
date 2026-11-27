@@ -53,6 +53,10 @@ enum Permission: string
     case AttitudeLock = 'attitude.lock';
     case AttitudeApprove = 'attitude.approve';
 
+    case CbtView = 'cbt.view';
+    case CbtTeach = 'cbt.teach';
+    case CbtManage = 'cbt.manage';
+
     case ReportsView = 'reports.view';
     case AuditView = 'audit.view';
 
@@ -94,6 +98,9 @@ enum Permission: string
             self::AttitudeView => 'Lihat nilai sikap',
             self::AttitudeLock => 'Koreksi dan kunci nilai sikap',
             self::AttitudeApprove => 'Setujui nilai sikap final',
+            self::CbtView => 'Lihat mapel, penugasan, dan ujian CBT',
+            self::CbtTeach => 'Kelola ujian dan soal pada penugasan sendiri',
+            self::CbtManage => 'Kelola mapel, penugasan guru, dan semua ujian CBT',
             self::ReportsView => 'Lihat dan ekspor laporan',
             self::AuditView => 'Lihat jejak audit',
         };

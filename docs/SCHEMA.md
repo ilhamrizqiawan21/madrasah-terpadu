@@ -323,13 +323,13 @@ Unik (`student_id`,`academic_year_id`,`aspect`).
 
 ## K. Ujian CBT (Fase 15, ADR-020)
 
-### `subjects` (T-1501)
+### `subjects` (T-1501 ✅)
 
-`unit_id`, `name`, `code string(20)`, `is_active`. Unik (`unit_id`,`code`).
+`unit_id → units` (restrict), `code string(20)` (huruf besar), `name string(100)`, `is_active bool default true`, timestamps. Unik (`unit_id`,`code`), indeks (`unit_id`,`is_active`). Ditulis lewat `SubjectService`.
 
-### `teaching_assignments` (T-1501)
+### `teaching_assignments` (T-1501 ✅)
 
-`user_id` (guru), `subject_id`, `classroom_id`, `academic_year_id`. Unik keempatnya.
+`user_id → users` (guru aktif, restrict), `subject_id → subjects` (restrict), `classroom_id → classrooms` (restrict), `academic_year_id → academic_years` (restrict), timestamps. Unik (`user_id`,`subject_id`,`classroom_id`,`academic_year_id`), indeks (`academic_year_id`,`classroom_id`). Ditulis lewat `TeachingAssignmentService`.
 
 ### `student_exam_pins` (T-1502)
 

@@ -126,6 +126,18 @@ final class Navigation
                 ],
             ],
             [
+                'key' => 'ujian',
+                'label' => 'Ujian',
+                'items' => [
+                    [
+                        'label' => 'Mapel & penugasan',
+                        'route' => 'admin.cbt.subjects.index',
+                        'permission' => Permission::CbtView->value,
+                        'feature' => Feature::Cbt,
+                    ],
+                ],
+            ],
+            [
                 'key' => 'laporan',
                 'label' => 'Laporan',
                 'items' => [
