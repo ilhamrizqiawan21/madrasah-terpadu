@@ -261,7 +261,7 @@ Semua laporan: filter unit/rombel/periode, paginasi layar, ekspor PDF & Excel ic
 
 - [x] **T-1301 Laporan presensi** (P0) — harian, bulanan per rombel, per siswa. ✅ 2026-11-27 — Bukti: `AttendanceReportService`, `ReportExportService`, `AttendanceReportController`, `admin/reports/attendance.tsx`; `tests/Feature/Reports/AttendanceReportTest.php` (otorisasi + angka harian/bulanan/siswa + ekspor PDF & XLSX ✔), `phpstan` 0 error, `tsc` & `npm run build` ✔.
 - [ ] **T-1302 Laporan keuangan** (P0) — piutang per jenis/rombel, penerimaan per metode/periode, buku kas penerimaan, kartu tagihan siswa.
-- [ ] **T-1303 Laporan BK** (P0) — catatan per periode, siswa dengan poin tertinggi, tindak lanjut terbuka, reward & voucher.
+- [x] **T-1303 Laporan BK** (P0) — catatan per periode, siswa dengan poin tertinggi, tindak lanjut terbuka, reward & voucher. ✅ 2026-11-27 — Bukti: `BehaviorReportService`, `BehaviorReportController`, `admin/reports/behavior.tsx`; `tests/Feature/Reports/BehaviorReportTest.php` (otorisasi + 4 mode + ekspor PDF & XLSX ✔), `phpstan` 0 error, `tsc` & `npm run build` ✔.
 - [ ] **T-1304 Laporan kantin** (P1) — lihat T-807 bila belum.
 - [ ] **T-1305 Laporan hafalan & PIB** (P1) — progres per kelompok/rombel, setoran per guru.
 - [ ] **T-1306 Laporan pembiasaan** (P1) — keterlaksanaan per item/rombel.
