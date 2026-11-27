@@ -50,6 +50,7 @@ class DashboardController extends Controller
         $canManageClassrooms = $user->can(Permission::ClassroomsManage->value);
         $canManageGuardians = $user->can(Permission::GuardiansManage->value);
         $attendanceOn = $this->features->enabled(Feature::Attendance) && $user->can(Permission::AttendanceView->value);
+        $isAdmin = $user->hasRole(Role::Admin->value);
         $cbtOn = $this->features->enabled(Feature::Cbt) && $user->can(Permission::CbtView->value);
 
         return Inertia::render('admin/dashboard', [
@@ -69,7 +70,10 @@ class DashboardController extends Controller
             'leaves' => $attendanceOn ? $this->dashboard->pendingLeaves($user, $unit, $yearId) : null,
             'exams' => $cbtOn ? $this->dashboard->exams($user) : null,
             'dataGaps' => $canManageStudents ? $this->dashboard->dataGaps($unit, $yearId) : null,
-            'queue' => $user->hasRole(Role::Admin->value) ? $this->dashboard->queueHealth() : null,
+            'queue' => $isAdmin ? $this->dashboard->queueHealth() : null,
+            'heldModules' => $isAdmin ? $this->dashboard->heldModules() : [],
+            'security' => $isAdmin ? $this->dashboard->security() : null,
+            'units' => $isAdmin && $attendanceOn ? $this->dashboard->unitComparison($yearId) : null,
             'recentMutations' => $canManageStudents ? $this->recentMutations($unit) : [],
             'permissions' => [
                 'view_students' => $canViewStudents,

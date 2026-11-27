@@ -13,6 +13,7 @@ use App\Enums\Permission;
 use App\Enums\Role;
 use App\Enums\StudentStatus;
 use App\Models\AttendanceDay;
+use App\Models\AuditLog;
 use App\Models\Classroom;
 use App\Models\DisciplineFollowup;
 use App\Models\Enrollment;
@@ -323,6 +324,78 @@ final class StaffDashboardService
                 ->whereNull('homeroom_teacher_id')
                 ->count(),
         ];
+    }
+
+    /**
+     * Perbandingan antarunit hari ini (paritas dasbor yayasan aplikasi lama), hanya data nyata.
+     *
+     * @return list<array{code: string, name: string, students: int, classrooms: int, recorded: int, present: int, late: int, absent: int}>
+     */
+    public function unitComparison(?int $yearId): array
+    {
+        $date = CarbonImmutable::now(AttendanceClassifier::BUSINESS_TIMEZONE)->toDateString();
+        $units = Unit::query()->where('is_active', true)->orderBy('code')->get(['id', 'code', 'name']);
+
+        $students = Student::query()->where('status', StudentStatus::Active->value)
+            ->selectRaw('unit_id, count(*) as aggregate')->groupBy('unit_id')->pluck('aggregate', 'unit_id');
+        $classrooms = Classroom::query()->where('is_active', true)
+            ->when($yearId !== null, fn (Builder $q) => $q->where('academic_year_id', $yearId))
+            ->selectRaw('unit_id, count(*) as aggregate')->groupBy('unit_id')->pluck('aggregate', 'unit_id');
+        $attendance = AttendanceDay::query()
+            ->join('students', 'students.id', '=', 'attendance_days.student_id')
+            ->whereDate('attendance_days.school_date', $date)
+            ->selectRaw('students.unit_id as unit_id, attendance_days.status as status, count(*) as aggregate')
+            ->groupBy('students.unit_id', 'attendance_days.status')
+            ->get();
+
+        return array_values($units->map(function (Unit $unit) use ($students, $classrooms, $attendance): array {
+            $rows = $attendance->where('unit_id', $unit->id);
+            $count = fn (string $status): int => (int) $rows->filter(fn ($r): bool => $r->getRawOriginal('status') === $status)->sum('aggregate');
+
+            return [
+                'code' => $unit->code,
+                'name' => $unit->name,
+                'students' => (int) ($students[$unit->id] ?? 0),
+                'classrooms' => (int) ($classrooms[$unit->id] ?? 0),
+                'recorded' => (int) $rows->sum('aggregate'),
+                'present' => $count('present'),
+                'late' => $count('late'),
+                'absent' => $count('absent'),
+            ];
+        })->all());
+    }
+
+    /**
+     * Keamanan akun: login gagal 24 jam terakhir dan login staf terbaru.
+     *
+     * @return array{failed_logins_24h: int, recent_logins: list<array{name: string, at: string}>}
+     */
+    public function security(): array
+    {
+        return [
+            'failed_logins_24h' => AuditLog::query()->where('action', 'login_failed')->where('created_at', '>=', now()->subDay())->count(),
+            'recent_logins' => array_values(User::query()
+                ->whereNotNull('last_login_at')
+                ->whereHas('roles', fn (Builder $q) => $q->whereIn('name', array_map(fn (Role $r): string => $r->value, Role::staff())))
+                ->orderByDesc('last_login_at')
+                ->limit(5)
+                ->get(['id', 'name', 'last_login_at'])
+                ->map(fn (User $u): array => ['name' => $u->name, 'at' => $u->last_login_at?->toIso8601String() ?? ''])
+                ->all()),
+        ];
+    }
+
+    /**
+     * Modul uang yang ditahan selama masa paralel (ADR-021) dan masih nonaktif.
+     *
+     * @return list<string>
+     */
+    public function heldModules(): array
+    {
+        return array_values(array_map(
+            fn (Feature $f): string => $f->label(),
+            array_filter(Feature::cases(), fn (Feature $f): bool => $f->heldUntilCutover() && ! $this->features->enabled($f)),
+        ));
     }
 
     /**

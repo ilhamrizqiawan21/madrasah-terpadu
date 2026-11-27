@@ -117,6 +117,23 @@ type Props = {
         classrooms_without_homeroom: number;
     } | null;
     queue: { pending_jobs: number; failed_jobs: number } | null;
+    heldModules: string[];
+    security: {
+        failed_logins_24h: number;
+        recent_logins: { name: string; at: string }[];
+    } | null;
+    units:
+        | {
+              code: string;
+              name: string;
+              students: number;
+              classrooms: number;
+              recorded: number;
+              present: number;
+              late: number;
+              absent: number;
+          }[]
+        | null;
     recentMutations: MutationSummary[];
     permissions: {
         view_students: boolean;
@@ -178,6 +195,9 @@ export default function AdminDashboard({
     exams,
     dataGaps,
     queue,
+    heldModules,
+    security,
+    units,
     recentMutations,
     permissions,
 }: Props) {
@@ -321,6 +341,9 @@ export default function AdminDashboard({
                                         }
                                     />
                                 )}
+                                {units && units.length > 1 && (
+                                    <UnitsPanel units={units} />
+                                )}
                                 {exams && (
                                     <ExamsPanel
                                         exams={exams}
@@ -356,7 +379,15 @@ export default function AdminDashboard({
                                         mutations={recentMutations}
                                     />
                                 )}
-                                {queue && <QueuePanel queue={queue} />}
+                                {queue && (
+                                    <QueuePanel
+                                        queue={queue}
+                                        heldModules={heldModules}
+                                    />
+                                )}
+                                {security && (
+                                    <SecurityPanel security={security} />
+                                )}
                             </div>
                         )}
                     </div>
@@ -1066,9 +1097,154 @@ function MutationsPanel({ mutations }: { mutations: MutationSummary[] }) {
     );
 }
 
-function QueuePanel({ queue }: { queue: NonNullable<Props['queue']> }) {
+function UnitsPanel({ units }: { units: NonNullable<Props['units']> }) {
     return (
-        <DashboardPanel title="Antrean latar belakang">
+        <DashboardPanel
+            title="Perbandingan unit hari ini"
+            meta="Siswa aktif, rombel, dan presensi gerbang per unit"
+            bodyClassName="p-0 sm:p-0"
+        >
+            <div className="overflow-x-auto">
+                <table className="w-full min-w-[520px] text-sm">
+                    <thead className="text-xs text-muted-foreground">
+                        <tr className="border-b border-border">
+                            <th className="px-4 py-2 text-left font-medium sm:px-5">
+                                Unit
+                            </th>
+                            <th className="px-3 py-2 text-right font-medium">
+                                Siswa
+                            </th>
+                            <th className="px-3 py-2 text-right font-medium">
+                                Rombel
+                            </th>
+                            <th className="w-40 px-3 py-2 text-left font-medium">
+                                Tercatat
+                            </th>
+                            <th className="px-3 py-2 text-right font-medium">
+                                Terlambat
+                            </th>
+                            <th className="px-4 py-2 text-right font-medium sm:px-5">
+                                Alpa
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody className="divide-y divide-border">
+                        {units.map((unit) => {
+                            const pct =
+                                unit.students > 0
+                                    ? Math.round(
+                                          (unit.recorded / unit.students) * 100,
+                                      )
+                                    : 0;
+
+                            return (
+                                <tr key={unit.code}>
+                                    <td className="px-4 py-2.5 sm:px-5">
+                                        <div className="font-medium">
+                                            {unit.code}
+                                        </div>
+                                        <div className="text-xs text-muted-foreground">
+                                            {unit.name}
+                                        </div>
+                                    </td>
+                                    <td className="px-3 py-2.5 text-right tabular-nums">
+                                        {numberFormatter.format(unit.students)}
+                                    </td>
+                                    <td className="px-3 py-2.5 text-right tabular-nums">
+                                        {numberFormatter.format(
+                                            unit.classrooms,
+                                        )}
+                                    </td>
+                                    <td className="px-3 py-2.5">
+                                        <div className="flex items-center gap-2">
+                                            <span
+                                                className="h-1.5 flex-1 overflow-hidden rounded-full bg-muted"
+                                                aria-hidden
+                                            >
+                                                <span
+                                                    className="block h-full rounded-full bg-primary/75"
+                                                    style={{
+                                                        width: `${Math.min(pct, 100)}%`,
+                                                    }}
+                                                />
+                                            </span>
+                                            <span className="w-9 text-right text-xs tabular-nums">
+                                                {pct}%
+                                            </span>
+                                        </div>
+                                    </td>
+                                    <td className="px-3 py-2.5 text-right tabular-nums">
+                                        {unit.late}
+                                    </td>
+                                    <td
+                                        className={cn(
+                                            'px-4 py-2.5 text-right tabular-nums sm:px-5',
+                                            unit.absent > 0 &&
+                                                'font-medium text-destructive',
+                                        )}
+                                    >
+                                        {unit.absent}
+                                    </td>
+                                </tr>
+                            );
+                        })}
+                    </tbody>
+                </table>
+            </div>
+        </DashboardPanel>
+    );
+}
+
+function SecurityPanel({
+    security,
+}: {
+    security: NonNullable<Props['security']>;
+}) {
+    return (
+        <DashboardPanel
+            title="Keamanan akun"
+            meta={
+                security.failed_logins_24h > 0
+                    ? `${security.failed_logins_24h} percobaan login gagal dalam 24 jam`
+                    : 'Tidak ada login gagal dalam 24 jam'
+            }
+            tone={security.failed_logins_24h >= 10 ? 'attention' : 'default'}
+            bodyClassName={
+                security.recent_logins.length > 0 ? 'p-0 sm:p-0' : undefined
+            }
+        >
+            {security.recent_logins.length === 0 ? (
+                <p className="text-sm text-muted-foreground">
+                    Belum ada staf yang login.
+                </p>
+            ) : (
+                <ul className="divide-y divide-border">
+                    {security.recent_logins.map((login, index) => (
+                        <li
+                            key={`${login.name}-${index}`}
+                            className="flex items-center justify-between gap-3 px-4 py-2.5 text-sm sm:px-5"
+                        >
+                            <span className="truncate">{login.name}</span>
+                            <span className="shrink-0 text-xs text-muted-foreground">
+                                <DateText value={login.at} mode="datetime" />
+                            </span>
+                        </li>
+                    ))}
+                </ul>
+            )}
+        </DashboardPanel>
+    );
+}
+
+function QueuePanel({
+    queue,
+    heldModules,
+}: {
+    queue: NonNullable<Props['queue']>;
+    heldModules: string[];
+}) {
+    return (
+        <DashboardPanel title="Status sistem">
             <dl className="grid grid-cols-2 gap-3">
                 <div className="rounded-lg border border-border bg-background/60 px-3 py-2">
                     <dt className="text-xs text-muted-foreground">Menunggu</dt>
@@ -1101,6 +1277,20 @@ function QueuePanel({ queue }: { queue: NonNullable<Props['queue']> }) {
                     jalankan ulang tugas yang gagal.
                 </p>
             )}
+            <dl className="mt-3 space-y-1.5 border-t border-border pt-3 text-sm">
+                <div className="flex justify-between gap-3">
+                    <dt className="text-muted-foreground">Cadangan data</dt>
+                    <dd>Belum diatur</dd>
+                </div>
+                {heldModules.length > 0 && (
+                    <div className="flex justify-between gap-3">
+                        <dt className="text-muted-foreground">
+                            Modul keuangan
+                        </dt>
+                        <dd className="text-right">Nonaktif (masa paralel)</dd>
+                    </div>
+                )}
+            </dl>
         </DashboardPanel>
     );
 }
