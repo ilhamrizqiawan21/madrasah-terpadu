@@ -1,7 +1,10 @@
 import { Link, router, usePage } from '@inertiajs/react';
 import type { LucideIcon } from 'lucide-react';
 import {
+    Bell,
+    Menu,
     BookOpen,
+    CalendarClock,
     CalendarCheck,
     ChartColumn,
     ChevronDown,
@@ -51,7 +54,6 @@ import {
     SidebarMenuSubItem,
     SidebarProvider,
     SidebarRail,
-    SidebarTrigger,
     useSidebar,
 } from '@/components/ui/sidebar';
 import { UserMenuContent } from '@/components/user-menu-content';
@@ -78,6 +80,14 @@ type SharedProps = {
     };
     navigation?: StaffNavGroup[];
     schoolContext?: SchoolContext | null;
+    attention?: AttentionItem[];
+};
+
+type AttentionItem = {
+    key: string;
+    label: string;
+    count: number;
+    href: string;
 };
 
 const groupIcons: Record<string, LucideIcon> = {
@@ -133,10 +143,7 @@ export default function StaffLayout({
             <StaffSidebar />
             <SidebarInset className="min-w-0 bg-background">
                 <header className="sticky top-0 z-20 flex h-14 shrink-0 items-center gap-3 border-b border-border bg-card/95 px-3 shadow-xs backdrop-blur-sm sm:px-5">
-                    <SidebarTrigger
-                        className="size-9"
-                        aria-label="Buka atau ciutkan menu"
-                    />
+                    <SidebarToggle />
                     <div className="min-w-0 flex-1 text-sm">
                         {showBreadcrumbs ? (
                             <div className="truncate text-muted-foreground">
@@ -148,8 +155,10 @@ export default function StaffLayout({
                             </span>
                         )}
                     </div>
+                    <AttentionBell />
                     <SchoolContextPicker />
                 </header>
+                <PastYearBanner />
 
                 <main className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6">
                     {children}
@@ -254,7 +263,10 @@ function StaffSidebar() {
             <SidebarFooter className="border-t border-sidebar-border">
                 {auth.user && <SidebarUser user={auth.user} />}
             </SidebarFooter>
-            <SidebarRail />
+            <SidebarRail
+                aria-label="Ciutkan atau lebarkan menu samping"
+                title="Ciutkan atau lebarkan menu samping"
+            />
         </Sidebar>
     );
 }
@@ -544,5 +556,170 @@ function SchoolContextPicker() {
                 ))}
             </DropdownMenuContent>
         </DropdownMenu>
+    );
+}
+
+/** Lonceng "perlu tindakan": hanya hitungan nyata dari server, masing-masing menuju halamannya. */
+function AttentionBell() {
+    const { attention = [] } = usePage<SharedProps>().props;
+    const total = attention.reduce((sum, item) => sum + item.count, 0);
+
+    return (
+        <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+                <Button
+                    variant="ghost"
+                    size="icon"
+                    className="relative size-9 shrink-0"
+                    aria-label={
+                        total > 0
+                            ? `Perlu tindakan: ${total}`
+                            : 'Perlu tindakan: tidak ada'
+                    }
+                >
+                    <Bell className="size-5" strokeWidth={1.75} />
+                    {total > 0 && (
+                        <span
+                            className="absolute -top-0.5 -right-0.5 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-accent-attention px-1 text-[11px] font-semibold text-accent-attention-foreground tabular-nums ring-2 ring-card"
+                            aria-hidden
+                        >
+                            {total > 99 ? '99+' : total}
+                        </span>
+                    )}
+                </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-80 p-0">
+                <DropdownMenuLabel className="border-b border-border px-3 py-2.5">
+                    Perlu tindakan
+                </DropdownMenuLabel>
+                {attention.length === 0 ? (
+                    <p className="px-3 py-4 text-sm text-muted-foreground">
+                        Tidak ada yang menunggu tindakan Anda.
+                    </p>
+                ) : (
+                    <div className="p-1">
+                        {attention.map((item) => (
+                            <DropdownMenuItem
+                                key={item.key}
+                                asChild
+                                className="gap-3 px-2 py-2"
+                            >
+                                <Link href={item.href}>
+                                    <span className="flex h-7 min-w-9 items-center justify-center rounded-md bg-accent-attention/20 px-1.5 text-sm font-semibold tabular-nums">
+                                        {item.count}
+                                    </span>
+                                    <span className="text-sm">
+                                        {item.label}
+                                    </span>
+                                </Link>
+                            </DropdownMenuItem>
+                        ))}
+                    </div>
+                )}
+            </DropdownMenuContent>
+        </DropdownMenu>
+    );
+}
+
+/** Pita peringatan saat konteks bukan tahun ajaran aktif, agar data tidak salah dimasukkan. */
+function PastYearBanner() {
+    const { schoolContext } = usePage<SharedProps>().props;
+    const activeYear = schoolContext?.academicYears.find((y) => y.isActive);
+
+    if (
+        !schoolContext ||
+        !activeYear ||
+        schoolContext.academicYearId === null ||
+        schoolContext.academicYearId === activeYear.id
+    ) {
+        return null;
+    }
+
+    return (
+        <div
+            role="status"
+            className="flex flex-wrap items-center gap-x-3 gap-y-2 border-b border-warning/40 bg-warning/15 px-4 py-2 text-sm sm:px-6"
+        >
+            <CalendarClock
+                className="size-4 shrink-0 text-warning-foreground"
+                strokeWidth={1.75}
+            />
+            <p className="min-w-0 flex-1">
+                Anda melihat tahun ajaran{' '}
+                <span className="font-semibold">
+                    {schoolContext.academicYear}
+                </span>
+                . Tahun ajaran aktif: {activeYear.label}.
+            </p>
+            <Button
+                size="sm"
+                variant="outline"
+                className="h-8 bg-card"
+                onClick={() =>
+                    router.post(
+                        SchoolContextController.url(),
+                        { academic_year_id: activeYear.id },
+                        { preserveScroll: true },
+                    )
+                }
+            >
+                Pindah ke tahun aktif
+            </Button>
+        </div>
+    );
+}
+
+/**
+ * Tombol hamburger di ujung kiri topbar, sejajar tepi sidebar, dipisah garis tipis dari breadcrumb.
+ * Desktop: menciutkan/melebarkan sidebar (Ctrl+B). Ponsel: membuka sheet menu, disertai logo
+ * karena sidebar tersembunyi.
+ */
+function SidebarToggle() {
+    const { toggleSidebar, open, openMobile, isMobile } = useSidebar();
+    const { name, branding } = usePage<SharedProps>().props;
+    const getInitials = useInitials();
+    const expanded = isMobile ? openMobile : open;
+    const appName = branding?.appName || name;
+
+    return (
+        <div className="flex shrink-0 items-center gap-2">
+            <Button
+                variant="ghost"
+                size="icon"
+                className="-ml-1 size-10 text-foreground/80 hover:bg-muted hover:text-foreground"
+                onClick={toggleSidebar}
+                aria-label={
+                    isMobile
+                        ? 'Buka menu'
+                        : expanded
+                          ? 'Ciutkan menu samping'
+                          : 'Lebarkan menu samping'
+                }
+                aria-expanded={expanded}
+                title={isMobile ? undefined : 'Ctrl+B'}
+            >
+                <Menu className="size-5" strokeWidth={1.75} />
+            </Button>
+            {isMobile && (
+                <Link
+                    href={dashboard()}
+                    className="flex items-center"
+                    aria-label={`${appName}, ke Beranda`}
+                >
+                    {branding?.logoUrl ? (
+                        <img
+                            src={branding.logoUrl}
+                            alt=""
+                            className="size-8 rounded-md object-contain"
+                        />
+                    ) : (
+                        <span className="flex size-8 items-center justify-center rounded-md bg-primary text-xs font-semibold text-primary-foreground">
+                            {getInitials(appName)}
+                        </span>
+                    )}
+                </Link>
+            )}
+            <span className="h-6 w-px bg-border" aria-hidden />
+        </div>
     );
 }

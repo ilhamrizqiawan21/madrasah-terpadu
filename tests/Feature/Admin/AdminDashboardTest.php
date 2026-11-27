@@ -234,3 +234,40 @@ test('tren presensi berisi hari sekolah terakhir dan melewati akhir pekan unit',
             ->where('attendance.trend.1.date', '2026-11-20')
         );
 });
+
+test('lonceng perlu tindakan hanya memuat hitungan nyata sesuai izin dan rombel wali kelas', function (): void {
+    ['unit' => $unit, 'year' => $year] = dashboardSchool();
+    $teacher = User::factory()->create();
+    $teacher->assignRole(RoleEnum::Teacher->value);
+    $own = Classroom::factory()->for($unit)->for($year)->create(['homeroom_teacher_id' => $teacher->id]);
+    $other = Classroom::factory()->for($unit)->for($year)->create();
+    $mine = enrollIn($own, 1);
+    $others = enrollIn($other, 2);
+
+    foreach ([$mine[0], $others[0], $others[1]] as $student) {
+        LeaveRequest::query()->create([
+            'student_id' => $student->id, 'requested_by' => $teacher->id, 'type' => 'sick',
+            'starts_on' => now()->toDateString(), 'ends_on' => now()->toDateString(),
+            'reason' => 'Demam', 'status' => 'pending',
+        ]);
+    }
+
+    $admin = User::factory()->create();
+    $admin->assignRole(RoleEnum::Admin->value);
+
+    $this->actingAs($teacher)->get(route('admin.dashboard'))
+        ->assertInertia(fn (Assert $page) => $page
+            ->has('attention', 1)
+            ->where('attention.0.key', 'leaves')
+            ->where('attention.0.count', 1)
+        );
+
+    $this->actingAs($admin)->get(route('admin.dashboard'))
+        ->assertInertia(fn (Assert $page) => $page->where('attention.0.count', 3));
+
+    $treasurer = User::factory()->create();
+    $treasurer->assignRole(RoleEnum::Treasurer->value);
+
+    $this->actingAs($treasurer)->get(route('admin.dashboard'))
+        ->assertInertia(fn (Assert $page) => $page->where('attention', []));
+});

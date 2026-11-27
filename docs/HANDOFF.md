@@ -23,7 +23,7 @@ Aturan: singkat dan faktual. Jangan menyalin isi TODO/ADR; tautkan saja. Hapus b
 
 ## Terakhir diperbarui
 
-2026-11-27 · Gemini (eksekutor), setelah **T-1107 (Materi hadits & doa, Fase 11)** selesai
+2026-11-27 · Gemini (eksekutor), setelah **T-1102 (Target hafalan, Fase 11)** selesai
 
 ## Keadaan sekarang
 

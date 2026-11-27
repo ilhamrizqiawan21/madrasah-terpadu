@@ -292,9 +292,9 @@ Unik (`student_id`,`habit_item_id`,`log_date`). Indeks (`log_date`,`verification
 
 `unit_id null` (`→ units`, restrict), `kind string(20)` (`hadith|prayer`), `title string(180)`, `arabic_text text null`, `translation text null`, `source string(150) null`, `sort_order smallint unsigned`, `is_active`, timestamps. Materi yang punya setoran hanya dinonaktifkan. Ditulis lewat `MemorizationMaterialService`.
 
-### `memorization_targets` (T-1102)
+### `memorization_targets` (T-1102 ✅)
 
-`unit_id`, `grade string(10)`, `academic_year_id`, `kind string` (`quran|hadith|prayer`), `title`, `ranges json null` (Qur'an: daftar {surah, ayah_from, ayah_to}), `material_ids json null` (hadits/doa), `is_active`.
+`unit_id` (`→ units`, restrict), `grade string(10)`, `academic_year_id` (`→ academic_years`, restrict), `kind string(20)` (`quran|hadith|prayer`), `title string(180)`, `ranges json null` (Qur'an: daftar {surah, ayah_from, ayah_to}), `material_ids json null` (hadits/doa), `is_active`, timestamps. Ditulis lewat `MemorizationTargetService`.
 
 ### `rubrics`, `rubric_versions`, `rubric_criteria` (T-1103, port penilaian-tahfidz)
 

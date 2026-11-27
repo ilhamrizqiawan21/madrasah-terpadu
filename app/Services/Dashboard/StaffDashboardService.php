@@ -5,32 +5,33 @@ declare(strict_types=1);
 namespace App\Services\Dashboard;
 
 use App\Domain\Attendance\AttendanceClassifier;
-use Illuminate\Support\Facades\Cache;
-use App\Services\Features\FeatureFlags;
-use App\Models\RewardRedemption;
-use App\Models\DisciplineFollowup;
-use App\Enums\Feature;
 use App\Enums\ExamResultStatus;
 use App\Enums\ExamStatus;
+use App\Enums\Feature;
 use App\Enums\LeaveRequestStatus;
 use App\Enums\Permission;
 use App\Enums\Role;
 use App\Enums\StudentStatus;
 use App\Models\AttendanceDay;
 use App\Models\Classroom;
+use App\Models\DisciplineFollowup;
 use App\Models\Enrollment;
 use App\Models\Exam;
 use App\Models\ExamResult;
 use App\Models\ExamSession;
+use App\Models\HabitLog;
 use App\Models\LeaveRequest;
+use App\Models\RewardRedemption;
 use App\Models\SchoolHoliday;
 use App\Models\Student;
 use App\Models\Unit;
 use App\Models\User;
 use App\Services\Attendance\SchoolCalendarService;
+use App\Services\Features\FeatureFlags;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -440,11 +441,14 @@ final class StaffDashboardService
                 $items[] = [
                     'key' => 'habits',
                     'label' => 'siswa dengan pembiasaan belum diverifikasi',
-                    'count' => Student::query()
-                        ->where('status', StudentStatus::Active->value)
-                        ->tap(fn (Builder $q) => $homeroomOnly ? $inHomeroom($inUnit($q)) : $inUnit($q))
-                        ->whereHas('habitLogs', fn (Builder $h) => $h->where('verification', 'pending')->where('done', true))
-                        ->count(),
+                    'count' => HabitLog::query()
+                        ->where('verification', 'pending')
+                        ->where('done', true)
+                        ->whereHas('student', fn (Builder $s) => $homeroomOnly
+                            ? $inHomeroom($inUnit($s->where('status', StudentStatus::Active->value)))
+                            : $inUnit($s->where('status', StudentStatus::Active->value)))
+                        ->distinct()
+                        ->count('student_id'),
                     'href' => route('admin.habits.verify.index', absolute: false),
                 ];
             }

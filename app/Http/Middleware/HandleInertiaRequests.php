@@ -10,6 +10,7 @@ use App\Support\Branding;
 use App\Support\GuardianContext;
 use App\Support\Navigation;
 use App\Support\SchoolContext;
+use App\Support\StaffAttention;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -64,6 +65,7 @@ class HandleInertiaRequests extends Middleware
             'schoolContext' => fn (): ?array => $request->user('web')?->hasAnyRole(array_map(fn (Role $role): string => $role->value, Role::adminArea()))
                 ? SchoolContext::resolve($request->session())
                 : null,
+            'attention' => fn (): array => StaffAttention::forRequest($request),
             'guardianContext' => fn (): ?array => $request->user('web')?->hasRole(Role::Guardian->value)
                 ? GuardianContext::resolve($request->user('web'), $request->session())
                 : null,
