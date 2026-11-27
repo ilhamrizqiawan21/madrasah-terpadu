@@ -44,6 +44,16 @@ type Attendance = {
         nis: string;
         classroom: string;
     }[];
+    trend: TrendDay[];
+};
+
+type TrendDay = {
+    date: string;
+    present: number;
+    late: number;
+    excused: number;
+    sick: number;
+    absent: number;
 };
 
 type Leaves = {
@@ -301,6 +311,15 @@ export default function AdminDashboard({
                             >
                                 {attendance && (
                                     <AttendancePanel attendance={attendance} />
+                                )}
+                                {attendance && attendance.trend.length > 1 && (
+                                    <TrendPanel
+                                        trend={attendance.trend}
+                                        total={attendance.total}
+                                        isHomeroom={
+                                            attendance.scope === 'homeroom'
+                                        }
+                                    />
                                 )}
                                 {exams && (
                                     <ExamsPanel
@@ -565,21 +584,27 @@ function ClassroomBreakdown({
                                 href={AttendanceController.index({
                                     query: { classroom_id: classroom.id },
                                 })}
-                                className="group grid grid-cols-[6rem_1fr_auto] items-center gap-3 rounded-md text-sm focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+                                className="group -mx-2 grid grid-cols-[4.5rem_1fr_auto] items-center gap-3 rounded-md px-2 py-1 text-sm transition-colors duration-150 hover:bg-muted/60 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none sm:grid-cols-[6rem_1fr_auto]"
                             >
                                 <span className="truncate font-medium group-hover:text-primary">
                                     {classroom.name}
                                 </span>
-                                <span className="h-1.5 overflow-hidden rounded-full bg-muted">
+                                <span
+                                    className="flex h-2 overflow-hidden rounded-full bg-accent-attention/35"
+                                    aria-hidden
+                                >
                                     <span
-                                        className="block h-full rounded-full bg-primary/70"
+                                        className="block h-full bg-primary/75"
                                         style={{
                                             width: `${(done / classroom.total) * 100}%`,
                                         }}
                                     />
                                 </span>
-                                <span className="text-xs text-muted-foreground tabular-nums">
-                                    {classroom.not_yet} dari {classroom.total}
+                                <span className="text-right text-xs text-muted-foreground tabular-nums">
+                                    <span className="font-semibold text-foreground">
+                                        {classroom.not_yet} belum
+                                    </span>{' '}
+                                    · {done}/{classroom.total} tercatat
                                 </span>
                             </Link>
                         </li>

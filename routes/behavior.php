@@ -7,6 +7,7 @@ use App\Enums\Permission;
 use App\Http\Controllers\Admin\BehaviorRecordController;
 use App\Http\Controllers\Admin\DisciplineController;
 use App\Http\Controllers\Admin\PointRuleController;
+use App\Http\Controllers\Admin\RewardController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('perilaku')
@@ -63,5 +64,36 @@ Route::prefix('perilaku')
                     ->whereNumber('threshold')
                     ->middleware('permission:'.Permission::ThresholdsManage->value)
                     ->name('thresholds.toggle');
+            });
+
+        Route::prefix('reward')
+            ->name('rewards.')
+            ->middleware('feature:'.Feature::Rewards->value)
+            ->controller(RewardController::class)
+            ->group(function (): void {
+                Route::get('/', 'index')
+                    ->middleware('permission:'.Permission::BehaviorView->value)
+                    ->name('index');
+                Route::post('penawaran', 'storeOffer')
+                    ->middleware('permission:'.Permission::RewardsApprove->value)
+                    ->name('offers.store');
+                Route::put('penawaran/{rewardOffer}', 'updateOffer')
+                    ->whereNumber('rewardOffer')
+                    ->middleware('permission:'.Permission::RewardsApprove->value)
+                    ->name('offers.update');
+                Route::patch('penawaran/{rewardOffer}/status', 'toggleOffer')
+                    ->whereNumber('rewardOffer')
+                    ->middleware('permission:'.Permission::RewardsApprove->value)
+                    ->name('offers.toggle');
+                Route::post('penukaran', 'requestRedemption')
+                    ->name('redemptions.store');
+                Route::post('penukaran/{rewardRedemption}/setujui', 'approve')
+                    ->whereNumber('rewardRedemption')
+                    ->middleware('permission:'.Permission::RewardsApprove->value)
+                    ->name('redemptions.approve');
+                Route::post('penukaran/{rewardRedemption}/tolak', 'reject')
+                    ->whereNumber('rewardRedemption')
+                    ->middleware('permission:'.Permission::RewardsApprove->value)
+                    ->name('redemptions.reject');
             });
     });

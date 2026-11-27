@@ -123,6 +123,12 @@ final class Navigation
                         'permission' => Permission::BehaviorView->value,
                         'feature' => Feature::Behavior,
                     ],
+                    [
+                        'label' => 'Reward & voucher',
+                        'route' => 'admin.behavior.rewards.index',
+                        'permission' => Permission::BehaviorView->value,
+                        'feature' => Feature::Rewards,
+                    ],
                 ],
             ],
             [

@@ -41,6 +41,11 @@ final class StaffDashboardService
 
     private const CLASSROOM_LIST_LIMIT = 6;
 
+    private const TREND_DAYS = 7;
+
+    /** Rentang kalender yang ditelusuri untuk mengumpulkan TREND_DAYS hari sekolah (libur panjang dilewati). */
+    private const TREND_LOOKBACK_DAYS = 20;
+
     public function __construct(private readonly SchoolCalendarService $calendar) {}
 
     /**
@@ -55,6 +60,7 @@ final class StaffDashboardService
      *     counts: array{present: int, late: int, excused: int, sick: int, absent: int, not_yet: int},
      *     classrooms: list<array{id: int, name: string, total: int, not_yet: int}>,
      *     not_yet_students: list<array{id: int, name: string, nis: string, classroom: string}>,
+     *     trend: list<array{date: string, present: int, late: int, excused: int, sick: int, absent: int}>,
      * }
      */
     public function attendanceToday(User $user, ?Unit $unit, ?int $yearId): array
@@ -131,8 +137,10 @@ final class StaffDashboardService
             ->all());
 
         $scheduleUnit = $unit ?? ($classrooms->isNotEmpty() ? Unit::query()->find($classrooms->first()->unit_id) : null);
+        $studentIds = array_values($enrollments->map(fn (Enrollment $e): int => $e->student_id)->all());
 
         return [
+            'trend' => $this->trend($studentIds, $scheduleUnit, $today),
             'date' => $date,
             'scope' => $scope,
             'off_day' => $scheduleUnit !== null ? $this->offDayLabel($scheduleUnit, $today) : null,
@@ -215,11 +223,11 @@ final class StaffDashboardService
             $inProgress = 0;
             $finished = 0;
 
+            /** @var ExamSession $row */
             foreach ($rows as $row) {
-                $status = ExamSessionStatus::from((string) $row->getAttribute('status'));
                 $amount = (int) $row->getAttribute('aggregate');
 
-                if ($status->isFinished()) {
+                if ($row->status->isFinished()) {
                     $finished += $amount;
                 } else {
                     $inProgress += $amount;
@@ -313,6 +321,71 @@ final class StaffDashboardService
             'pending_jobs' => $usesDatabase ? DB::table((string) config("queue.connections.{$connection}.table", 'jobs'))->count() : 0,
             'failed_jobs' => DB::table((string) config('queue.failed.table', 'failed_jobs'))->count(),
         ];
+    }
+
+    /**
+     * Rekap per status untuk hari sekolah terakhir (termasuk hari ini), melewati akhir pekan
+     * dan hari libur unit. Satu kueri agregat untuk seluruh rentang.
+     *
+     * @param  list<int>  $studentIds
+     * @return list<array{date: string, present: int, late: int, excused: int, sick: int, absent: int}>
+     */
+    private function trend(array $studentIds, ?Unit $unit, CarbonImmutable $today): array
+    {
+        if ($studentIds === [] || $unit === null) {
+            return [];
+        }
+
+        $weekend = $this->calendar->weekendDaysForUnit($unit);
+        $start = $today->subDays(self::TREND_LOOKBACK_DAYS);
+
+        $holidays = SchoolHoliday::query()
+            ->whereBetween('holiday_date', [$start->toDateString(), $today->toDateString()])
+            ->where('is_day_off', true)
+            ->where(fn (Builder $q) => $q->whereNull('unit_id')->orWhere('unit_id', $unit->id))
+            ->pluck('holiday_date')
+            ->map(fn (mixed $value): string => substr((string) $value, 0, 10))
+            ->all();
+
+        $schoolDays = [];
+
+        for ($day = $today; $day->greaterThanOrEqualTo($start) && count($schoolDays) < self::TREND_DAYS; $day = $day->subDay()) {
+            if (in_array($day->dayOfWeekIso, $weekend, true) || in_array($day->toDateString(), $holidays, true)) {
+                continue;
+            }
+
+            $schoolDays[] = $day->toDateString();
+        }
+
+        if ($schoolDays === []) {
+            return [];
+        }
+
+        $schoolDays = array_reverse($schoolDays);
+        $empty = ['present' => 0, 'late' => 0, 'excused' => 0, 'sick' => 0, 'absent' => 0];
+        $rows = array_fill_keys($schoolDays, $empty);
+
+        AttendanceDay::query()
+            ->whereIn('student_id', $studentIds)
+            ->whereBetween('school_date', [$schoolDays[0], end($schoolDays)])
+            ->select('school_date', 'status', DB::raw('count(*) as aggregate'))
+            ->groupBy('school_date', 'status')
+            ->get()
+            ->each(function (AttendanceDay $row) use (&$rows): void {
+                $date = $row->school_date->toDateString();
+
+                if (isset($rows[$date])) {
+                    $rows[$date][$row->status->value] += (int) $row->getAttribute('aggregate');
+                }
+            });
+
+        $trend = [];
+
+        foreach ($rows as $date => $counts) {
+            $trend[] = ['date' => $date, ...$counts];
+        }
+
+        return $trend;
     }
 
     private function isHomeroomOnly(User $user): bool

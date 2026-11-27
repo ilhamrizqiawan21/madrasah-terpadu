@@ -224,9 +224,9 @@ Indeks (`status`,`due_date`), (`student_id`,`status`). Sisa = `amount - adjustme
 `student_id`, `cashier_id → users`, `client_uuid uuid unique` (dari POS), `total bigint`, `paid_from_vouchers bigint`, `paid_from_wallet bigint`, `items json null`,
 `status string` (`completed|reversed`), `reversed_at null`, `reversed_by null`, `reversal_reason null`, `created_at`.
 
-### `canteen_vouchers` (T-904)
+### `canteen_vouchers` (T-904 ✅)
 
-`student_id`, `reward_redemption_id unique`, `amount bigint`, `remaining bigint`, `expires_on date`, `created_at`.
+`student_id` (`→ students`, restrict), `reward_redemption_id unique` (`→ reward_redemptions`, restrict), `amount bigint`, `remaining bigint`, `expires_on date`, `created_at`. Indeks (`student_id`, `expires_on`). Ditulis lewat `RewardRedemptionService`.
 
 ### `voucher_redemptions` (T-904) — append-only
 
@@ -257,14 +257,14 @@ Indeks (`student_id`,`academic_year_id`,`account`). Ditulis lewat `PointLedgerSe
 `student_id` (`→ students`, restrict), `academic_year_id` (`→ academic_years`, restrict), `discipline_threshold_id` (`→ discipline_thresholds`, restrict), `triggered_at`, `status string(20)` (`open|done`), `done_by null` (`→ users`), `done_at null`, `note text null`, timestamps.
 Unik (`student_id`,`academic_year_id`,`discipline_threshold_id`) — satu ambang hanya memicu sekali per tahun ajaran. Ditulis lewat `DisciplineFollowupService`.
 
-### `reward_offers` (T-904)
+### `reward_offers` (T-904 ✅)
 
-`unit_id null`, `name`, `cost_points smallint`, `voucher_amount bigint`, `voucher_valid_days smallint`, `stock int null`, `is_active`, timestamps.
+`unit_id null` (`→ units`, restrict), `name string(150)`, `cost_points smallint unsigned`, `voucher_amount bigint unsigned`, `voucher_valid_days smallint unsigned`, `stock int unsigned null`, `is_active`, timestamps. Ditulis lewat `RewardOfferService`.
 
-### `reward_redemptions` (T-904)
+### `reward_redemptions` (T-904 ✅)
 
-`student_id`, `academic_year_id`, `reward_offer_id`, `cost_points` (snapshot), `voucher_amount` (snapshot), `requested_by → users`, `status string` (`pending|approved|rejected|cancelled`),
-`decided_by null`, `decided_at null`, `decision_note null`, timestamps.
+`student_id` (`→ students`, restrict), `academic_year_id` (`→ academic_years`, restrict), `reward_offer_id` (`→ reward_offers`, restrict), `cost_points` (snapshot), `voucher_amount` (snapshot), `requested_by → users` (restrict), `status string(20)` (`pending|approved|rejected|cancelled`),
+`decided_by null` (`→ users`), `decided_at null`, `decision_note text null`, timestamps. Ditulis lewat `RewardRedemptionService`.
 
 ### `reward_offer_notices` (T-905)
 
