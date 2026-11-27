@@ -12,7 +12,10 @@ beforeEach(function (): void {
     }
 
     // Kewajiban 2FA bisa dimatikan sementara (ADR-025); tes T-104 menguji saat dinyalakan.
-    config(['sekolah.security.require_two_factor' => true]);
+    config([
+        'sekolah.security.two_factor_enabled' => true,
+        'sekolah.security.require_two_factor' => true,
+    ]);
 });
 
 test('saat kewajiban 2FA dimatikan, admin tanpa 2FA tetap bisa masuk area staf', function (): void {

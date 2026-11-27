@@ -8,6 +8,9 @@ use Laravel\Fortify\Features;
 
 beforeEach(function (): void {
     $this->skipUnlessFortifyHas(Features::twoFactorAuthentication());
+
+    // 2FA dimatikan secara bawaan (ADR-026); tes ini menguji jalur saat dinyalakan.
+    config(['sekolah.security.two_factor_enabled' => true]);
 });
 
 test('two factor challenge redirects to login when not authenticated', function (): void {

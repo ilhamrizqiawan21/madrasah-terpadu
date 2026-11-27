@@ -238,6 +238,12 @@ Akun wali dibuat lewat impor/data induk dengan password awal acak. Tidak ada hal
 **Keputusan:** kewajiban 2FA dikendalikan sakelar `sekolah.security.require_two_factor` (`REQUIRE_TWO_FACTOR` di `.env`), **bawaan `false`**. Saat `false`, `EnsureTwoFactorForPrivilegedRoles` melewatkan semua pengguna. Fitur 2FA Fortify tetap ada sebagai pilihan: akun yang mengaktifkannya tetap ditanya kode saat masuk. Tes T-104 tetap menguji jalur wajib dengan sakelar dinyalakan.
 **Akibat:** sebelum produksi pemilik menyalakan `REQUIRE_TWO_FACTOR=true` (DEPLOYMENT §2), atau mencatat ADR baru bila tetap opsional.
 
+## ADR-026 — Fitur 2FA dimatikan sementara (Diterima, 2026-11-27; keputusan pemilik, melengkapi ADR-025)
+
+**Konteks:** setelah ADR-025, kewajiban 2FA sudah mati, tetapi akun yang pernah mengaktifkan 2FA tetap ditanya kode saat login. Pemilik meminta autentikasi dua faktor dinonaktifkan dulu sepenuhnya.
+**Keputusan:** sakelar `sekolah.security.two_factor_enabled` (`TWO_FACTOR_ENABLED`, **bawaan `false`**). Saat `false`: pipeline login (`Fortify::authenticateThrough` di `FortifyServiceProvider`, sama dengan pipeline bawaan Fortify) tidak memasang tantangan 2FA; halaman Keamanan tidak menampilkan pengaturan 2FA; `EnsureTwoFactorForPrivilegedRoles` dilewati walau `REQUIRE_TWO_FACTOR=true`, agar admin tidak terkunci. Data 2FA yang tersimpan tidak dihapus. Rute Fortify 2FA tetap terdaftar (dibutuhkan Wayfinder) dan tes jalur 2FA tetap berjalan dengan sakelar dinyalakan.
+**Akibat:** sebelum produksi pemilik menyalakan `TWO_FACTOR_ENABLED=true` (dan `REQUIRE_TWO_FACTOR=true` bila tetap wajib untuk Admin/Bendahara), DEPLOYMENT §2.
+
 ---
 
 ## Usulan terbuka (menunggu klien, lihat PRD §8)

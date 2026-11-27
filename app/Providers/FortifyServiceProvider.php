@@ -20,6 +20,11 @@ use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\Password;
 use Inertia\Inertia;
+use Laravel\Fortify\Actions\AttemptToAuthenticate;
+use Laravel\Fortify\Actions\CanonicalizeUsername;
+use Laravel\Fortify\Actions\EnsureLoginIsNotThrottled;
+use Laravel\Fortify\Actions\PrepareAuthenticatedSession;
+use Laravel\Fortify\Contracts\RedirectsIfTwoFactorAuthenticatable;
 use Laravel\Fortify\Features;
 use Laravel\Fortify\Fortify;
 
@@ -55,6 +60,16 @@ class FortifyServiceProvider extends ServiceProvider
 
     private function configureAuthentication(): void
     {
+        // Sama dengan pipeline bawaan Fortify, kecuali tantangan 2FA hanya dipasang bila
+        // fitur 2FA dinyalakan (ADR-026).
+        Fortify::authenticateThrough(fn (Request $request): array => array_values(array_filter([
+            config('fortify.limiters.login') ? null : EnsureLoginIsNotThrottled::class,
+            config('fortify.lowercase_usernames') ? CanonicalizeUsername::class : null,
+            config('sekolah.security.two_factor_enabled') ? RedirectsIfTwoFactorAuthenticatable::class : null,
+            AttemptToAuthenticate::class,
+            PrepareAuthenticatedSession::class,
+        ])));
+
         Fortify::authenticateUsing(function (Request $request): ?User {
             $identity = trim((string) $request->input(Fortify::username()));
             $password = (string) $request->input('password');

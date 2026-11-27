@@ -16,6 +16,9 @@ return [
         // Wajib 2FA untuk Admin & Bendahara (T-104). Dimatikan sementara atas
         // keputusan pemilik (ADR-025); nyalakan sebelum produksi.
         'require_two_factor' => (bool) env('REQUIRE_TWO_FACTOR', false),
+        // Fitur 2FA secara keseluruhan (ADR-026). false = tanpa tantangan kode saat login
+        // dan tanpa menu 2FA di Keamanan, termasuk untuk akun yang sudah pernah mengaktifkannya.
+        'two_factor_enabled' => (bool) env('TWO_FACTOR_ENABLED', false),
     ],
 
     'attendance' => [

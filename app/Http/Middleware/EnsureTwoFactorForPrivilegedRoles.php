@@ -15,7 +15,8 @@ final class EnsureTwoFactorForPrivilegedRoles
 {
     public function handle(Request $request, Closure $next): Response
     {
-        if (! config('sekolah.security.require_two_factor')) {
+        // Saat fitur 2FA dimatikan (ADR-026), kewajiban 2FA ikut gugur agar admin tidak terkunci.
+        if (! config('sekolah.security.two_factor_enabled') || ! config('sekolah.security.require_two_factor')) {
             return $next($request);
         }
 

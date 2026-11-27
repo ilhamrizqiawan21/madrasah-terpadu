@@ -15,7 +15,7 @@ git clone <repo> /var/www/madrasah-terpadu && cd /var/www/madrasah-terpadu
 composer install --no-dev --optimize-autoloader
 cp .env.example .env && php artisan key:generate
 # isi .env: APP_ENV=production, APP_DEBUG=false, APP_URL=https://<domain>, DB_*, MIDTRANS_*, VAPID_*, MAIL_* (opsional)
-# REQUIRE_TWO_FACTOR=true untuk produksi (ADR-025), kecuali pemilik memutuskan lain
+# TWO_FACTOR_ENABLED=true dan REQUIRE_TWO_FACTOR=true untuk produksi (ADR-025, ADR-026), kecuali pemilik memutuskan lain
 php artisan migrate --force
 php artisan db:seed --class=ProductionSeeder --force   # peran, izin, unit, surah. TANPA akun/data palsu
 php artisan app:create-admin                          # interaktif

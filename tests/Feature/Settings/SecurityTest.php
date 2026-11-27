@@ -9,6 +9,7 @@ use Laravel\Fortify\Features;
 
 test('security page is displayed', function (): void {
     $this->skipUnlessFortifyHas(Features::twoFactorAuthentication());
+    config(['sekolah.security.two_factor_enabled' => true]); // ADR-026: mati secara bawaan
 
     Features::twoFactorAuthentication([
         'confirm' => true,
