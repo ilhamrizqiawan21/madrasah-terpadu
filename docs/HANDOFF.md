@@ -23,7 +23,7 @@ Aturan: singkat dan faktual. Jangan menyalin isi TODO/ADR; tautkan saja. Hapus b
 
 ## Terakhir diperbarui
 
-2026-11-28 · Gemini (eksekutor), setelah **Paket P-16 (CBT inti: T-1501 s.d. T-1506) selesai seluruhnya**
+2026-11-27 · Gemini (eksekutor), setelah **Paket P-16 & P-17 (Fase 15 Ujian CBT: T-1501 s.d. T-1511) selesai seluruhnya**
 
 ## Keadaan sekarang
 
@@ -35,7 +35,7 @@ Aturan: singkat dan faktual. Jangan menyalin isi TODO/ADR; tautkan saja. Hapus b
 - **Fase 3 & 4 (Portal wali, PWA, Notifikasi) SELESAI SELURUHNYA**: T-301 ✔ (`eac3672`), T-302 ✔ (`f5727e3`), T-303 ✔ (`ddd01b4`), T-304 ✔ (`ef8ef1b`), T-305 ✔ (`78f4f3d`), T-401 ✔ (`c1a3744`), T-402 ✔ (`43e0d43`), T-403 ✔ (`e8beee1`), T-404 ✔ (`f3f259e`), T-405 ✔ (`5ac2cce`).
 - **Paket P-07 — Fase 5 (Presensi gerbang + RFID) SELESAI SELURUHNYA**: T-501 ✔ (`bd611b4`), T-502 ✔ (`7c2fb93`), T-503 ✔ (`417469c`), T-504 ✔ (`2f351d2`), T-505 ✔ (`4398cab`), T-506 ✔ (`65babf7`), T-507 ✔ (`9ac58ea`), T-508 ✔ (`68fde07`), T-509 ✔ (portal presensi wali).
 - **Paket P-16 — Fase 15 (CBT inti) SELESAI SELURUHNYA**: T-1501 ✔ (`0ca124c`), T-1502 ✔ (`1c6392d`), T-1503 ✔ (`34d7f89`), T-1504 ✔ (`5fdde57`), T-1505 ✔ (`6d8250e`), T-1506 ✔ (`4cdd1e3`).
-- **Paket P-17 — Fase 15 (CBT pengawasan & hasil)**: T-1507 ✔ (`8c521f9`), T-1508 ✔ (`f9cfd61`), T-1509 ✔ (`2e77412`), T-1510 ✔ (`CbtResultController` + `ExcelCell` netral formula + `Guardian\ExamResultController`, `composer check` hijau 485 tes / Larastan 0).
+- **Paket P-17 — Fase 15 (CBT pengawasan & hasil) SELESAI SELURUHNYA**: T-1507 ✔ (`8c521f9`), T-1508 ✔ (`f9cfd61`), T-1509 ✔ (`2e77412`), T-1510 ✔ (`b9353ec`), T-1511 ✔ (`docs/handover/ujian-cbt.md` panduan hari-H CBT).
 - **Perbaikan setelah review** (`855c151`): `schoolContext` hanya dibagikan ke peran area `/admin` (`Role::adminArea()`), cache pengaturan TTL 10 menit + ditulis ulang setelah commit, pembersihan logo/favicon memakai nilai lama dari baris terkunci, tahun ajaran terpilih di luar 6 terbaru tetap dipakai, `activate` mengunci semua tahun ajaran urut id.
 - **Keputusan pemilik diterapkan** (`1e223e7`): `/` dialihkan ke `dashboard` (tamu → login, pengguna → beranda sesuai peran), halaman `welcome` dihapus; semua input jam memakai `TimeInput` 24 jam `HH.MM`.
 - `composer check` hijau setelah T-509. CI GitHub hijau sejak ADR-023 (PHP ≥ 8.4); commit setelah `59a0ff1` belum di-push.
@@ -44,11 +44,11 @@ Aturan: singkat dan faktual. Jangan menyalin isi TODO/ADR; tautkan saja. Hapus b
 
 ## Sedang dikerjakan
 
-Tidak ada (Paket **P-16 CBT inti** selesai dan ber-commit).
+Tidak ada (Fase 15 Ujian CBT — Paket **P-16** & **P-17** selesai seluruhnya).
 
 ## Langkah berikutnya
 
-1. Lanjut paket berikutnya pada Rilis 1.0 di `docs/TODO.md`: **P-11 Buku Saku BK & reward** (`T-901` s.d. `T-906`), **P-12 Pembiasaan** (`T-1001` s.d. `T-1004`), **P-14 Hafalan & PIB** (`T-1101` s.d. `T-1108`), atau **P-17 CBT pengawasan & hasil** (`T-1507` s.d. `T-1511`).
+1. Lanjut paket berikutnya pada Rilis 1.0 di `docs/TODO.md`: **P-11 Buku Saku BK & reward** (`T-901` s.d. `T-906`), **P-12 Pembiasaan** (`T-1001` s.d. `T-1004`), **P-14 Hafalan & PIB** (`T-1101` s.d. `T-1108`), atau **P-21 Kerangka paritas** (`T-1601` s.d. `T-1606`).
 2. Pemilik mengonfirmasi keputusan T-204, T-205, T-206, dan T-211 di bawah.
 3. Pemilik: `git push` untuk semua commit sejak `59a0ff1`.
 
