@@ -11,7 +11,9 @@ use App\Models\User;
 use App\Services\Audit\AuditLogger;
 use App\Support\InitialPassword;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 /**
@@ -47,13 +49,15 @@ final class StaffUserService
 
     /**
      * @param  array{name: string, username: string, phone: ?string, email: ?string, roles: list<string>, unit_id?: ?int, nip?: ?string, position?: ?string}  $data
+     * @param  array<string, mixed>  $profile
      * @return array{user: User, password: string}
      */
-    public function create(array $data, User $actor): array
+    public function create(array $data, User $actor, array $profile = [], ?string $password = null, ?UploadedFile $photo = null): array
     {
-        $password = InitialPassword::generate();
+        // Admin boleh menetapkan kata sandi seperti di aplikasi lama; bila kosong, dibuat acak dan ditampilkan sekali.
+        $password ??= InitialPassword::generate();
 
-        $user = DB::transaction(function () use ($data, $password, $actor): User {
+        $user = DB::transaction(function () use ($data, $password, $actor, $profile, $photo): User {
             $user = User::query()->create([
                 'name' => $data['name'],
                 'username' => $data['username'],
@@ -64,7 +68,7 @@ final class StaffUserService
             ]);
 
             $user->syncRoles($data['roles']);
-            $this->syncProfile($user, $data);
+            $this->syncProfile($user, $data, $profile, $photo);
 
             $this->auditLogger->record(
                 action: 'created',
@@ -81,10 +85,11 @@ final class StaffUserService
 
     /**
      * @param  array{name: string, username: string, phone: ?string, email: ?string, roles: list<string>, unit_id?: ?int, nip?: ?string, position?: ?string}  $data
+     * @param  array<string, mixed>  $profile
      */
-    public function update(User $user, array $data, User $actor): User
+    public function update(User $user, array $data, User $actor, array $profile = [], ?string $password = null, ?UploadedFile $photo = null): User
     {
-        return DB::transaction(function () use ($user, $data, $actor): User {
+        return DB::transaction(function () use ($user, $data, $actor, $profile, $password, $photo): User {
             /** @var list<string> $currentRoles */
             $currentRoles = $user->getRoleNames()->values()->all();
             $before = $this->snapshot($user, array_values(array_intersect($currentRoles, self::staffRoleValues())));
@@ -110,7 +115,11 @@ final class StaffUserService
             // Peran non-staf (mis. guru yang juga wali murid) dipertahankan.
             $nonStaffRoles = array_values(array_diff($currentRoles, self::staffRoleValues()));
             $user->syncRoles([...$data['roles'], ...$nonStaffRoles]);
-            $this->syncProfile($user, $data);
+            $this->syncProfile($user, $data, $profile, $photo);
+
+            if ($password !== null) {
+                $user->forceFill(['password' => $password])->save();
+            }
 
             $this->auditLogger->record(
                 action: 'updated',
@@ -200,27 +209,60 @@ final class StaffUserService
 
     /**
      * @param  array{unit_id?: ?int, nip?: ?string, position?: ?string}  $data
+     * @param  array<string, mixed>  $profile
      */
-    private function syncProfile(User $user, array $data): void
+    private function syncProfile(User $user, array $data, array $profile = [], ?UploadedFile $photo = null): void
     {
-        $unitId = $data['unit_id'] ?? null;
-        $nip = $data['nip'] ?? null;
-        $position = $data['position'] ?? null;
+        $values = [
+            'unit_id' => $data['unit_id'] ?? null,
+            'nip' => $data['nip'] ?? null,
+            'position' => $data['position'] ?? null,
+            ...$profile,
+        ];
 
-        if ($unitId === null && $nip === null && $position === null && ! $user->staffProfile()->exists()) {
+        $existing = StaffProfile::query()->where('user_id', $user->id)->first();
+        $hasContent = $photo !== null || array_filter($values, static fn (mixed $v): bool => $v !== null && $v !== 0 && $v !== '') !== [];
+
+        if (! $hasContent && $existing === null) {
             return;
         }
 
-        StaffProfile::query()->updateOrCreate(
-            ['user_id' => $user->id],
-            [
-                'unit_id' => $unitId,
-                'nip' => $nip,
-                'position' => $position,
-            ],
-        );
+        if ($photo !== null) {
+            // Foto pegawai disimpan di disk privat dan hanya dibuka lewat rute berizin.
+            $values['photo_path'] = $photo->store('staff-photos', 'local');
+
+            if ($existing?->photo_path !== null) {
+                Storage::disk('local')->delete($existing->photo_path);
+            }
+        }
+
+        StaffProfile::query()->updateOrCreate(['user_id' => $user->id], $values);
 
         $user->unsetRelation('staffProfile');
+    }
+
+    /**
+     * Hapus akun pegawai (soft delete, seperti tombol Hapus aplikasi lama). Riwayat transaksi dan audit tetap utuh.
+     */
+    public function delete(User $user, User $actor): void
+    {
+        if ($user->is($actor)) {
+            throw StaffUserGuardException::cannotDeleteSelf();
+        }
+
+        $user->loadMissing('staffProfile');
+
+        DB::transaction(function () use ($user, $actor): void {
+            if ($user->hasRole(Role::Admin->value)) {
+                $this->ensureNotLastActiveAdmin($user);
+            }
+
+            $before = $this->snapshot($user, array_values(array_intersect($user->getRoleNames()->all(), self::staffRoleValues())));
+            $user->forceFill(['is_active' => false])->save();
+            $user->delete();
+
+            $this->auditLogger->record(action: 'deleted', subject: $user, before: $before, userId: $actor->id);
+        });
     }
 
     /**
@@ -240,6 +282,9 @@ final class StaffUserService
             'unit_id' => $profile?->unit_id,
             'nip' => $profile?->nip,
             'position' => $profile?->position,
+            'assignment_type' => $profile?->assignment_type?->value,
+            'employment_status' => $profile?->employment_status?->value,
+            'base_salary' => $profile?->base_salary,
         ];
     }
 }

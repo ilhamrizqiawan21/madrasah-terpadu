@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\Admin;
 
+use App\Enums\EmploymentStatus;
+use App\Enums\StaffAssignmentType;
 use App\Models\User;
 use App\Services\Users\StaffUserService;
 use App\Support\PhoneNumber;
@@ -33,6 +35,15 @@ class StaffUserRequest extends FormRequest
             'position' => is_string($position) && trim($position) !== '' ? trim($position) : null,
             'unit_id' => $this->filled('unit_id') ? $this->integer('unit_id') : null,
         ]);
+
+        foreach (['title_prefix', 'title_suffix', 'nik', 'nuptk', 'gender', 'birth_place', 'birth_date', 'address', 'password'] as $field) {
+            $value = $this->input($field);
+            $this->merge([$field => is_string($value) && trim($value) !== '' ? trim($value) : null]);
+        }
+
+        foreach (['base_salary', 'allowance', 'hourly_rate'] as $field) {
+            $this->merge([$field => $this->filled($field) ? $this->input($field) : 0]);
+        }
     }
 
     /**
@@ -53,6 +64,21 @@ class StaffUserRequest extends FormRequest
             'unit_id' => ['nullable', 'integer', Rule::exists('units', 'id')->where('is_active', true)],
             'nip' => ['nullable', 'string', 'max:30'],
             'position' => ['nullable', 'string', 'max:80'],
+            'title_prefix' => ['nullable', 'string', 'max:20'],
+            'title_suffix' => ['nullable', 'string', 'max:40'],
+            'nik' => ['nullable', 'digits:16'],
+            'nuptk' => ['nullable', 'digits:16'],
+            'gender' => ['nullable', Rule::in(['L', 'P'])],
+            'birth_place' => ['nullable', 'string', 'max:60'],
+            'birth_date' => ['nullable', 'date_format:Y-m-d', 'before:today'],
+            'address' => ['nullable', 'string', 'max:255'],
+            'assignment_type' => ['nullable', Rule::enum(StaffAssignmentType::class)],
+            'employment_status' => ['nullable', Rule::enum(EmploymentStatus::class)],
+            'base_salary' => ['integer', 'min:0', 'max:1000000000'],
+            'allowance' => ['integer', 'min:0', 'max:1000000000'],
+            'hourly_rate' => ['integer', 'min:0', 'max:100000000'],
+            'password' => ['nullable', 'string', 'min:8', 'max:100'],
+            'photo' => ['nullable', 'file', 'mimes:jpg,jpeg,png,webp', 'mimetypes:image/jpeg,image/png,image/webp', 'max:2048'],
         ];
     }
 
@@ -68,6 +94,21 @@ class StaffUserRequest extends FormRequest
             'unit_id' => 'unit',
             'nip' => 'NIP',
             'position' => 'jabatan',
+            'title_prefix' => 'gelar depan',
+            'title_suffix' => 'gelar belakang',
+            'nik' => 'NIK',
+            'nuptk' => 'NUPTK',
+            'gender' => 'jenis kelamin',
+            'birth_place' => 'tempat lahir',
+            'birth_date' => 'tanggal lahir',
+            'address' => 'alamat',
+            'assignment_type' => 'tipe penugasan',
+            'employment_status' => 'status ikatan kerja',
+            'base_salary' => 'gaji pokok',
+            'allowance' => 'tunjangan',
+            'hourly_rate' => 'tarif honor per JP',
+            'password' => 'kata sandi',
+            'photo' => 'pas foto',
         ];
     }
 
@@ -99,5 +140,25 @@ class StaffUserRequest extends FormRequest
             'nip' => $validated['nip'] ?? null,
             'position' => $validated['position'] ?? null,
         ];
+    }
+
+    /**
+     * Biodata, status kerja, dan penggajian pegawai (staff_profiles).
+     *
+     * @return array<string, mixed>
+     */
+    public function profileData(): array
+    {
+        return $this->safe()->only([
+            'title_prefix', 'title_suffix', 'nik', 'nuptk', 'gender', 'birth_place', 'birth_date', 'address',
+            'assignment_type', 'employment_status', 'base_salary', 'allowance', 'hourly_rate',
+        ]);
+    }
+
+    public function chosenPassword(): ?string
+    {
+        $password = $this->validated('password');
+
+        return is_string($password) ? $password : null;
     }
 }

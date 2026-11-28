@@ -1,13 +1,22 @@
 import { Head, router, useForm } from '@inertiajs/react';
-import { Copy, KeyRound, UserCheck, UserPlus, UserX } from 'lucide-react';
-import type { FormEvent } from 'react';
+import {
+    Copy,
+    KeyRound,
+    Printer,
+    Trash2,
+    UserCheck,
+    UserPlus,
+    UserX,
+} from 'lucide-react';
+import type { ComponentProps, FormEvent, ReactNode } from 'react';
 import { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import StaffUserController from '@/actions/App/Http/Controllers/Admin/StaffUserController';
 import { ConfirmDialog } from '@/components/app/confirm-dialog';
 import type { DataTableColumn } from '@/components/app/data-table';
 import { DataTable } from '@/components/app/data-table';
-import { DateText } from '@/components/app/date-text';
+import { DateInput } from '@/components/app/date-input';
+import { MoneyText } from '@/components/app/money-text';
 import { ErrorState } from '@/components/app/error-state';
 import { FormDialog } from '@/components/app/form-dialog';
 import { PageHeader } from '@/components/app/page-header';
@@ -39,7 +48,6 @@ import {
     TooltipTrigger,
 } from '@/components/ui/tooltip';
 import StaffLayout from '@/layouts/staff-layout';
-import { dashboard } from '@/routes/admin';
 import type {
     IssuedCredentials,
     PaginatedResource,
@@ -53,7 +61,11 @@ type Filters = {
     status: string;
     sort: string;
     direction: 'asc' | 'desc';
+    unit: number | null;
+    assignment: string;
 };
+
+type Option = { value: string; label: string };
 
 type UnitOption = {
     id: number;
@@ -66,6 +78,8 @@ type Props = {
     filters: Filters;
     roleOptions: RoleOption[];
     unitOptions: UnitOption[];
+    assignmentOptions: Option[];
+    employmentOptions: Option[];
 };
 
 type StaffForm = {
@@ -77,6 +91,21 @@ type StaffForm = {
     unit_id: number | null;
     nip: string;
     position: string;
+    title_prefix: string;
+    title_suffix: string;
+    nik: string;
+    nuptk: string;
+    gender: string;
+    birth_place: string;
+    birth_date: string;
+    address: string;
+    assignment_type: string;
+    employment_status: string;
+    base_salary: string;
+    allowance: string;
+    hourly_rate: string;
+    password: string;
+    photo: File | null;
 };
 
 const ALL = 'semua';
@@ -90,14 +119,44 @@ const emptyForm: StaffForm = {
     unit_id: null,
     nip: '',
     position: '',
+    title_prefix: '',
+    title_suffix: '',
+    nik: '',
+    nuptk: '',
+    gender: '',
+    birth_place: '',
+    birth_date: '',
+    address: '',
+    assignment_type: 'guru',
+    employment_status: 'gty',
+    base_salary: '',
+    allowance: '',
+    hourly_rate: '',
+    password: '',
+    photo: null,
 };
+
+function fullName(user: StaffUser): string {
+    const prefix = user.profile?.title_prefix;
+    const suffix = user.profile?.title_suffix;
+
+    return (
+        [prefix, user.name].filter(Boolean).join(' ') +
+        (suffix ? `, ${suffix}` : '')
+    );
+}
 
 export default function StaffUsersIndex({
     users,
     filters,
     roleOptions,
     unitOptions,
+    assignmentOptions,
+    employmentOptions,
 }: Props) {
+    const [selectedIds, setSelectedIds] = useState<number[]>([]);
+    const [bulkOpen, setBulkOpen] = useState(false);
+    const [deletingId, setDeletingId] = useState<number | null>(null);
     const [search, setSearch] = useState(filters.search);
     const [loading, setLoading] = useState(false);
     const [loadFailed, setLoadFailed] = useState(false);
@@ -133,7 +192,8 @@ export default function StaffUsersIndex({
         const query = { ...filters, search: searchValue, ...changes };
         const params = Object.fromEntries(
             Object.entries(query).filter(
-                ([, value]) => value !== '' && value !== undefined,
+                ([, value]) =>
+                    value !== '' && value !== undefined && value !== null,
             ),
         );
 
@@ -188,6 +248,21 @@ export default function StaffUsersIndex({
             unit_id: user.profile?.unit_id ?? null,
             nip: user.profile?.nip ?? '',
             position: user.profile?.position ?? '',
+            title_prefix: user.profile?.title_prefix ?? '',
+            title_suffix: user.profile?.title_suffix ?? '',
+            nik: user.profile?.nik ?? '',
+            nuptk: user.profile?.nuptk ?? '',
+            gender: user.profile?.gender ?? '',
+            birth_place: user.profile?.birth_place ?? '',
+            birth_date: user.profile?.birth_date ?? '',
+            address: user.profile?.address ?? '',
+            assignment_type: user.profile?.assignment_type ?? 'guru',
+            employment_status: user.profile?.employment_status ?? 'gty',
+            base_salary: user.profile ? String(user.profile.base_salary) : '',
+            allowance: user.profile ? String(user.profile.allowance) : '',
+            hourly_rate: user.profile ? String(user.profile.hourly_rate) : '',
+            password: '',
+            photo: null,
         });
         setFormOpen(true);
     };
@@ -197,12 +272,16 @@ export default function StaffUsersIndex({
 
         const options = {
             preserveScroll: true,
+            forceFormData: true,
             onSuccess: () => setFormOpen(false),
         };
 
         if (editing) {
-            form.put(StaffUserController.update.url(editing.id), options);
+            // Unggahan foto butuh multipart: kirim POST dengan _method=PUT.
+            form.transform((data) => ({ ...data, _method: 'put' }));
+            form.post(StaffUserController.update.url(editing.id), options);
         } else {
+            form.transform((data) => data);
             form.post(StaffUserController.store.url(), options);
         }
     };
@@ -267,8 +346,49 @@ export default function StaffUsersIndex({
         }
     };
 
+    const destroyOne = (user: StaffUser): void => {
+        router.delete(StaffUserController.destroy.url(user.id), {
+            preserveScroll: true,
+            onStart: () => setDeletingId(user.id),
+            onFinish: () => setDeletingId(null),
+        });
+    };
+
+    const destroySelected = (): void => {
+        router.post(
+            StaffUserController.bulkDestroy.url(),
+            { ids: selectedIds },
+            {
+                preserveScroll: true,
+                onStart: () => setActing(true),
+                onFinish: () => {
+                    setActing(false);
+                    setBulkOpen(false);
+                    setSelectedIds([]);
+                },
+            },
+        );
+    };
+
+    const toggleSelected = (id: number, checked: boolean): void => {
+        setSelectedIds((ids) =>
+            checked ? [...ids, id] : ids.filter((value) => value !== id),
+        );
+    };
+
+    const selectableIds = users.data
+        .filter((user) => !user.is_self)
+        .map((user) => user.id);
+    const allSelected =
+        selectableIds.length > 0 &&
+        selectableIds.every((id) => selectedIds.includes(id));
+
     const hasFilters =
-        filters.search !== '' || filters.role !== '' || filters.status !== '';
+        filters.search !== '' ||
+        filters.role !== '' ||
+        filters.status !== '' ||
+        filters.unit !== null ||
+        filters.assignment !== '';
 
     const rolesError =
         form.errors.roles ??
@@ -278,70 +398,99 @@ export default function StaffUsersIndex({
 
     const columns: DataTableColumn<StaffUser>[] = [
         {
+            key: 'select',
+            label: 'Pilih',
+            align: 'center',
+            render: (user) =>
+                user.is_self ? null : (
+                    <Checkbox
+                        checked={selectedIds.includes(user.id)}
+                        onCheckedChange={(checked) =>
+                            toggleSelected(user.id, checked === true)
+                        }
+                        aria-label={`Pilih ${user.name}`}
+                    />
+                ),
+        },
+        {
             key: 'name',
-            label: 'Nama',
+            label: 'Nama lengkap & gelar',
             sortable: true,
             render: (user) => (
-                <div className="min-w-40">
-                    <div className="font-medium text-foreground">
-                        {user.name}
-                        {user.is_self && (
-                            <span className="ml-1.5 text-xs font-normal text-muted-foreground">
-                                (Anda)
-                            </span>
-                        )}
-                    </div>
-                    <div className="text-xs text-muted-foreground">
-                        {user.username ?? '—'}
+                <div className="flex min-w-48 items-center gap-3">
+                    {user.profile?.photo_url ? (
+                        <img
+                            src={user.profile.photo_url}
+                            alt=""
+                            className="size-10 shrink-0 rounded-full object-cover"
+                        />
+                    ) : (
+                        <span
+                            aria-hidden
+                            className="flex size-10 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-semibold text-muted-foreground"
+                        >
+                            {user.name.slice(0, 2).toUpperCase()}
+                        </span>
+                    )}
+                    <div>
+                        <div className="font-medium text-foreground">
+                            {fullName(user)}
+                            {user.is_self && (
+                                <span className="ml-1.5 text-xs font-normal text-muted-foreground">
+                                    (Anda)
+                                </span>
+                            )}
+                        </div>
+                        <div className="text-xs text-muted-foreground">
+                            @{user.username ?? '—'}
+                        </div>
                     </div>
                 </div>
             ),
         },
         {
-            key: 'roles',
-            label: 'Peran',
-            render: (user) =>
-                user.roles.length > 0 ? (
+            key: 'ids',
+            label: 'NIP / NUPTK / NIK',
+            render: (user) => (
+                <div className="text-xs whitespace-nowrap text-muted-foreground tabular-nums">
+                    <div>NIP: {user.profile?.nip ?? '—'}</div>
+                    <div>NUPTK: {user.profile?.nuptk ?? '—'}</div>
+                    <div>NIK: {user.profile?.nik ?? '—'}</div>
+                </div>
+            ),
+        },
+        {
+            key: 'assignment',
+            label: 'Tipe & status kerja',
+            render: (user) => (
+                <div className="min-w-32 space-y-1">
+                    <div className="text-sm">
+                        {user.profile?.assignment_label ?? '—'}
+                    </div>
                     <div className="flex flex-wrap gap-1">
+                        {user.profile?.employment_label && (
+                            <StatusBadge variant="muted">
+                                {user.profile.employment_label}
+                            </StatusBadge>
+                        )}
                         {user.roles.map((role) => (
-                            <StatusBadge key={role.value} variant="muted">
+                            <StatusBadge key={role.value} variant="default">
                                 {role.label}
                             </StatusBadge>
                         ))}
                     </div>
-                ) : (
-                    <span className="text-muted-foreground">
-                        Belum ada peran
-                    </span>
-                ),
+                </div>
+            ),
         },
         {
-            key: 'profile',
-            label: 'Unit & penugasan',
+            key: 'unit',
+            label: 'Unit penempatan',
             render: (user) => {
-                const unitCode = user.profile?.unit_code;
-                const position = user.profile?.position;
-                const nip = user.profile?.nip;
                 const homerooms = user.homeroom_classrooms ?? [];
 
-                if (!unitCode && !position && !nip && homerooms.length === 0) {
-                    return <span className="text-muted-foreground">—</span>;
-                }
-
                 return (
-                    <div className="min-w-36 text-sm">
-                        {(unitCode || position) && (
-                            <div>
-                                {[unitCode, position]
-                                    .filter(Boolean)
-                                    .join(' · ')}
-                            </div>
-                        )}
-                        {nip && (
-                            <div className="text-xs text-muted-foreground tabular-nums">
-                                NIP {nip}
-                            </div>
-                        )}
+                    <div className="min-w-28 text-sm">
+                        <div>{user.profile?.unit_code ?? 'Yayasan'}</div>
                         {homerooms.length > 0 && (
                             <div className="text-xs text-muted-foreground">
                                 Wali kelas: {homerooms.join(', ')}
@@ -352,11 +501,25 @@ export default function StaffUsersIndex({
             },
         },
         {
-            key: 'phone',
-            label: 'Nomor HP',
-            className: 'tabular-nums whitespace-nowrap',
-            render: (user) =>
-                user.phone ?? <span className="text-muted-foreground">—</span>,
+            key: 'contact',
+            label: 'Kontak',
+            render: (user) => (
+                <div className="text-xs tabular-nums">
+                    <div>{user.phone ?? '—'}</div>
+                    <div className="text-muted-foreground">
+                        {user.email ?? '—'}
+                    </div>
+                </div>
+            ),
+        },
+        {
+            key: 'base_salary',
+            label: 'Gaji pokok',
+            align: 'right',
+            sortable: true,
+            render: (user) => (
+                <MoneyText amount={user.profile?.base_salary ?? 0} />
+            ),
         },
         {
             key: 'status',
@@ -370,24 +533,18 @@ export default function StaffUsersIndex({
                 ),
         },
         {
-            key: 'last_login_at',
-            label: 'Login terakhir',
-            sortable: true,
-            className: 'whitespace-nowrap',
-            render: (user) => (
-                <DateText
-                    value={user.last_login_at}
-                    mode="datetime"
-                    fallback="Belum pernah"
-                />
-            ),
-        },
-        {
             key: 'actions',
             label: 'Aksi',
             align: 'center',
             render: (user) => (
-                <RowActions onEdit={() => openEdit(user)}>
+                <RowActions
+                    onEdit={() => openEdit(user)}
+                    onDelete={user.is_self ? undefined : () => destroyOne(user)}
+                    deleting={deletingId === user.id}
+                    itemName={user.name}
+                    deleteTitle="Hapus data pegawai?"
+                    deleteDescription={`Akun ${user.name} dihapus dan tidak dapat masuk lagi. Riwayat transaksi dan catatan yang pernah dibuat tetap tersimpan.`}
+                >
                     <Tooltip>
                         <TooltipTrigger asChild>
                             <Button
@@ -449,24 +606,40 @@ export default function StaffUsersIndex({
     return (
         <StaffLayout
             breadcrumbs={[
-                { title: 'Beranda', href: dashboard() },
+                { title: 'Pengguna', href: '#' },
                 {
-                    title: 'Pengguna staf',
+                    title: 'Guru & Staf',
                     href: StaffUserController.index(),
                 },
             ]}
         >
-            <Head title="Pengguna staf" />
+            <Head title="Guru & Staf" />
 
             <div className="space-y-4">
                 <PageHeader
-                    title="Pengguna staf"
-                    description="Akun guru, bendahara, BK, kepala unit, petugas gerbang, dan kasir kantin."
+                    title="Guru & Staf"
+                    description="Buku induk pendidik dan tenaga kependidikan beserta akun masuknya."
                     actions={
-                        <Button type="button" onClick={openCreate}>
-                            <UserPlus className="size-4" strokeWidth={1.75} />
-                            Tambah staf
-                        </Button>
+                        <>
+                            <Button
+                                type="button"
+                                variant="outline"
+                                onClick={() => window.print()}
+                            >
+                                <Printer
+                                    className="size-4"
+                                    strokeWidth={1.75}
+                                />
+                                Cetak daftar
+                            </Button>
+                            <Button type="button" onClick={openCreate}>
+                                <UserPlus
+                                    className="size-4"
+                                    strokeWidth={1.75}
+                                />
+                                Tambah pegawai
+                            </Button>
+                        </>
                     }
                 />
 
@@ -475,10 +648,70 @@ export default function StaffUsersIndex({
                         type="search"
                         value={search}
                         onChange={(event) => changeSearch(event.target.value)}
-                        placeholder="Cari nama, username, atau nomor HP"
+                        placeholder="Cari nama, username, HP, NIP, NUPTK, NIK"
                         aria-label="Cari pengguna staf"
                         className="w-full sm:max-w-xs"
                     />
+                    <Select
+                        value={
+                            filters.unit === null ? ALL : String(filters.unit)
+                        }
+                        onValueChange={(value) =>
+                            visit({
+                                unit: value === ALL ? null : Number(value),
+                                page: 1,
+                            })
+                        }
+                    >
+                        <SelectTrigger
+                            className="w-full sm:w-44"
+                            aria-label="Saring unit"
+                        >
+                            <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value={ALL}>Semua unit</SelectItem>
+                            {unitOptions.map((unit) => (
+                                <SelectItem
+                                    key={unit.id}
+                                    value={String(unit.id)}
+                                >
+                                    {unit.name}
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                    <Select
+                        value={
+                            filters.assignment === '' ? ALL : filters.assignment
+                        }
+                        onValueChange={(value) =>
+                            visit({
+                                assignment: value === ALL ? '' : value,
+                                page: 1,
+                            })
+                        }
+                    >
+                        <SelectTrigger
+                            className="w-full sm:w-52"
+                            aria-label="Saring tipe penugasan"
+                        >
+                            <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value={ALL}>
+                                Semua tipe penugasan
+                            </SelectItem>
+                            {assignmentOptions.map((option) => (
+                                <SelectItem
+                                    key={option.value}
+                                    value={option.value}
+                                >
+                                    {option.label}
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
                     <Select
                         value={filters.role === '' ? ALL : filters.role}
                         onValueChange={(value) =>
@@ -523,6 +756,36 @@ export default function StaffUsersIndex({
                     </Select>
                 </div>
 
+                <div className="flex flex-wrap items-center gap-2 print:hidden">
+                    <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() =>
+                            setSelectedIds(allSelected ? [] : selectableIds)
+                        }
+                        disabled={selectableIds.length === 0}
+                    >
+                        {allSelected
+                            ? 'Batal pilih'
+                            : 'Pilih semua di halaman ini'}
+                    </Button>
+                    {selectedIds.length > 0 && (
+                        <Button
+                            type="button"
+                            variant="destructive"
+                            size="sm"
+                            onClick={() => setBulkOpen(true)}
+                        >
+                            <Trash2 className="size-4" strokeWidth={1.75} />
+                            Hapus terpilih ({selectedIds.length})
+                        </Button>
+                    )}
+                    <span className="ml-auto text-sm text-muted-foreground">
+                        {users.meta.total} pegawai terdaftar
+                    </span>
+                </div>
+
                 {loadFailed ? (
                     <ErrorState
                         description="Daftar pengguna staf tidak dapat dimuat. Periksa koneksi lalu coba lagi."
@@ -553,14 +816,14 @@ export default function StaffUsersIndex({
                         empty={
                             hasFilters
                                 ? {
-                                      title: 'Tidak ada staf yang cocok',
+                                      title: 'Tidak ada pegawai yang cocok',
                                       description:
                                           'Ubah kata kunci atau saringan untuk melihat staf lain.',
                                   }
                                 : {
-                                      title: 'Belum ada akun staf',
+                                      title: 'Belum ada data pegawai',
                                       description:
-                                          'Tambahkan akun staf agar guru dan petugas dapat masuk sesuai perannya.',
+                                          'Tambahkan guru dan staf agar mereka dapat masuk sesuai perannya.',
                                       action: (
                                           <Button
                                               type="button"
@@ -570,7 +833,7 @@ export default function StaffUsersIndex({
                                                   className="size-4"
                                                   strokeWidth={1.75}
                                               />
-                                              Tambah staf
+                                              Tambah pegawai
                                           </Button>
                                       ),
                                   }
@@ -582,163 +845,307 @@ export default function StaffUsersIndex({
             <FormDialog
                 open={formOpen}
                 onOpenChange={setFormOpen}
-                title={editing ? 'Ubah akun staf' : 'Tambah akun staf'}
-                description={
-                    editing
-                        ? undefined
-                        : 'Kata sandi awal dibuat otomatis dan ditampilkan sekali setelah disimpan.'
+                title={
+                    editing ? 'Ubah data pegawai' : 'Tambah pegawai / guru baru'
                 }
+                description="Biodata pendidik dan tenaga kependidikan beserta akun masuknya."
                 onSubmit={submit}
                 processing={form.processing}
+                submitLabel="Simpan profil pegawai"
+                contentClassName="sm:max-w-3xl"
             >
-                <div className="grid gap-2">
-                    <Label htmlFor="staff-name">Nama lengkap</Label>
-                    <Input
-                        id="staff-name"
-                        value={form.data.name}
-                        onChange={(event) =>
-                            form.setData('name', event.target.value)
-                        }
-                        autoComplete="off"
-                        required
-                    />
-                    <InputError message={form.errors.name} />
-                </div>
-                <div className="grid gap-2">
-                    <Label htmlFor="staff-username">Username</Label>
-                    <Input
-                        id="staff-username"
-                        value={form.data.username}
-                        onChange={(event) =>
-                            form.setData('username', event.target.value)
-                        }
-                        autoComplete="off"
-                        autoCapitalize="none"
-                        required
-                    />
-                    <InputError message={form.errors.username} />
-                </div>
-                <div className="grid gap-4 sm:grid-cols-2">
-                    <div className="grid gap-2">
-                        <Label htmlFor="staff-phone">Nomor HP (opsional)</Label>
-                        <Input
-                            id="staff-phone"
-                            type="tel"
-                            value={form.data.phone}
-                            onChange={(event) =>
-                                form.setData('phone', event.target.value)
-                            }
-                            autoComplete="off"
-                        />
-                        <InputError message={form.errors.phone} />
-                    </div>
-                    <div className="grid gap-2">
-                        <Label htmlFor="staff-email">Email (opsional)</Label>
-                        <Input
-                            id="staff-email"
-                            type="email"
-                            value={form.data.email}
-                            onChange={(event) =>
-                                form.setData('email', event.target.value)
-                            }
-                            autoComplete="off"
-                        />
-                        <InputError message={form.errors.email} />
-                    </div>
-                </div>
-                <fieldset className="grid gap-2">
-                    <legend className="mb-1 text-sm font-medium">Peran</legend>
-                    <div className="grid gap-2 sm:grid-cols-2">
-                        {roleOptions.map((role) => {
-                            const id = `staff-role-${role.value}`;
+                <FieldSelect
+                    id="staff-unit"
+                    label="Unit penempatan"
+                    value={
+                        form.data.unit_id !== null
+                            ? String(form.data.unit_id)
+                            : ALL
+                    }
+                    onChange={(value) =>
+                        form.setData(
+                            'unit_id',
+                            value === ALL ? null : Number(value),
+                        )
+                    }
+                    options={[
+                        { value: ALL, label: 'Yayasan (semua unit)' },
+                        ...unitOptions.map((u) => ({
+                            value: String(u.id),
+                            label: u.name,
+                        })),
+                    ]}
+                    error={form.errors.unit_id}
+                />
 
-                            return (
-                                <div
-                                    key={role.value}
-                                    className="flex items-center gap-2"
-                                >
-                                    <Checkbox
-                                        id={id}
-                                        checked={form.data.roles.includes(
-                                            role.value,
-                                        )}
-                                        onCheckedChange={(checked) =>
-                                            toggleRole(
-                                                role.value,
-                                                checked === true,
-                                            )
-                                        }
-                                    />
-                                    <Label htmlFor={id} className="font-normal">
-                                        {role.label}
-                                    </Label>
-                                </div>
-                            );
-                        })}
+                <FormSection title="1. Identitas pribadi & gelar">
+                    <div className="grid gap-4 sm:grid-cols-[8rem_1fr_9rem]">
+                        <Field
+                            id="staff-prefix"
+                            label="Gelar depan"
+                            value={form.data.title_prefix}
+                            onChange={(v) => form.setData('title_prefix', v)}
+                            error={form.errors.title_prefix}
+                            placeholder="Dr."
+                        />
+                        <Field
+                            id="staff-name"
+                            label="Nama lengkap"
+                            value={form.data.name}
+                            onChange={(v) => form.setData('name', v)}
+                            error={form.errors.name}
+                            required
+                        />
+                        <Field
+                            id="staff-suffix"
+                            label="Gelar belakang"
+                            value={form.data.title_suffix}
+                            onChange={(v) => form.setData('title_suffix', v)}
+                            error={form.errors.title_suffix}
+                            placeholder="S.Pd"
+                        />
                     </div>
-                    <InputError message={rolesError} />
-                </fieldset>
-                <div className="grid gap-4 sm:grid-cols-2">
-                    <div className="grid gap-2">
-                        <Label htmlFor="staff-unit">Unit (opsional)</Label>
-                        <Select
+                    <div className="grid gap-4 sm:grid-cols-3">
+                        <Field
+                            id="staff-nik"
+                            label="NIK"
+                            value={form.data.nik}
+                            onChange={(v) => form.setData('nik', v)}
+                            error={form.errors.nik}
+                            inputMode="numeric"
+                            maxLength={16}
+                        />
+                        <Field
+                            id="staff-nuptk"
+                            label="NUPTK (jika ada)"
+                            value={form.data.nuptk}
+                            onChange={(v) => form.setData('nuptk', v)}
+                            error={form.errors.nuptk}
+                            inputMode="numeric"
+                            maxLength={16}
+                        />
+                        <Field
+                            id="staff-nip"
+                            label="NIP (PNS / yayasan)"
+                            value={form.data.nip}
+                            onChange={(v) => form.setData('nip', v)}
+                            error={form.errors.nip}
+                        />
+                    </div>
+                    <div className="grid gap-4 sm:grid-cols-3">
+                        <FieldSelect
+                            id="staff-gender"
+                            label="Jenis kelamin"
                             value={
-                                form.data.unit_id !== null
-                                    ? String(form.data.unit_id)
-                                    : ALL
+                                form.data.gender === '' ? ALL : form.data.gender
                             }
-                            onValueChange={(value) =>
+                            onChange={(v) =>
+                                form.setData('gender', v === ALL ? '' : v)
+                            }
+                            options={[
+                                { value: ALL, label: 'Pilih' },
+                                { value: 'L', label: 'Laki-laki' },
+                                { value: 'P', label: 'Perempuan' },
+                            ]}
+                            error={form.errors.gender}
+                        />
+                        <Field
+                            id="staff-birth-place"
+                            label="Tempat lahir"
+                            value={form.data.birth_place}
+                            onChange={(v) => form.setData('birth_place', v)}
+                            error={form.errors.birth_place}
+                        />
+                        <div className="grid gap-2">
+                            <Label htmlFor="staff-birth-date">
+                                Tanggal lahir
+                            </Label>
+                            <DateInput
+                                id="staff-birth-date"
+                                value={form.data.birth_date}
+                                onChange={(e) =>
+                                    form.setData('birth_date', e.target.value)
+                                }
+                            />
+                            <InputError message={form.errors.birth_date} />
+                        </div>
+                    </div>
+                    <Field
+                        id="staff-address"
+                        label="Alamat domisili"
+                        value={form.data.address}
+                        onChange={(v) => form.setData('address', v)}
+                        error={form.errors.address}
+                    />
+                </FormSection>
+
+                <FormSection title="2. Status kepegawaian & gaji">
+                    <div className="grid gap-4 sm:grid-cols-3">
+                        <FieldSelect
+                            id="staff-assignment"
+                            label="Tipe penugasan"
+                            value={form.data.assignment_type}
+                            onChange={(v) => form.setData('assignment_type', v)}
+                            options={assignmentOptions}
+                            error={form.errors.assignment_type}
+                        />
+                        <FieldSelect
+                            id="staff-employment"
+                            label="Status ikatan kerja"
+                            value={form.data.employment_status}
+                            onChange={(v) =>
+                                form.setData('employment_status', v)
+                            }
+                            options={employmentOptions}
+                            error={form.errors.employment_status}
+                        />
+                        <Field
+                            id="staff-position"
+                            label="Jabatan (opsional)"
+                            value={form.data.position}
+                            onChange={(v) => form.setData('position', v)}
+                            error={form.errors.position}
+                        />
+                    </div>
+                    <div className="grid gap-4 sm:grid-cols-3">
+                        <Field
+                            id="staff-salary"
+                            label="Gaji pokok (Rp)"
+                            value={form.data.base_salary}
+                            onChange={(v) => form.setData('base_salary', v)}
+                            error={form.errors.base_salary}
+                            inputMode="numeric"
+                        />
+                        <Field
+                            id="staff-allowance"
+                            label="Tunjangan (Rp)"
+                            value={form.data.allowance}
+                            onChange={(v) => form.setData('allowance', v)}
+                            error={form.errors.allowance}
+                            inputMode="numeric"
+                        />
+                        <Field
+                            id="staff-hourly"
+                            label="Honor per JP (Rp)"
+                            value={form.data.hourly_rate}
+                            onChange={(v) => form.setData('hourly_rate', v)}
+                            error={form.errors.hourly_rate}
+                            inputMode="numeric"
+                        />
+                    </div>
+                </FormSection>
+
+                <FormSection title="3. Akun masuk">
+                    <div className="grid gap-4 sm:grid-cols-2">
+                        <Field
+                            id="staff-username"
+                            label="Username"
+                            value={form.data.username}
+                            onChange={(v) => form.setData('username', v)}
+                            error={form.errors.username}
+                            required
+                            autoCapitalize="none"
+                        />
+                        <Field
+                            id="staff-password"
+                            label={
+                                editing
+                                    ? 'Kata sandi baru (kosongkan bila tetap)'
+                                    : 'Kata sandi (kosongkan untuk dibuat otomatis)'
+                            }
+                            value={form.data.password}
+                            onChange={(v) => form.setData('password', v)}
+                            error={form.errors.password}
+                            type="password"
+                            autoComplete="new-password"
+                        />
+                        <Field
+                            id="staff-phone"
+                            label="Nomor HP / WhatsApp"
+                            value={form.data.phone}
+                            onChange={(v) => form.setData('phone', v)}
+                            error={form.errors.phone}
+                            type="tel"
+                        />
+                        <Field
+                            id="staff-email"
+                            label="Email"
+                            value={form.data.email}
+                            onChange={(v) => form.setData('email', v)}
+                            error={form.errors.email}
+                            type="email"
+                        />
+                    </div>
+                    <fieldset className="grid gap-2">
+                        <legend className="mb-1 text-sm font-medium">
+                            Peran (hak akses)
+                        </legend>
+                        <div className="grid gap-2 sm:grid-cols-3">
+                            {roleOptions.map((role) => {
+                                const id = `staff-role-${role.value}`;
+
+                                return (
+                                    <div
+                                        key={role.value}
+                                        className="flex items-center gap-2"
+                                    >
+                                        <Checkbox
+                                            id={id}
+                                            checked={form.data.roles.includes(
+                                                role.value,
+                                            )}
+                                            onCheckedChange={(checked) =>
+                                                toggleRole(
+                                                    role.value,
+                                                    checked === true,
+                                                )
+                                            }
+                                        />
+                                        <Label
+                                            htmlFor={id}
+                                            className="font-normal"
+                                        >
+                                            {role.label}
+                                        </Label>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                        <InputError message={rolesError} />
+                    </fieldset>
+                </FormSection>
+
+                <FormSection title="4. Pas foto">
+                    <div className="grid gap-2">
+                        <Label htmlFor="staff-photo">
+                            Foto (JPG/PNG/WebP, maks 2 MB)
+                        </Label>
+                        <Input
+                            id="staff-photo"
+                            type="file"
+                            accept="image/jpeg,image/png,image/webp"
+                            onChange={(e) =>
                                 form.setData(
-                                    'unit_id',
-                                    value === ALL ? null : Number(value),
+                                    'photo',
+                                    e.target.files?.[0] ?? null,
                                 )
                             }
-                        >
-                            <SelectTrigger id="staff-unit">
-                                <SelectValue placeholder="Semua / Yayasan" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value={ALL}>
-                                    Semua / Yayasan
-                                </SelectItem>
-                                {unitOptions.map((unit) => (
-                                    <SelectItem
-                                        key={unit.id}
-                                        value={String(unit.id)}
-                                    >
-                                        {unit.code} · {unit.name}
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                        <InputError message={form.errors.unit_id} />
-                    </div>
-                    <div className="grid gap-2">
-                        <Label htmlFor="staff-nip">NIP (opsional)</Label>
-                        <Input
-                            id="staff-nip"
-                            value={form.data.nip}
-                            onChange={(event) =>
-                                form.setData('nip', event.target.value)
-                            }
-                            autoComplete="off"
                         />
-                        <InputError message={form.errors.nip} />
+                        <InputError message={form.errors.photo} />
                     </div>
-                </div>
-                <div className="grid gap-2">
-                    <Label htmlFor="staff-position">Jabatan (opsional)</Label>
-                    <Input
-                        id="staff-position"
-                        value={form.data.position}
-                        onChange={(event) =>
-                            form.setData('position', event.target.value)
-                        }
-                        autoComplete="off"
-                    />
-                    <InputError message={form.errors.position} />
-                </div>
+                </FormSection>
             </FormDialog>
+
+            <ConfirmDialog
+                open={bulkOpen}
+                onOpenChange={setBulkOpen}
+                title={`Hapus ${selectedIds.length} data pegawai?`}
+                description="Akun terpilih dihapus dan tidak dapat masuk lagi. Akun Anda sendiri dan admin aktif terakhir otomatis dilewati."
+                confirmLabel="Hapus terpilih"
+                variant="destructive"
+                loading={acting}
+                onConfirm={destroySelected}
+            />
 
             <ConfirmDialog
                 open={statusTarget !== null}
@@ -821,5 +1228,84 @@ export default function StaffUsersIndex({
                 </DialogContent>
             </Dialog>
         </StaffLayout>
+    );
+}
+
+function FormSection({
+    title,
+    children,
+}: {
+    title: string;
+    children: ReactNode;
+}) {
+    return (
+        <fieldset className="grid gap-4 rounded-lg border border-border p-4">
+            <legend className="px-1 text-sm font-semibold">{title}</legend>
+            {children}
+        </fieldset>
+    );
+}
+
+function Field({
+    id,
+    label,
+    value,
+    onChange,
+    error,
+    ...rest
+}: {
+    id: string;
+    label: string;
+    value: string;
+    onChange: (value: string) => void;
+    error?: string;
+} & Omit<ComponentProps<typeof Input>, 'id' | 'value' | 'onChange'>) {
+    return (
+        <div className="grid gap-2">
+            <Label htmlFor={id}>{label}</Label>
+            <Input
+                id={id}
+                value={value}
+                onChange={(e) => onChange(e.target.value)}
+                autoComplete="off"
+                {...rest}
+            />
+            <InputError message={error} />
+        </div>
+    );
+}
+
+function FieldSelect({
+    id,
+    label,
+    value,
+    onChange,
+    options,
+    error,
+}: {
+    id: string;
+    label: string;
+    value: string;
+    onChange: (value: string) => void;
+    options: { value: string; label: string }[];
+    error?: string;
+}) {
+    return (
+        <div className="grid gap-2">
+            <Label htmlFor={id}>{label}</Label>
+            <Select value={value} onValueChange={onChange}>
+                <SelectTrigger id={id}>
+                    <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                    {options.map((option) => (
+                        <SelectItem key={option.value} value={option.value}>
+                            {option.label}
+                        </SelectItem>
+                    ))}
+                </SelectContent>
+            </Select>
+            <InputError message={error} />
+        </div>
     );
 }

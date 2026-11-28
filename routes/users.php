@@ -26,6 +26,9 @@ Route::middleware('permission:'.Permission::UsersManage->value)
         Route::put('{staffUser}', 'update')->whereNumber('staffUser')->name('update');
         Route::patch('{staffUser}/status', 'updateStatus')->whereNumber('staffUser')->name('status.update');
         Route::post('{staffUser}/reset-kata-sandi', 'resetPassword')->whereNumber('staffUser')->name('password.reset');
+        Route::delete('{staffUser}', 'destroy')->whereNumber('staffUser')->name('destroy');
+        Route::post('hapus-terpilih', 'bulkDestroy')->name('bulk-destroy');
+        Route::get('{staffUser}/foto', 'photo')->whereNumber('staffUser')->name('photo');
     });
 
 // Peran & Hak Akses: izin per peran (alur aplikasi lama, kolom Lihat/Kelola).

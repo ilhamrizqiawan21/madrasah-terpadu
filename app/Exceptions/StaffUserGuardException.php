@@ -22,6 +22,11 @@ final class StaffUserGuardException extends RuntimeException
         return new self('Anda tidak dapat melepas peran Admin dari akun Anda sendiri.');
     }
 
+    public static function cannotDeleteSelf(): self
+    {
+        return new self('Anda tidak dapat menghapus akun Anda sendiri.');
+    }
+
     public static function lastActiveAdmin(): self
     {
         return new self('Akun ini adalah admin aktif terakhir. Tambahkan admin lain terlebih dahulu.');

@@ -37,4 +37,9 @@ class UserPolicy
     {
         return $actor->can(Permission::UsersManage->value);
     }
+
+    public function delete(User $actor, User $target): bool
+    {
+        return $actor->can(Permission::UsersManage->value);
+    }
 }
