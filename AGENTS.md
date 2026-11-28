@@ -9,3 +9,4 @@ Instruksi untuk semua agen AI di repo ini (Gemini, Claude, Codex, Cursor, dan la
 4. Untuk pembayaran dan dompet: baca `docs/PAYMENTS.md` seluruhnya.
 5. `composer check` harus hijau sebelum tugas dinyatakan selesai.
 6. Peran arsitek dipegang Claude: keputusan desain baru ditulis sebagai _Usulan_ di `docs/DECISIONS.md`, bukan langsung diimplementasikan.
+7. **Duplikasi alur aplikasi lama (sejak 2026-11-28): ikuti `docs/LEGACY_DUPLICATION.md`.** Pembagian: Claude = Keuangan Siswa, Pembayaran online, Akuntansi & Kas, Kantin; Gemini = grup menu lainnya. Aplikasi lama hanya-baca.

@@ -12,6 +12,15 @@ Stack: Laravel 13, Inertia 3, React 19 + TypeScript, Tailwind 4, **shadcn/ui**, 
 Bahasa: **UI & dokumen Bahasa Indonesia; kode & identifier Bahasa Inggris.** Uang = integer rupiah. Waktu bisnis = WITA (`Asia/Makassar`).
 Repo rujukan (hanya-baca): `~/Projects/sipesan`, `~/Projects/pib-laravel`, `~/Projects/penilaian-tahfidz`, `~/Projects/standar-ui-project`.
 
+## Tugas aktif sejak 2026-11-28: duplikasi alur aplikasi lama
+
+Ikuti **`docs/LEGACY_DUPLICATION.md`** (playbook bersama Claude & Gemini) sebelum aturan lain di berkas ini. Ringkasnya:
+
+- Bagianmu: semua grup menu **selain** Keuangan Siswa, Pembayaran online, Akuntansi & Kas, dan Kantin (milik Claude). PPDB dilewati.
+- Aplikasi lama = produksi, **hanya baca**: jangan klik tombol aksi apa pun.
+- Satu menu/tahap → tes terarah + Larastan + tsc + build + buka di browser → commit → laporan singkat → "Lanjut?". `composer check` penuh hanya bila pemilik meminta.
+- Tiru pola halaman Akademik yang sudah jadi (`MasterCrudPage`, layout fungsi panah, ganti item "Segera" di `Navigation`).
+
 ## Urutan baca (wajib sebelum menyentuh kode)
 
 1. `docs/AI_RULES.md` — **aturan mengikat**
