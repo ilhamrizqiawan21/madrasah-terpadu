@@ -117,15 +117,36 @@ const groupIcons: Record<string, LucideIcon> = {
     settings: Settings,
 };
 
-function usePathActive() {
+/**
+ * Hanya satu item menu yang aktif: item dengan path terpanjang yang cocok dengan URL sekarang
+ * (mis. /admin/siswa/mutasi mengalahkan /admin/siswa). Item dengan path sama dibedakan lewat query.
+ */
+function usePathActive(hrefs: string[]) {
     const page = usePage();
-    const currentPath = page.url.split('?')[0];
+    const [currentPath, currentQuery = ''] = page.url.split('?');
 
-    return (href: string): boolean => {
+    const matches = hrefs.filter((href) => {
         const path = href.split('?')[0];
 
         return currentPath === path || currentPath.startsWith(`${path}/`);
-    };
+    });
+    const longest = Math.max(
+        -1,
+        ...matches.map((href) => href.split('?')[0].length),
+    );
+    const candidates = matches.filter(
+        (href) => href.split('?')[0].length === longest,
+    );
+    const best =
+        candidates.find(
+            (href) =>
+                (href.split('?')[1] ?? '') !== '' &&
+                currentQuery.includes(href.split('?')[1]),
+        ) ??
+        candidates.find((href) => !href.includes('?')) ??
+        candidates[0];
+
+    return (href: string): boolean => best !== undefined && href === best;
 }
 
 export default function StaffLayout({
@@ -187,7 +208,9 @@ function StaffSidebar() {
         navigation = [],
         auth,
     } = usePage<SharedProps>().props;
-    const isActive = usePathActive();
+    const isActive = usePathActive(
+        navigation.flatMap((group) => group.items.map((item) => item.href)),
+    );
     const currentPath = usePage().url.split('?')[0];
     const appName = branding?.appName || name;
     const getInitials = useInitials();
