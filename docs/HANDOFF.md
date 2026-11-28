@@ -55,17 +55,19 @@ Aturan: singkat dan faktual. Jangan menyalin isi TODO/ADR; tautkan saja. Hapus b
 
 ## Sedang dikerjakan
 
-Fase 7 (Midtrans) + T-805: semua kode di-commit (`4504da2`…`4156bf4`), `composer check` hijau (Pest 740 tes). Belum: gerbang UI T-702/T-705/T-805 dan T-708.
+Fase 7 (Midtrans) + T-805: semua kode di-commit (`4504da2`…`4156bf4`), `composer check` hijau (Pest 740 tes). T-702/T-705/T-805 dicentang (fungsi dicek; antislop & 360 px ditunda ke fase poles UI). T-708 dilewati dulu atas arahan pemilik.
 
 ## Langkah berikutnya
 
-1. **Cek UI** halaman `guardian/payment`, portal Tagihan (centang + bilah "Bayar sekarang"), `admin/billing/online-payments`, form "Isi saldo online" di dompet wali — 360/768/1280, keyboard, empat keadaan, antislop. Pemilik membatalkan pengisian data pratinjau ke DB lokal (2026-11-28); minta izin/cara lain dulu (mis. DB terpisah) sebelum menulis data uji.
+1. **Poles UI (fase terpisah, arahan pemilik 2026-11-28)**: antislop + cek 360/768 px untuk halaman pembayaran, antrean Pembayaran online, dan form isi saldo. Fungsi sudah dicek di desktop dengan DB SQLite terpisah (MariaDB lokal tidak disentuh).
 2. **T-708 uji sandbox**: pemilik mengisi `MIDTRANS_SERVER_KEY`/`MIDTRANS_CLIENT_KEY` sandbox di `.env` + tunnel (`cloudflared tunnel --url http://localhost:8000`), `APP_URL` = URL tunnel (header `X-Override-Notification` memakai `APP_URL`). Verifikasi khusus: header override berlaku untuk Snap (PAYMENTS §2a).
 3. `composer check:mysql` dengan user DB khusus (tes grup `mysql` baru: `PaymentOrderTest`, `MidtransWebhookTest`).
 4. Diputuskan pemilik 2026-11-28: **U-14** ikuti PAYMENTS (tagihan `partial` di kasir); **U-05** kelebihan bayar ke saldo kantin dimatikan dulu (`PAYMENTS_OVERPAYMENT_TO_WALLET=false`). **T-708 dilewati dulu** atas arahan pemilik.
 5. Deploy: migrasi `2026_11_28_000013`–`000014`; worker sudah mendengar antrean `payments`; jadwal baru `ExpirePaymentOrders` (15 menit) dan `payments:reconcile` (01.00 WITA).
 
 ## Arahan pemilik yang berlaku
+
+- **Berikutnya (2026-11-28): duplikasi FITUR & ALUR dari web asli (aplikasi lama) sama persis** — permintaan klien. Yang disamakan alurnya, bukan tampilannya; tampilan dipoles terpisah (antislop, modern). Butuh dari pemilik: akses/URL aplikasi lama atau rekaman/tangkapan layar per alur, dan urutan modul.
 
 - **Desain wajib sesuai mockup** di `docs/mockup/menu.html` (SVG per layar, mis. "12 · Pola pengaturan"). Sebelum membangun layar, render mockup terkait:
   ekstrak `<svg aria-label="...">` dari `menu.html`, lalu `magick -density 96 file.svg file.png` di direktori scratchpad. Bila mockup bertentangan dengan keamanan (mis. logo SVG), ikuti keamanan dan sebutkan di laporan.

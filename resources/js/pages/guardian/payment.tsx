@@ -422,7 +422,9 @@ function statusDescription(order: Order): string {
         case 'pending':
             return `${subject} setelah Midtrans mengirim konfirmasi ke sekolah.`;
         case 'expired':
-            return 'Order ini sudah kedaluwarsa. Buat pembayaran baru dari halaman tagihan.';
+            return order.purpose === 'wallet_topup'
+                ? 'Order ini sudah kedaluwarsa. Isi saldo lagi dari halaman dompet.'
+                : 'Order ini sudah kedaluwarsa. Buat pembayaran baru dari halaman tagihan.';
         default:
             return 'Pembayaran untuk order ini tidak berhasil. Silakan buat pembayaran baru.';
     }

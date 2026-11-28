@@ -296,7 +296,7 @@ export default function OnlinePaymentsIndex({
 
                 <nav
                     aria-label="Kelompok pembayaran online"
-                    className="flex gap-1 overflow-x-auto border-b border-border"
+                    className="flex gap-1 overflow-x-auto overflow-y-hidden border-b border-border"
                 >
                     {TABS.map((tab) => {
                         const active = filters.tab === tab.key;
