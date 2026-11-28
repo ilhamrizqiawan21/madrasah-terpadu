@@ -335,6 +335,6 @@ export function MasterCrudPage<T extends Row>({
     );
 }
 
-export function masterLayout(page: ReactNode) {
-    return page;
-}
+// Fungsi panah, bukan deklarasi function: Inertia 3 memperlakukan deklarasi function sebagai komponen
+// sehingga props halaman ikut dirender (React error #31).
+export const masterLayout = (page: ReactNode): ReactNode => page;
