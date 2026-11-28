@@ -444,6 +444,20 @@ export default function StaffUsersIndex({
                         <div className="text-xs text-muted-foreground">
                             @{user.username ?? '—'}
                         </div>
+                        {/* Ringkasan kolom yang disembunyikan saat area konten sempit. */}
+                        <div className="text-xs text-muted-foreground @4xl:hidden">
+                            {[
+                                user.profile?.assignment_label,
+                                user.profile?.unit_code ?? 'Yayasan',
+                            ]
+                                .filter(Boolean)
+                                .join(' · ')}
+                        </div>
+                        {user.phone && (
+                            <div className="text-xs text-muted-foreground tabular-nums @6xl:hidden">
+                                {user.phone}
+                            </div>
+                        )}
                     </div>
                 </div>
             ),
@@ -451,6 +465,7 @@ export default function StaffUsersIndex({
         {
             key: 'ids',
             label: 'NIP / NUPTK / NIK',
+            className: 'hidden @6xl:table-cell',
             render: (user) => (
                 <div className="text-xs whitespace-nowrap text-muted-foreground tabular-nums">
                     <div>NIP: {user.profile?.nip ?? '—'}</div>
@@ -462,6 +477,7 @@ export default function StaffUsersIndex({
         {
             key: 'assignment',
             label: 'Tipe & status kerja',
+            className: 'hidden @2xl:table-cell',
             render: (user) => (
                 <div className="min-w-32 space-y-1">
                     <div className="text-sm">
@@ -485,6 +501,7 @@ export default function StaffUsersIndex({
         {
             key: 'unit',
             label: 'Unit penempatan',
+            className: 'hidden @4xl:table-cell',
             render: (user) => {
                 const homerooms = user.homeroom_classrooms ?? [];
 
@@ -503,6 +520,7 @@ export default function StaffUsersIndex({
         {
             key: 'contact',
             label: 'Kontak',
+            className: 'hidden @6xl:table-cell',
             render: (user) => (
                 <div className="text-xs tabular-nums">
                     <div>{user.phone ?? '—'}</div>
@@ -516,6 +534,7 @@ export default function StaffUsersIndex({
             key: 'base_salary',
             label: 'Gaji pokok',
             align: 'right',
+            className: 'hidden @4xl:table-cell',
             sortable: true,
             render: (user) => (
                 <MoneyText amount={user.profile?.base_salary ?? 0} />
@@ -615,7 +634,7 @@ export default function StaffUsersIndex({
         >
             <Head title="Guru & Staf" />
 
-            <div className="space-y-4">
+            <div className="@container space-y-4">
                 <PageHeader
                     title="Guru & Staf"
                     description="Buku induk pendidik dan tenaga kependidikan beserta akun masuknya."
@@ -643,14 +662,14 @@ export default function StaffUsersIndex({
                     }
                 />
 
-                <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+                <div className="flex flex-wrap gap-2">
                     <Input
                         type="search"
                         value={search}
                         onChange={(event) => changeSearch(event.target.value)}
                         placeholder="Cari nama, username, HP, NIP, NUPTK, NIK"
-                        aria-label="Cari pengguna staf"
-                        className="w-full sm:max-w-xs"
+                        aria-label="Cari pegawai"
+                        className="w-full @3xl:w-72"
                     />
                     <Select
                         value={
@@ -664,7 +683,7 @@ export default function StaffUsersIndex({
                         }
                     >
                         <SelectTrigger
-                            className="w-full sm:w-44"
+                            className="w-full @lg:w-44"
                             aria-label="Saring unit"
                         >
                             <SelectValue />
@@ -693,7 +712,7 @@ export default function StaffUsersIndex({
                         }
                     >
                         <SelectTrigger
-                            className="w-full sm:w-52"
+                            className="w-full @lg:w-56"
                             aria-label="Saring tipe penugasan"
                         >
                             <SelectValue />
@@ -719,7 +738,7 @@ export default function StaffUsersIndex({
                         }
                     >
                         <SelectTrigger
-                            className="w-full sm:w-48"
+                            className="w-full @lg:w-44"
                             aria-label="Saring peran"
                         >
                             <SelectValue />
@@ -743,7 +762,7 @@ export default function StaffUsersIndex({
                         }
                     >
                         <SelectTrigger
-                            className="w-full sm:w-40"
+                            className="w-full @lg:w-40"
                             aria-label="Saring status"
                         >
                             <SelectValue />
