@@ -11,8 +11,11 @@ use App\Http\Requests\Admin\CopyClassroomsRequest;
 use App\Http\Requests\Admin\UpdateClassroomStatusRequest;
 use App\Http\Resources\ClassroomResource;
 use App\Models\AcademicYear;
+use App\Models\ClassGroup;
 use App\Models\Classroom;
 use App\Models\Enrollment;
+use App\Models\GradeLevel;
+use App\Models\Major;
 use App\Models\Unit;
 use App\Models\User;
 use App\Services\Classrooms\ClassroomService;
@@ -42,7 +45,7 @@ class ClassroomController extends Controller
         $search = trim((string) $request->query('search', ''));
 
         $classrooms = Classroom::query()
-            ->with(['unit', 'academicYear', 'homeroomTeacher'])
+            ->with(['unit', 'academicYear', 'homeroomTeacher', 'major'])
             ->when(
                 $unitId === null || $yearId === null,
                 fn (Builder $query) => $query->whereKey([]),
@@ -82,6 +85,11 @@ class ClassroomController extends Controller
                 'label' => $year->label(),
                 'is_active' => $year->is_active,
             ])->values(),
+            // Pilihan master (Tingkat Kelas, Rombel, Jurusan) untuk unit terpilih; teks lama tetap diterima.
+            'gradeOptions' => $unitId === null ? [] : GradeLevel::query()->where('unit_id', $unitId)->orderBy('sort_order')->orderBy('name')->pluck('name')->values()->all(),
+            'groupOptions' => $unitId === null ? [] : ClassGroup::query()->where('unit_id', $unitId)->orderBy('name')->pluck('name')->values()->all(),
+            'majorOptions' => $unitId === null ? [] : Major::query()->where('unit_id', $unitId)->orderBy('name')->get(['id', 'name'])
+                ->map(fn (Major $m): array => ['id' => $m->id, 'name' => $m->name])->values()->all(),
             'teacherOptions' => ClassroomService::homeroomCandidates()
                 ->orderBy('name')
                 ->orderBy('id')

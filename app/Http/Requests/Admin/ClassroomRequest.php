@@ -49,6 +49,8 @@ class ClassroomRequest extends FormRequest
                     ->where('academic_year_id', $yearId)
                     ->ignore($editing ? $classroom->id : null),
             ],
+            'major_id' => ['nullable', 'integer', Rule::exists('majors', 'id')->where('unit_id', $unitId)],
+            'capacity' => ['nullable', 'integer', 'min:1', 'max:200'],
             'homeroom_teacher_id' => [
                 'nullable', 'integer',
                 function (string $attribute, mixed $value, Closure $fail): void {
@@ -78,6 +80,8 @@ class ClassroomRequest extends FormRequest
             'grade' => 'tingkat',
             'name' => 'nama rombel',
             'homeroom_teacher_id' => 'wali kelas',
+            'major_id' => 'jurusan',
+            'capacity' => 'kuota siswa',
         ];
     }
 
@@ -92,7 +96,7 @@ class ClassroomRequest extends FormRequest
     }
 
     /**
-     * @return array{unit_id: int, academic_year_id: int, grade: string, name: string, homeroom_teacher_id: int|null}
+     * @return array{unit_id: int, academic_year_id: int, grade: string, name: string, homeroom_teacher_id: int|null, major_id: int|null, capacity: int|null}
      */
     public function classroomData(): array
     {
@@ -104,6 +108,8 @@ class ClassroomRequest extends FormRequest
             'grade' => (string) $this->validated('grade'),
             'name' => (string) $this->validated('name'),
             'homeroom_teacher_id' => $teacherId === null ? null : (int) $teacherId,
+            'major_id' => $this->validated('major_id') === null ? null : (int) $this->validated('major_id'),
+            'capacity' => $this->validated('capacity') === null ? null : (int) $this->validated('capacity'),
         ];
     }
 }

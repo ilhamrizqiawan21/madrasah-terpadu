@@ -1,5 +1,5 @@
 import { Head, Link, router, useForm } from '@inertiajs/react';
-import { CopyPlus, Plus, Power, PowerOff } from 'lucide-react';
+import { CopyPlus, Plus, Power, PowerOff, Printer } from 'lucide-react';
 import type { FormEvent, ReactNode } from 'react';
 import { useEffect, useRef, useState } from 'react';
 import AcademicYearController from '@/actions/App/Http/Controllers/Admin/AcademicYearController';
@@ -39,6 +39,9 @@ type Classroom = {
     unit: { id: number; code: string };
     academic_year: { id: number; label: string };
     homeroom_teacher: { id: number; name: string } | null;
+    major_id: number | null;
+    major_name: string | null;
+    capacity: number | null;
 };
 
 type UnitOption = { id: number; code: string; name: string };
@@ -58,6 +61,9 @@ type Props = {
     unitOptions: UnitOption[];
     academicYearOptions: YearOption[];
     teacherOptions: TeacherOption[];
+    gradeOptions: string[];
+    groupOptions: string[];
+    majorOptions: { id: number; name: string }[];
 };
 
 type ClassroomForm = {
@@ -66,6 +72,8 @@ type ClassroomForm = {
     grade: string;
     name: string;
     homeroom_teacher_id: number | null;
+    major_id: number | null;
+    capacity: string;
 };
 
 type CopyForm = {
@@ -83,6 +91,9 @@ export default function ClassroomsIndex({
     unitOptions,
     academicYearOptions,
     teacherOptions,
+    gradeOptions,
+    groupOptions,
+    majorOptions,
 }: Props) {
     const [search, setSearch] = useState(filters.search);
     const [loading, setLoading] = useState(false);
@@ -110,6 +121,8 @@ export default function ClassroomsIndex({
         grade: '',
         name: '',
         homeroom_teacher_id: null,
+        major_id: null,
+        capacity: '',
     });
     const copyForm = useForm<CopyForm>({
         unit_id: null,
@@ -172,6 +185,8 @@ export default function ClassroomsIndex({
             grade: '',
             name: '',
             homeroom_teacher_id: null,
+            major_id: null,
+            capacity: '',
         });
         setFormOpen(true);
     };
@@ -185,6 +200,9 @@ export default function ClassroomsIndex({
             grade: classroom.grade,
             name: classroom.name,
             homeroom_teacher_id: classroom.homeroom_teacher?.id ?? null,
+            major_id: classroom.major_id,
+            capacity:
+                classroom.capacity === null ? '' : String(classroom.capacity),
         });
         setFormOpen(true);
     };
@@ -330,18 +348,36 @@ export default function ClassroomsIndex({
 
     const columns: DataTableColumn<Classroom>[] = [
         {
-            key: 'name',
-            label: 'Rombel',
+            key: 'grade',
+            label: 'Tingkat kelas',
             render: (classroom) => (
-                <div className="min-w-28">
+                <span className="font-medium">{classroom.grade}</span>
+            ),
+        },
+        {
+            key: 'name',
+            label: 'Nama rombel',
+            render: (classroom) => (
+                <div className="min-w-24">
                     <div className="font-medium text-foreground">
                         {classroom.name}
                     </div>
-                    <div className="text-xs text-muted-foreground">
-                        Tingkat {classroom.grade}
-                    </div>
+                    {classroom.major_name && (
+                        <div className="text-xs text-muted-foreground @3xl:hidden">
+                            {classroom.major_name}
+                        </div>
+                    )}
                 </div>
             ),
+        },
+        {
+            key: 'major',
+            label: 'Jurusan',
+            className: 'hidden @3xl:table-cell',
+            render: (classroom) =>
+                classroom.major_name ?? (
+                    <span className="text-muted-foreground">—</span>
+                ),
         },
         {
             key: 'homeroom_teacher',
@@ -358,10 +394,25 @@ export default function ClassroomsIndex({
             label: 'Siswa',
             align: 'right',
             className: 'tabular-nums',
-            render: (classroom) =>
-                studentCounts[classroom.id] ?? (
-                    <span className="text-muted-foreground">0</span>
-                ),
+            render: (classroom) => {
+                const count = studentCounts[classroom.id] ?? 0;
+
+                return (
+                    <span
+                        className={
+                            classroom.capacity !== null &&
+                            count > classroom.capacity
+                                ? 'text-destructive'
+                                : undefined
+                        }
+                    >
+                        {count}
+                        {classroom.capacity !== null
+                            ? ` / ${classroom.capacity}`
+                            : ''}
+                    </span>
+                );
+            },
         },
         {
             key: 'status',
@@ -423,17 +474,31 @@ export default function ClassroomsIndex({
         <StaffLayout
             breadcrumbs={[
                 { title: 'Akademik', href: ClassroomController.index() },
-                { title: 'Rombel', href: ClassroomController.index() },
+                {
+                    title: 'Kelas & Wali Kelas',
+                    href: ClassroomController.index(),
+                },
             ]}
         >
-            <Head title="Rombel" />
+            <Head title="Kelas & Wali Kelas" />
 
-            <div className="space-y-4">
+            <div className="@container space-y-4">
                 <PageHeader
-                    title="Rombel"
-                    description="Rombel per unit dan tahun ajaran beserta wali kelasnya."
+                    title="Kelas & Wali Kelas"
+                    description="Rombel per unit dan tahun ajaran: tingkat, jurusan, kuota, dan wali kelasnya."
                     actions={
                         <div className="flex flex-wrap gap-2">
+                            <Button
+                                type="button"
+                                variant="soft"
+                                onClick={() => window.print()}
+                            >
+                                <Printer
+                                    className="size-4"
+                                    strokeWidth={1.75}
+                                />
+                                Cetak daftar rombel
+                            </Button>
                             {copyButton}
                             {addButton}
                         </div>
@@ -559,6 +624,7 @@ export default function ClassroomsIndex({
                                 form.setData('grade', event.target.value)
                             }
                             placeholder="1"
+                            list="classroom-grade-options"
                             maxLength={10}
                             autoComplete="off"
                             required
@@ -575,12 +641,78 @@ export default function ClassroomsIndex({
                                 form.setData('name', event.target.value)
                             }
                             placeholder="1-A"
+                            list="classroom-group-options"
                             maxLength={30}
                             autoComplete="off"
                             required
                             aria-invalid={Boolean(form.errors.name)}
                         />
                         <InputError message={form.errors.name} />
+                    </div>
+                </div>
+                <datalist id="classroom-grade-options">
+                    {gradeOptions.map((option) => (
+                        <option key={option} value={option} />
+                    ))}
+                </datalist>
+                <datalist id="classroom-group-options">
+                    {groupOptions.map((option) => (
+                        <option key={option} value={option} />
+                    ))}
+                </datalist>
+                <div className="grid gap-4 sm:grid-cols-2">
+                    <div className="grid gap-2">
+                        <Label htmlFor="classroom-major">
+                            Jurusan (opsional)
+                        </Label>
+                        <Select
+                            value={
+                                form.data.major_id === null
+                                    ? 'none'
+                                    : String(form.data.major_id)
+                            }
+                            onValueChange={(value) =>
+                                form.setData(
+                                    'major_id',
+                                    value === 'none' ? null : Number(value),
+                                )
+                            }
+                        >
+                            <SelectTrigger id="classroom-major">
+                                <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="none">
+                                    Tanpa jurusan
+                                </SelectItem>
+                                {majorOptions.map((major) => (
+                                    <SelectItem
+                                        key={major.id}
+                                        value={String(major.id)}
+                                    >
+                                        {major.name}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                        <InputError message={form.errors.major_id} />
+                    </div>
+                    <div className="grid gap-2">
+                        <Label htmlFor="classroom-capacity">
+                            Kuota siswa (opsional)
+                        </Label>
+                        <Input
+                            id="classroom-capacity"
+                            type="number"
+                            inputMode="numeric"
+                            min={1}
+                            max={200}
+                            value={form.data.capacity}
+                            onChange={(event) =>
+                                form.setData('capacity', event.target.value)
+                            }
+                        />
+                        <InputError message={form.errors.capacity} />
                     </div>
                 </div>
                 <div className="grid gap-2">

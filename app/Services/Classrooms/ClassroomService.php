@@ -32,7 +32,7 @@ final class ClassroomService
     }
 
     /**
-     * @param  array{unit_id: int, academic_year_id: int, grade: string, name: string, homeroom_teacher_id: int|null}  $data
+     * @param  array{unit_id: int, academic_year_id: int, grade: string, name: string, homeroom_teacher_id: int|null, major_id?: int|null, capacity?: int|null}  $data
      */
     public function create(array $data, User $actor): Classroom
     {
@@ -53,7 +53,7 @@ final class ClassroomService
     /**
      * Unit dan tahun ajaran rombel tetap; yang berubah hanya tingkat, nama, dan wali kelas.
      *
-     * @param  array{grade: string, name: string, homeroom_teacher_id: int|null}  $data
+     * @param  array{grade: string, name: string, homeroom_teacher_id: int|null, major_id?: int|null, capacity?: int|null}  $data
      */
     public function update(Classroom $classroom, array $data, User $actor): Classroom
     {
@@ -64,6 +64,8 @@ final class ClassroomService
                 'grade' => $data['grade'],
                 'name' => $data['name'],
                 'homeroom_teacher_id' => $data['homeroom_teacher_id'],
+                'major_id' => $data['major_id'] ?? null,
+                'capacity' => $data['capacity'] ?? null,
             ])->save();
 
             $this->auditLogger->record(

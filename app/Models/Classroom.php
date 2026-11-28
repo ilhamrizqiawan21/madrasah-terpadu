@@ -22,6 +22,8 @@ use Illuminate\Support\Carbon;
  * @property string $grade
  * @property string $name
  * @property int|null $homeroom_teacher_id
+ * @property int|null $major_id
+ * @property int|null $capacity
  * @property bool $is_active
  * @property Carbon $created_at
  * @property Carbon $updated_at
@@ -29,7 +31,7 @@ use Illuminate\Support\Carbon;
  * @property-read AcademicYear $academicYear
  * @property-read User|null $homeroomTeacher
  */
-#[Fillable(['unit_id', 'academic_year_id', 'grade', 'name', 'homeroom_teacher_id', 'is_active'])]
+#[Fillable(['unit_id', 'academic_year_id', 'grade', 'name', 'major_id', 'capacity', 'homeroom_teacher_id', 'is_active'])]
 class Classroom extends Model
 {
     /** @use HasFactory<ClassroomFactory> */
@@ -75,5 +77,13 @@ class Classroom extends Model
     public function teachingAssignments(): HasMany
     {
         return $this->hasMany(TeachingAssignment::class);
+    }
+
+    /**
+     * @return BelongsTo<Major, $this>
+     */
+    public function major(): BelongsTo
+    {
+        return $this->belongsTo(Major::class);
     }
 }
