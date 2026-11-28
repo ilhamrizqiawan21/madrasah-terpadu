@@ -14,6 +14,7 @@ use App\Models\User;
 use App\Models\Wallet;
 use App\Models\WalletEntry;
 use App\Services\Audit\AuditLogger;
+use App\Support\AppTimezone;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Facades\DB;
@@ -180,8 +181,8 @@ final class WalletService
     public function spentTodayWita(Wallet $wallet): int
     {
         $nowWita = CarbonImmutable::now(self::BUSINESS_TIMEZONE);
-        $startUtc = $nowWita->startOfDay()->utc();
-        $endUtc = $nowWita->endOfDay()->utc();
+        $startUtc = $nowWita->startOfDay()->setTimezone(AppTimezone::name());
+        $endUtc = $nowWita->endOfDay()->setTimezone(AppTimezone::name());
 
         $purchases = (int) WalletEntry::query()
             ->where('wallet_id', $wallet->id)

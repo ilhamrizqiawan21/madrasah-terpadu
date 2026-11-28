@@ -18,6 +18,7 @@ use App\Models\ExamAnswer;
 use App\Models\ExamQuestion;
 use App\Models\ExamSession;
 use App\Models\Student;
+use App\Support\AppTimezone;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
 
@@ -153,7 +154,7 @@ final class ExamSessionService
                     [
                         'answer' => $item['answer'],
                         'is_flagged' => $item['is_flagged'],
-                        'client_ts' => CarbonImmutable::parse($item['client_ts'])->utc(),
+                        'client_ts' => CarbonImmutable::parse($item['client_ts'])->setTimezone(AppTimezone::name()),
                         'received_at' => $now,
                     ],
                 );

@@ -10,6 +10,7 @@ use App\Models\CanteenTransaction;
 use App\Models\Unit;
 use App\Models\Wallet;
 use App\Models\WalletEntry;
+use App\Support\AppTimezone;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
@@ -45,8 +46,8 @@ final class CanteenReportService
      */
     public function build(?Unit $unit, string $fromDate, string $toDate): array
     {
-        $fromUtc = CarbonImmutable::parse($fromDate, self::BUSINESS_TIMEZONE)->startOfDay()->utc();
-        $toUtc = CarbonImmutable::parse($toDate, self::BUSINESS_TIMEZONE)->endOfDay()->utc();
+        $fromUtc = CarbonImmutable::parse($fromDate, self::BUSINESS_TIMEZONE)->startOfDay()->setTimezone(AppTimezone::name());
+        $toUtc = CarbonImmutable::parse($toDate, self::BUSINESS_TIMEZONE)->endOfDay()->setTimezone(AppTimezone::name());
 
         $salesByCashier = CanteenTransaction::query()
             ->join('users', 'users.id', '=', 'canteen_transactions.cashier_id')

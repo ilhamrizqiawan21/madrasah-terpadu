@@ -36,6 +36,7 @@ use App\Models\Unit;
 use App\Models\User;
 use App\Services\Attendance\SchoolCalendarService;
 use App\Services\Features\FeatureFlags;
+use App\Support\AppTimezone;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
@@ -220,8 +221,8 @@ final class StaffDashboardService
     public function exams(User $user): array
     {
         $tz = AttendanceClassifier::BUSINESS_TIMEZONE;
-        $startOfDay = CarbonImmutable::now($tz)->startOfDay()->utc();
-        $endOfDay = CarbonImmutable::now($tz)->endOfDay()->utc();
+        $startOfDay = CarbonImmutable::now($tz)->startOfDay()->setTimezone(AppTimezone::name());
+        $endOfDay = CarbonImmutable::now($tz)->endOfDay()->setTimezone(AppTimezone::name());
 
         /** @var Collection<int, Exam> $todayExams */
         $todayExams = Exam::query()
@@ -662,7 +663,7 @@ final class StaffDashboardService
         $summarize = function (CarbonImmutable $fromWita, CarbonImmutable $toWita) use ($unit): array {
             $rows = Payment::query()
                 ->whereNull('payments.reversed_at')
-                ->whereBetween('payments.paid_at', [$fromWita->utc(), $toWita->utc()])
+                ->whereBetween('payments.paid_at', [$fromWita->setTimezone(AppTimezone::name()), $toWita->setTimezone(AppTimezone::name())])
                 ->when($unit !== null, fn (Builder $q) => $q->whereHas('student', fn (Builder $s) => $s->where('unit_id', $unit->id)))
                 ->selectRaw('payments.method as method, count(*) as tx_count, coalesce(sum(payments.amount), 0) as total_amount')
                 ->groupBy('payments.method')
@@ -908,11 +909,11 @@ final class StaffDashboardService
             ->join('wallets', 'wallets.id', '=', 'wallet_entries.wallet_id')
             ->join('students', 'students.id', '=', 'wallets.student_id')
             ->where('wallet_entries.type', 'topup')
-            ->whereBetween('wallet_entries.created_at', [$nowWita->startOfMonth()->utc(), $nowWita->endOfMonth()->utc()])
+            ->whereBetween('wallet_entries.created_at', [$nowWita->startOfMonth()->setTimezone(AppTimezone::name()), $nowWita->endOfMonth()->setTimezone(AppTimezone::name())])
             ->when($unit !== null, fn ($q) => $q->where('students.unit_id', $unit->id))
             ->selectRaw('coalesce(sum(CASE WHEN wallet_entries.created_at >= ? AND wallet_entries.created_at <= ? THEN wallet_entries.amount ELSE 0 END), 0) as topup_today', [
-                $nowWita->startOfDay()->utc()->toDateTimeString(),
-                $nowWita->endOfDay()->utc()->toDateTimeString(),
+                $nowWita->startOfDay()->setTimezone(AppTimezone::name())->toDateTimeString(),
+                $nowWita->endOfDay()->setTimezone(AppTimezone::name())->toDateTimeString(),
             ])
             ->selectRaw('coalesce(sum(wallet_entries.amount), 0) as topup_month')
             ->first();
@@ -942,7 +943,7 @@ final class StaffDashboardService
             $cashByUnit = Payment::query()
                 ->join('students', 'students.id', '=', 'payments.student_id')
                 ->whereNull('payments.reversed_at')
-                ->whereBetween('payments.paid_at', [$nowWita->startOfMonth()->utc(), $nowWita->endOfMonth()->utc()])
+                ->whereBetween('payments.paid_at', [$nowWita->startOfMonth()->setTimezone(AppTimezone::name()), $nowWita->endOfMonth()->setTimezone(AppTimezone::name())])
                 ->selectRaw('students.unit_id as unit_id, coalesce(sum(payments.amount), 0) as total_amount')
                 ->groupBy('students.unit_id')
                 ->pluck('total_amount', 'unit_id');

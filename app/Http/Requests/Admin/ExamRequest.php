@@ -11,6 +11,7 @@ use App\Models\Exam;
 use App\Models\Subject;
 use App\Models\User;
 use App\Services\Cbt\ExamService;
+use App\Support\AppTimezone;
 use Carbon\CarbonImmutable;
 use Closure;
 use Illuminate\Foundation\Http\FormRequest;
@@ -127,8 +128,8 @@ class ExamRequest extends FormRequest
             'title' => trim((string) $validated['title']),
             'grade' => isset($validated['grade']) && $validated['grade'] !== '' ? trim((string) $validated['grade']) : null,
             'classroom_ids' => array_values(array_unique(array_map('intval', (array) $validated['classroom_ids']))),
-            'opens_at' => CarbonImmutable::parse((string) $validated['opens_at'], $tz)->utc(),
-            'closes_at' => CarbonImmutable::parse((string) $validated['closes_at'], $tz)->utc(),
+            'opens_at' => CarbonImmutable::parse((string) $validated['opens_at'], $tz)->setTimezone(AppTimezone::name()),
+            'closes_at' => CarbonImmutable::parse((string) $validated['closes_at'], $tz)->setTimezone(AppTimezone::name()),
             'duration_minutes' => (int) $validated['duration_minutes'],
             'shuffle_questions' => (bool) $validated['shuffle_questions'],
             'shuffle_options' => (bool) $validated['shuffle_options'],

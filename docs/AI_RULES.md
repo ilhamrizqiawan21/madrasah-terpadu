@@ -106,7 +106,7 @@ Langkah per tugas:
 - Paginasi semua daftar; indeks sesuai SCHEMA.md; `orderBy` eksplisit.
 - Eager load (`with`), `withCount`, `withSum` alih-alih loop.
 - Operasi massal (penerbitan tagihan, impor) dalam chunk + satu transaksi per chunk, dengan ringkasan hasil.
-- Semua waktu disimpan UTC, tanggal bisnis dihitung dalam WITA.
+- Kolom waktu disimpan dalam zona aplikasi (`APP_TIMEZONE=Asia/Makassar`, WITA). Laravel tidak mengonversi zona saat menulis atau membandingkan, jadi **jangan** memakai `->utc()` untuk nilai/batas kueri basis data; pakai `App\Support\AppTimezone::name()` bila perlu mengonversi (koreksi 2026-11-28, tes `TimezoneRegressionTest`).
 
 ## 7. UI/UX
 

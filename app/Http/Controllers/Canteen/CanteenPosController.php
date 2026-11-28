@@ -16,6 +16,7 @@ use App\Models\CanteenTransaction;
 use App\Models\Student;
 use App\Models\User;
 use App\Services\Wallet\CanteenPosService;
+use App\Support\AppTimezone;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -40,7 +41,7 @@ class CanteenPosController extends Controller
 
         $recentTransactions = CanteenTransaction::query()
             ->with('student:id,nis,name')
-            ->whereBetween('created_at', [$today->startOfDay()->utc(), $today->endOfDay()->utc()])
+            ->whereBetween('created_at', [$today->startOfDay()->setTimezone(AppTimezone::name()), $today->endOfDay()->setTimezone(AppTimezone::name())])
             ->orderByDesc('created_at')
             ->orderByDesc('id')
             ->limit(15)

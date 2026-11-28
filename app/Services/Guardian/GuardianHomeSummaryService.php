@@ -30,6 +30,7 @@ use App\Models\SchoolHoliday;
 use App\Models\Student;
 use App\Services\Attendance\SchoolCalendarService;
 use App\Services\Features\FeatureFlags;
+use App\Support\AppTimezone;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Cache;
@@ -238,7 +239,7 @@ final class GuardianHomeSummaryService
             ->where('student_id', $student->id)
             ->where(fn (Builder $q) => $q
                 ->where('status', LeaveRequestStatus::Pending->value)
-                ->orWhere('decided_at', '>=', $now->subDays(self::LEAVE_RECENT_DAYS)->utc()))
+                ->orWhere('decided_at', '>=', $now->subDays(self::LEAVE_RECENT_DAYS)->setTimezone(AppTimezone::name())))
             ->orderByRaw('case when status = ? then 0 else 1 end', [LeaveRequestStatus::Pending->value])
             ->orderByDesc('created_at')
             ->orderByDesc('id')
@@ -315,8 +316,8 @@ final class GuardianHomeSummaryService
             $upcoming = array_values(Exam::query()
                 ->with('subject:id,name')
                 ->whereIn('status', [ExamStatus::Scheduled->value, ExamStatus::Running->value])
-                ->where('closes_at', '>=', $now->utc())
-                ->where('opens_at', '<=', $now->addDays(self::EXAM_LOOKAHEAD_DAYS)->utc())
+                ->where('closes_at', '>=', $now->setTimezone(AppTimezone::name()))
+                ->where('opens_at', '<=', $now->addDays(self::EXAM_LOOKAHEAD_DAYS)->setTimezone(AppTimezone::name()))
                 ->orderBy('opens_at')
                 ->orderBy('id')
                 ->limit(30)
