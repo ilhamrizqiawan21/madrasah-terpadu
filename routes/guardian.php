@@ -20,6 +20,7 @@ use App\Http\Controllers\Guardian\MemorizationController;
 use App\Http\Controllers\Guardian\NotificationInboxController;
 use App\Http\Controllers\Guardian\NotificationPreferenceController;
 use App\Http\Controllers\Guardian\TransferProofController;
+use App\Http\Controllers\Guardian\WalletController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -85,6 +86,12 @@ Route::prefix('anak/{student}')
         Route::middleware('feature:'.Feature::Habits->value)->group(function (): void {
             Route::get('pembiasaan', [HabitController::class, 'index'])->name('students.habits.index');
             Route::post('pembiasaan/centang', [HabitController::class, 'toggle'])->name('students.habits.toggle');
+        });
+
+        Route::middleware('feature:'.Feature::Wallet->value)->group(function (): void {
+            Route::get('dompet', [WalletController::class, 'index'])->name('students.wallet.index');
+            Route::patch('dompet/limit', [WalletController::class, 'updateLimit'])->name('students.wallet.limit');
+            Route::patch('dompet/beku', [WalletController::class, 'toggleFreeze'])->name('students.wallet.freeze');
         });
 
         Route::middleware('feature:'.Feature::Attitude->value)->group(function (): void {

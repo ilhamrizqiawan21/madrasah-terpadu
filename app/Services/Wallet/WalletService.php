@@ -196,6 +196,53 @@ final class WalletService
         return max(0, abs($purchases) - $reversals);
     }
 
+    public function updateDailyLimit(Student $student, int $dailyLimit, User $actor): Wallet
+    {
+        $maxLimit = (int) config('sekolah.wallet.max_daily_limit', 100_000);
+        if ($dailyLimit < 0 || $dailyLimit > $maxLimit) {
+            throw ValidationException::withMessages([
+                'daily_limit' => 'Limit harian harus antara Rp 0 dan Rp '.number_format($maxLimit, 0, ',', '.').'.',
+            ]);
+        }
+
+        $wallet = $this->ensureWallet($student);
+
+        return DB::transaction(function () use ($wallet, $dailyLimit, $actor): Wallet {
+            /** @var Wallet $locked */
+            $locked = Wallet::query()->whereKey($wallet->id)->lockForUpdate()->firstOrFail();
+            $before = ['daily_limit' => $locked->daily_limit];
+
+            $locked->forceFill(['daily_limit' => $dailyLimit])->save();
+
+            $this->audit->record('wallet.limit_updated', $locked, $before, [
+                'daily_limit' => $dailyLimit,
+                'updated_by' => $actor->id,
+            ]);
+
+            return $locked;
+        });
+    }
+
+    public function setFrozen(Student $student, bool $frozen, User $actor): Wallet
+    {
+        $wallet = $this->ensureWallet($student);
+
+        return DB::transaction(function () use ($wallet, $frozen, $actor): Wallet {
+            /** @var Wallet $locked */
+            $locked = Wallet::query()->whereKey($wallet->id)->lockForUpdate()->firstOrFail();
+            $before = ['is_frozen' => $locked->is_frozen];
+
+            $locked->forceFill(['is_frozen' => $frozen])->save();
+
+            $this->audit->record($frozen ? 'wallet.frozen' : 'wallet.unfrozen', $locked, $before, [
+                'is_frozen' => $frozen,
+                'updated_by' => $actor->id,
+            ]);
+
+            return $locked;
+        });
+    }
+
     private function recordEntry(
         Student $student,
         WalletEntryType $type,
