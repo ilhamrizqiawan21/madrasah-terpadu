@@ -10,6 +10,9 @@ use App\Enums\MeetingAudience;
 use App\Enums\MutationType;
 use App\Enums\StaffAssignmentType;
 use App\Enums\StudentStatus;
+use App\Models\AcademicYear;
+use App\Models\Classroom;
+use App\Models\Enrollment;
 use App\Models\Guardian;
 use App\Models\Meeting;
 use App\Models\StaffProfile;
@@ -150,6 +153,19 @@ class LegacyMenusDemoSeeder extends Seeder
         $date = CarbonImmutable::now('Asia/Makassar')->subDays(3)->toDateString();
         $unit = $units->first();
 
+        $yearId = AcademicYear::query()->where('is_active', true)->value('id');
+        $classroomId = $yearId === null ? null : Classroom::query()
+            ->where('unit_id', $unit->id)->where('academic_year_id', $yearId)->orderBy('id')->value('id');
+        // Siswa uji selalu punya rombel tahun aktif, sama seperti siswa demo lainnya.
+        $enroll = function (Student $student) use ($yearId, $classroomId): void {
+            if ($yearId !== null && $classroomId !== null) {
+                Enrollment::query()->firstOrCreate(
+                    ['student_id' => $student->id, 'academic_year_id' => $yearId],
+                    ['classroom_id' => $classroomId],
+                );
+            }
+        };
+
         $cases = [
             ['9901', 'Siswa Pindah Uji', fn (Student $s) => $service->mutateOut($s, $date, 'MI Negeri 1 Kolaka', 'Ikut orang tua pindah tugas', $admin)],
             ['9902', 'Siswa DO Uji', fn (Student $s) => $service->mutateOut($s, $date, null, 'Drop out: tidak hadir lebih dari 3 bulan', $admin, dropout: true)],
@@ -164,6 +180,8 @@ class LegacyMenusDemoSeeder extends Seeder
                 'status' => StudentStatus::Active,
             ]);
 
+            $enroll($student);
+
             if (! StudentMutation::query()->where('student_id', $student->id)->exists() && $student->status === StudentStatus::Active) {
                 $mutate($student);
             }
@@ -176,6 +194,7 @@ class LegacyMenusDemoSeeder extends Seeder
             'gender' => Gender::Female,
             'status' => StudentStatus::Active,
         ]);
+        $enroll($incoming);
         StudentMutation::query()->firstOrCreate(['student_id' => $incoming->id, 'type' => MutationType::In], [
             'mutated_on' => $date,
             'school_name' => 'SD Negeri 2 Kolaka',
