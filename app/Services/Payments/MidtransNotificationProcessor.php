@@ -250,13 +250,13 @@ final class MidtransNotificationProcessor
     }
 
     /**
-     * Tagihan sudah dilunasi kasir di sela waktu: kelebihan menjadi saldo kantin (ADR-009, default U-05).
+     * Tagihan sudah dilunasi kasir di sela waktu: bawaannya hanya ditandai tinjau (U-05); saldo kantin bila flag dinyalakan (ADR-009).
      */
     private function handleOverpayment(PaymentOrder $order, int $overpaid): void
     {
         $credited = false;
 
-        if ((bool) config('sekolah.payments.overpayment_to_wallet', true)) {
+        if ((bool) config('sekolah.payments.overpayment_to_wallet', false)) {
             try {
                 $this->wallets->adjust(
                     student: $order->student,

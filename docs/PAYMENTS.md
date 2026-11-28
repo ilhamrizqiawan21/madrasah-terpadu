@@ -107,7 +107,7 @@ Aplikasi lama sekolah sudah memakai akun Midtrans yang sama. Dasbor Midtrans han
 
 5. Transisi ke `paid` hanya dari `pending`/`expired` (pembayaran yang tiba setelah order kedaluwarsa tetap sah). Order sudah `paid` → `process_result=duplicate`, selesai.
 6. Saat `paid`:
-    - `invoices`: buat `payments` (`method=midtrans`, `payment_order_id`, nomor kuitansi) + `payment_allocations` per item; perbarui `invoices.paid_total` dan status. Tagihan yang sudah lunas lewat kasir di sela waktu itu → kelebihan bayar dicatat sebagai **saldo kantin** siswa dengan entri `adjustment` dan bendahara diberi tahu (keputusan ADR-009).
+    - `invoices`: buat `payments` (`method=midtrans`, `payment_order_id`, nomor kuitansi) + `payment_allocations` per item; perbarui `invoices.paid_total` dan status. Tagihan yang sudah lunas lewat kasir di sela waktu itu → order ditandai kelebihan bayar, bendahara diberi tahu dan mengembalikan manual (U-05, 2026-11-28). Bila `PAYMENTS_OVERPAYMENT_TO_WALLET=true`, kelebihan dicatat sebagai **saldo kantin** siswa dengan entri `adjustment` (ADR-009).
     - `wallet_topup`: `WalletService::topUp()` dengan `idempotency_key = midtrans:<order_id>`.
     - `AuditLogger`, lalu notifikasi `InvoicePaid` / `WalletToppedUp` ke semua wali (afterCommit).
 7. Simpan `last_status_payload`, `payment_type`, `midtrans_transaction_id`, `paid_at`; tandai `payment_notifications.processed_at`.
@@ -128,7 +128,7 @@ Aplikasi lama sekolah sudah memakai akun Midtrans yang sama. Dasbor Midtrans han
 7. `expire` → order `expired`, tagihan dapat dibayar lagi.
 8. `settlement` datang setelah `expire` → lunas.
 9. Order tidak dikenal → dicatat, 200, tidak ada perubahan.
-10. Tagihan sudah dilunasi kasir sebelum webhook → kelebihan masuk saldo kantin + notifikasi bendahara.
+10. Tagihan sudah dilunasi kasir sebelum webhook → order ditandai kelebihan bayar + notifikasi bendahara (saldo kantin hanya bila flag dinyalakan).
 11. Top-up `settlement` → saldo bertambah sekali.
 12. Browser mengirim `gross_amount` palsu ke endpoint pembuatan order → diabaikan (nominal dari DB).
 13. Wali mencoba membayar tagihan anak lain → 404.
@@ -149,5 +149,6 @@ Pakai simulator pembayaran sandbox Midtrans untuk QRIS/GoPay/VA. Untuk webhook d
 - Kode: `MidtransClient` (HTTP, retry 5xx 2x, timeout 10 dtk), `PaymentOrderService` (§3), `MidtransWebhookController` + job `ProcessMidtransNotification` (antrean `payments`) + `MidtransNotificationProcessor` (§4), `MidtransStatusMapper` (Domain), `ExpirePaymentOrders` + `PaymentReconciliationService`/`payments:reconcile` (§5), `payments:check-config` (§2).
 - Get Status menjawab `status_code` 201/202/407 di body untuk pending/deny/expire; klien memperlakukan body yang memuat `transaction_status` sebagai status sah. Body tanpa `transaction_status` dengan `status_code` 404 = order belum punya transaksi (wali tidak memilih metode) → `ExpirePaymentOrders` menandai `expired` setelah lewat batas.
 - "Tandai `needs_review`" (§4 tabel) disimpan sebagai `payment_orders.review_reason` (`amount_mismatch|needs_review|overpaid|challenge`) tanpa mengubah status order; bendahara menutupnya lewat "Tandai sudah ditinjau" di Keuangan > Pembayaran online.
-- Kelebihan bayar (§4 langkah 6, ADR-009) → entri `adjustment` dompet berkunci `midtrans-overpaid:<order_id>`; dimatikan dengan `PAYMENTS_OVERPAYMENT_TO_WALLET=false`.
+- Kelebihan bayar (§4 langkah 6, ADR-009): **bawaan dimatikan (U-05, 2026-11-28)** — order ditandai `review_reason=overpaid`, bendahara diberi tahu dan mengembalikan manual. `PAYMENTS_OVERPAYMENT_TO_WALLET=true` mengaktifkan entri `adjustment` dompet berkunci `midtrans-overpaid:<order_id>`.
+- Tagihan `partial` tetap tidak bisa dibayar online (U-14 diputuskan: ikuti §3).
 - `payment_notifications` append-only; satu-satunya perubahan adalah pengisian `processed_at` + `process_result` sekali oleh pemroses.

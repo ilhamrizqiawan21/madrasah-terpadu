@@ -242,7 +242,8 @@ test('order tidak dikenal dicatat dan dijawab 200 tanpa perubahan (§6 no. 9)', 
     Http::assertNothingSent();
 });
 
-test('tagihan yang sudah dilunasi kasir: kelebihan masuk saldo kantin dan bendahara diberi tahu (§6 no. 10)', function (): void {
+test('tagihan yang sudah dilunasi kasir: kelebihan masuk saldo kantin bila flag dinyalakan dan bendahara diberi tahu (§6 no. 10)', function (): void {
+    config(['sekolah.payments.overpayment_to_wallet' => true]);
     app(ManualPaymentService::class)->receive(
         $this->treasurer,
         $this->child,
@@ -267,8 +268,7 @@ test('tagihan yang sudah dilunasi kasir: kelebihan masuk saldo kantin dan bendah
     Notification::assertSentTo($this->treasurer, PaymentReviewRequiredNotification::class);
 });
 
-test('kelebihan bayar tidak masuk saldo bila flag dimatikan, hanya ditandai tinjau', function (): void {
-    config(['sekolah.payments.overpayment_to_wallet' => false]);
+test('bawaan (U-05): kelebihan bayar tidak masuk saldo, hanya ditandai tinjau', function (): void {
     $this->invoice->forceFill(['status' => InvoiceStatus::Cancelled])->save();
     fakeMidtransStatus('settlement');
 

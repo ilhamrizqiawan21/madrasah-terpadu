@@ -44,6 +44,8 @@ Token 32 byte acak (bukan NIS) yang disimpan sebagai hash, dapat dicabut. Scanne
 
 Bila tagihan sudah lunas lewat kasir sebelum webhook Midtrans tiba, kelebihan bayar dicatat sebagai saldo kantin siswa dan bendahara diberi tahu. Alternatif: dikembalikan manual oleh bendahara. Default sampai diputuskan: saldo kantin.
 
+**Pembaruan 2026-11-28 (keputusan pemilik atas U-05): dimatikan dulu.** Bawaan `PAYMENTS_OVERPAYMENT_TO_WALLET=false`: kelebihan bayar hanya masuk antrean "Perlu ditinjau" (alasan Kelebihan bayar) dan bendahara diberi tahu; pengembalian diputuskan manual. Menyalakan flag mengaktifkan perilaku saldo kantin di atas tanpa perubahan kode.
+
 ## ADR-010 — Pembayaran online hanya pelunasan penuh per tagihan (Diterima)
 
 Wali boleh memilih beberapa tagihan, tetapi tiap tagihan dibayar penuh. Cicilan hanya lewat kasir. Alasan: alokasi parsial online menambah kasus tepi tanpa manfaat besar bagi klien.
@@ -294,10 +296,10 @@ Akun wali dibuat lewat impor/data induk dengan password awal acak. Tidak ada hal
 - **U-02** Biaya admin Midtrans ditanggung siapa (PRD §4.5). Default: yayasan.
 - **U-03** Keterlambatan otomatis menjadi pelanggaran (PRD §4.7). Default: tidak.
 - **U-04** Streak mutabaah menghasilkan poin (PRD §4.9). **Diputuskan pemilik (2026-11-27): poin streak mutabaah dapat dikustomisasi oleh admin/user** (aktif/nonaktif, jumlah hari berturut-turut, dan bobot poin kebaikan melalui `SettingKey::HabitStreak*`).
-- **U-05** ADR-009 kelebihan bayar.
+- **U-05** ADR-009 kelebihan bayar. **Diputuskan pemilik (2026-11-28): dimatikan dulu** — kelebihan bayar ditinjau & dikembalikan manual oleh bendahara (lihat ADR-009).
 - **U-06** Nama pencatat perilaku terlihat oleh wali. Default: tidak terlihat.
 - **U-13** Celah menu dari pengamatan ulang admin aplikasi lama 2026-11-27 (lihat bagian U-13). Sudah tampil di menu sebagai "Segera" (ADR-028).
-- **U-14** Pelunasan sisa tagihan `partial` lewat Midtrans (lihat bagian U-14).
+- **U-14** Pelunasan sisa tagihan `partial` lewat Midtrans. **Diputuskan pemilik (2026-11-28): ikuti PAYMENTS** — tagihan `partial` dilunasi di kasir (opsi 1).
 - **U-12** Fitur aplikasi lama yang belum ada di rencana (paritas, REUSE_MAP §4). Sebagian diputuskan lewat ADR-021/ADR-022; yang tersisa: format e-rapor resmi, kebutuhan akuntansi lanjutan, cakupan asrama.
 
 ### U-12 — Paritas dengan aplikasi lama (Usulan, 2026-11-27)
@@ -339,7 +341,7 @@ Akun wali dibuat lewat impor/data induk dengan password awal acak. Tidak ada hal
 
 **Pertanyaan untuk klien:** urutan prioritas (a)–(j), dan apakah (g)–(i) benar dipakai di aplikasi lama.
 
-### U-14 — Sisa tagihan yang sudah dicicil dibayar online (Usulan, 2026-11-28, T-702)
+### U-14 — Sisa tagihan yang sudah dicicil dibayar online (Diputuskan 2026-11-28: opsi 1, ikuti PAYMENTS)
 
 **Temuan.** Mockup 16 "Wali — Tagihan & pembayaran online" menampilkan tagihan berstatus _Sebagian_ (Uang Pangkal, "sisa dari Rp1.250.000") yang bisa dicentang dan dibayar lewat Snap. Sementara `PAYMENTS.md` §3 langkah 1 hanya mengizinkan tagihan `unpaid` ("tagihan `partial` dibayar di kasir").
 
