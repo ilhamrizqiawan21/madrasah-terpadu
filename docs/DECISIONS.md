@@ -290,6 +290,26 @@ Akun wali dibuat lewat impor/data induk dengan password awal acak. Tidak ada hal
 
 ---
 
+## ADR-030 — Akuntansi & Kas: satu Buku Kas Umum append-only sebagai pusat (Diterima, 2026-11-28; arahan pemilik)
+
+**Konteks:** ADR-022 dan U-12 (h) menunda akuntansi (COA, pemasukan non-siswa, buku kas, payroll, BOS, ZIS). Pada 2026-11-28 pemilik mengarahkan agar grup **Akuntansi & Kas** diduplikasi dari aplikasi lama dan **hasilnya lebih baik**, karena keuangan adalah titik berat klien. Struktur aplikasi lama (dibaca hanya-baca): Kategori Anggaran (COA), Pemasukan Non-Siswa, Penggajian, ZIS, Buku Kas Umum, BOS Termin, BOS RKAS, BOS BKU (SPJ K7), Pemetaan Alokasi Kas.
+
+**Keputusan:**
+
+1. **Satu buku besar kas** `cash_entries` per unit, **append-only**: tidak ada ubah/hapus; koreksi = entri pembalik (`reverses_entry_id`) dengan alasan. Semua menu lain (pemasukan non-siswa, belanja BOS, gaji, ZIS, pencairan BOS) **menulis ke buku ini lewat satu service** (`CashLedgerService`), jadi BKU selalu lengkap dan saldo tidak bisa berbeda antarmenu.
+2. **Pos akun (COA)** `cash_accounts` per unit: `direction` = `in` (pendapatan) atau `out` (pengeluaran). Pos sistem (Pencairan BOS, Penerimaan ZIS, dll.) dibuat otomatis dan tidak bisa dihapus.
+3. **Kotak kas** per entri: `cash` (tunai bendahara) atau `bank` (rekening unit), agar saldo tunai dan bank terlihat terpisah.
+4. **Sumber dana** pada pengeluaran: setiap pengeluaran menyebut pos pendapatan yang membiayainya. **Alokasi Dana** (pemetaan) membatasi pos pendapatan mana yang boleh membiayai pos pengeluaran tertentu. Saldo per sumber dana ditampilkan; pengeluaran yang melebihi saldo sumbernya **ditolak**.
+5. **BOS**: Termin (pencairan → entri masuk otomatis), RKAS (pagu kegiatan per termin; total pagu ≤ dana termin), BKU BOS/SPJ K7 (belanja per kegiatan → entri keluar otomatis; realisasi ≤ pagu).
+6. **ZIS** adalah dana amanah: saldo per kategori ZIS; penyaluran tidak boleh melebihi saldo kategorinya.
+7. **Penggajian**: komponen gaji per pegawai per bulan (gaji pokok, tunjangan, honor JP, bonus, potongan absensi, kasbon, potongan lain); pembayaran satuan/massal memposting entri keluar; slip dapat dicetak; pembatalan slip = entri pembalik.
+8. Uang integer rupiah; tanggal entri = tanggal bisnis WITA; semua tulis dalam transaksi + `AuditLogger`; izin baru `cash_book.manage` (bendahara, admin) dan `payroll.manage` (bendahara, admin); kunci fitur `cash_book`.
+9. Integrasi pembayaran SPP/isi saldo ke BKU dikerjakan sebagai tahap terpisah setelah inti selesai (pemetaan jenis tagihan → pos pendapatan).
+
+**Urutan kerja:** (1) COA + Alokasi Dana + Buku Kas Umum + Pemasukan Non-Siswa; (2) BOS Termin, RKAS, BKU BOS; (3) ZIS; (4) Penggajian; (5) posting otomatis SPP & isi saldo.
+
+**Akibat:** ADR-022 tidak lagi menunda akuntansi, payroll, BOS, dan ZIS. Kerangka `cash_categories` di SCHEMA (T-1605) digantikan `cash_accounts` + `cash_entries` versi lengkap.
+
 ## Usulan terbuka (menunggu klien, lihat PRD §8)
 
 - **U-01** Rumus nilai sikap (PRD §4.11). **Ditutup oleh ADR-029** (2026-11-27). Sisa untuk klien: cocokkan nama dimensi & label skala kokurikuler dengan panduan KMA 1503, dan kirim contoh format impor RDM.
