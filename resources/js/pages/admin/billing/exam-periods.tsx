@@ -1,8 +1,16 @@
-import { Head, router, useForm } from '@inertiajs/react';
-import { CheckCircle2, Lock, Plus, ShieldCheck, Trash2 } from 'lucide-react';
+import { Head, Link, router, useForm } from '@inertiajs/react';
+import {
+    CheckCircle2,
+    ListChecks,
+    Lock,
+    Plus,
+    ShieldCheck,
+    Trash2,
+} from 'lucide-react';
 import type { FormEvent } from 'react';
 import { useState } from 'react';
 import ExamDispensationController from '@/actions/App/Http/Controllers/Admin/ExamDispensationController';
+import ExamEligibilityController from '@/actions/App/Http/Controllers/Admin/ExamEligibilityController';
 import ExamPeriodController from '@/actions/App/Http/Controllers/Admin/ExamPeriodController';
 import { ConfirmDialog } from '@/components/app/confirm-dialog';
 import type { DataTableColumn } from '@/components/app/data-table';
@@ -339,6 +347,26 @@ export default function ExamPeriodsIndex({
                     onEdit={canManage ? () => openEdit(row) : undefined}
                     itemName={row.name}
                 >
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <Button
+                                type="button"
+                                variant="ghost"
+                                size="icon"
+                                asChild
+                            >
+                                <Link
+                                    href={ExamEligibilityController.index({
+                                        examPeriod: row.id,
+                                    })}
+                                    aria-label={`Daftar kelayakan ${row.name}`}
+                                >
+                                    <ListChecks className="size-4" />
+                                </Link>
+                            </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>Daftar kelayakan siswa</TooltipContent>
+                    </Tooltip>
                     {canManage && row.status.value === 'draft' && (
                         <Tooltip>
                             <TooltipTrigger asChild>

@@ -7,6 +7,7 @@ use App\Enums\Permission;
 use App\Http\Controllers\Admin\BillingRunController;
 use App\Http\Controllers\Admin\CashierController;
 use App\Http\Controllers\Admin\ExamDispensationController;
+use App\Http\Controllers\Admin\ExamEligibilityController;
 use App\Http\Controllers\Admin\ExamPeriodController;
 use App\Http\Controllers\Admin\FeeTypeController;
 use App\Http\Controllers\Admin\InvoiceAdjustmentController;
@@ -113,5 +114,13 @@ Route::prefix('keuangan')->group(function (): void {
         ->group(function (): void {
             Route::post('kelayakan-ujian/{examPeriod}/dispensasi', 'store')->name('exam-periods.dispensations.store');
             Route::post('kelayakan-ujian/dispensasi/{override}/cabut', 'revoke')->name('exam-periods.dispensations.revoke');
+        });
+
+    Route::controller(ExamEligibilityController::class)
+        ->middleware(['feature:'.Feature::ExamEligibility->value])
+        ->group(function (): void {
+            Route::get('kelayakan-ujian/{examPeriod}/daftar', 'index')->name('exam-periods.eligibility.index');
+            Route::get('kelayakan-ujian/{examPeriod}/ekspor-pdf', 'exportPdf')->name('exam-periods.eligibility.pdf');
+            Route::get('kelayakan-ujian/{examPeriod}/ekspor-excel', 'exportExcel')->name('exam-periods.eligibility.excel');
         });
 });
