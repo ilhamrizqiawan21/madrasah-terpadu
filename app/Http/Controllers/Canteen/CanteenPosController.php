@@ -12,9 +12,12 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Canteen\CanteenPurchaseRequest;
 use App\Http\Requests\Canteen\LookupStudentCardRequest;
 use App\Http\Requests\Canteen\ReverseCanteenTransactionRequest;
+use App\Models\CanteenProduct;
 use App\Models\CanteenTransaction;
 use App\Models\Student;
+use App\Models\Unit;
 use App\Models\User;
+use App\Models\Wallet;
 use App\Services\Wallet\CanteenPosService;
 use App\Support\AppTimezone;
 use Carbon\CarbonImmutable;
@@ -39,6 +42,18 @@ class CanteenPosController extends Controller
 
         $today = CarbonImmutable::now('Asia/Makassar');
 
+        $products = CanteenProduct::query()
+            ->with(['category:id,name', 'unit:id,code'])
+            ->where('is_active', true)
+            ->orderBy('unit_id')->orderBy('product_category_id')->orderBy('name')->orderBy('id')
+            ->get()
+            ->map(fn (CanteenProduct $p): array => [
+                'id' => $p->id, 'unit_id' => $p->unit_id, 'category_id' => $p->product_category_id,
+                'category' => $p->category->name, 'name' => $p->name, 'price' => $p->price, 'stock' => $p->stock,
+            ])
+            ->values()
+            ->all();
+
         $recentTransactions = CanteenTransaction::query()
             ->with('student:id,nis,name')
             ->whereBetween('created_at', [$today->startOfDay()->setTimezone(AppTimezone::name()), $today->endOfDay()->setTimezone(AppTimezone::name())])
@@ -48,6 +63,7 @@ class CanteenPosController extends Controller
             ->get()
             ->map(fn (CanteenTransaction $tx): array => [
                 'id' => $tx->id,
+                'summary' => CanteenPosService::summarizeItems($tx->items),
                 'student_name' => $tx->student->name,
                 'student_nis' => $tx->student->nis,
                 'total' => $tx->total,
@@ -65,6 +81,10 @@ class CanteenPosController extends Controller
 
         return Inertia::render('canteen/index', [
             'recentTransactions' => $recentTransactions,
+            'products' => $products,
+            'units' => Unit::query()->where('is_active', true)->whereIn('id', array_unique(array_column($products, 'unit_id')))
+                ->orderBy('id')->get(['id', 'code', 'name'])
+                ->map(fn (Unit $u): array => ['id' => $u->id, 'code' => $u->code, 'name' => $u->name])->values()->all(),
         ]);
     }
 
@@ -86,18 +106,33 @@ class CanteenPosController extends Controller
         $user = $request->user();
         abort_unless($user instanceof User, 403);
 
-        /** @var array{student_id: int, total: int, client_uuid: string, items?: list<array{name: string, amount: int}>|null} $validated */
         $validated = $request->validated();
         $student = Student::query()->findOrFail((int) $validated['student_id']);
+        $clientUuid = (string) $validated['client_uuid'];
 
         try {
-            $tx = $this->pos->purchase(
-                cashier: $user,
-                student: $student,
-                total: (int) $validated['total'],
-                clientUuid: $validated['client_uuid'],
-                items: $validated['items'] ?? null,
-            );
+            if (isset($validated['lines']) || isset($validated['manual_amount'])) {
+                /** @var list<array{product_id: int|string, qty: int|string}> $rawLines */
+                $rawLines = $validated['lines'] ?? [];
+                $tx = $this->pos->purchaseCart(
+                    cashier: $user,
+                    student: $student,
+                    lines: array_map(static fn (array $l): array => ['product_id' => (int) $l['product_id'], 'qty' => (int) $l['qty']], $rawLines),
+                    manualAmount: (int) ($validated['manual_amount'] ?? 0),
+                    manualNote: isset($validated['manual_note']) ? (string) $validated['manual_note'] : null,
+                    clientUuid: $clientUuid,
+                );
+            } else {
+                /** @var list<array{name: string, amount: int}>|null $items */
+                $items = $validated['items'] ?? null;
+                $tx = $this->pos->purchase(
+                    cashier: $user,
+                    student: $student,
+                    total: (int) $validated['total'],
+                    clientUuid: $clientUuid,
+                    items: $items,
+                );
+            }
         } catch (FrozenWalletException|InsufficientBalanceException|DailyLimitExceededException $e) {
             return response()->json(['message' => $e->getMessage()], 422);
         }
@@ -105,6 +140,7 @@ class CanteenPosController extends Controller
         return response()->json([
             'transaction' => [
                 'id' => $tx->id,
+                'summary' => CanteenPosService::summarizeItems($tx->items),
                 'student_name' => $student->name,
                 'student_nis' => $student->nis,
                 'total' => $tx->total,
@@ -114,6 +150,14 @@ class CanteenPosController extends Controller
                 'status_label' => $tx->status->label(),
                 'created_at' => $tx->created_at->toIso8601String(),
                 'can_reverse' => true,
+            ],
+            'receipt' => [
+                'number' => 'KTN-'.str_pad((string) $tx->id, 6, '0', STR_PAD_LEFT),
+                'items' => array_map(static fn (array $i): array => [
+                    'name' => $i['name'], 'qty' => $i['qty'] ?? 1, 'price' => $i['price'] ?? $i['amount'], 'amount' => $i['amount'],
+                ], $tx->items ?? [['name' => 'Belanja kantin', 'amount' => $tx->total]]),
+                'balance_after' => (int) Wallet::query()->where('student_id', $student->id)->value('balance'),
+                'cashier' => $user->name,
             ],
         ]);
     }

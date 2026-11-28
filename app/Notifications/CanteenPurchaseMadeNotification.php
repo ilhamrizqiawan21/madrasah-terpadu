@@ -17,6 +17,7 @@ final class CanteenPurchaseMadeNotification extends GuardianNotification
         private readonly string $studentName,
         private readonly int $total,
         private readonly int $balanceAfter,
+        private readonly ?string $itemsSummary = null,
     ) {
         parent::__construct();
     }
@@ -36,7 +37,9 @@ final class CanteenPurchaseMadeNotification extends GuardianNotification
         $totalText = Money::format($this->total);
         $balanceText = Money::format($this->balanceAfter);
 
-        return "Ananda {$this->studentName} jajan {$totalText} di Kantin. Sisa saldo {$balanceText}.";
+        $what = $this->itemsSummary === null || $this->itemsSummary === '' ? '' : " {$this->itemsSummary}";
+
+        return "Ananda {$this->studentName} jajan{$what} seharga {$totalText} di Kantin. Sisa saldo {$balanceText}.";
     }
 
     public function url(object $notifiable): string

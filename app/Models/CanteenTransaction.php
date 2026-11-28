@@ -22,7 +22,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property int $total
  * @property int $paid_from_vouchers
  * @property int $paid_from_wallet
- * @property list<array{name: string, amount: int}>|null $items
+ * @property list<array{name: string, amount: int, product_id?: int|null, price?: int, qty?: int}>|null $items
  * @property CanteenTransactionStatus $status
  * @property CarbonImmutable|null $reversed_at
  * @property int|null $reversed_by

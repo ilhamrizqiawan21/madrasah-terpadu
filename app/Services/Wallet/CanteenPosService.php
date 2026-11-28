@@ -9,6 +9,7 @@ use App\Enums\Permission;
 use App\Enums\StudentStatus;
 use App\Exceptions\Wallet\FrozenWalletException;
 use App\Models\AcademicYear;
+use App\Models\CanteenProduct;
 use App\Models\CanteenTransaction;
 use App\Models\CanteenVoucher;
 use App\Models\Student;
@@ -107,7 +108,83 @@ final class CanteenPosService
     }
 
     /**
-     * @param  list<array{name: string, amount: int}>|null  $items
+     * Belanja dari keranjang menu. Harga dan total dihitung ulang dari database, stok menu dikunci
+     * dan dikurangi dalam transaksi yang sama dengan pemotongan voucher/saldo. Bila pembayaran
+     * ditolak (saldo kurang, limit, dompet beku), seluruhnya dibatalkan termasuk stok.
+     *
+     * @param  list<array{product_id: int, qty: int}>  $lines
+     */
+    public function purchaseCart(
+        User $cashier,
+        Student $student,
+        array $lines,
+        int $manualAmount,
+        ?string $manualNote,
+        string $clientUuid,
+    ): CanteenTransaction {
+        $existing = CanteenTransaction::query()->where('client_uuid', $clientUuid)->first();
+        if ($existing instanceof CanteenTransaction) {
+            return $existing;
+        }
+
+        return DB::transaction(function () use ($cashier, $student, $lines, $manualAmount, $manualNote, $clientUuid): CanteenTransaction {
+            $products = CanteenProduct::query()
+                ->whereIn('id', array_map(static fn (array $l): int => $l['product_id'], $lines))
+                ->orderBy('id')
+                ->lockForUpdate()
+                ->get()
+                ->keyBy('id');
+
+            // Diperiksa lagi setelah kunci: permintaan ganda yang menunggu kunci tidak boleh memotong stok dua kali.
+            $again = CanteenTransaction::query()->where('client_uuid', $clientUuid)->first();
+            if ($again instanceof CanteenTransaction) {
+                return $again;
+            }
+
+            $items = [];
+            $total = 0;
+            foreach ($lines as $line) {
+                $product = $products->get($line['product_id']);
+                if (! $product instanceof CanteenProduct || ! $product->is_active) {
+                    throw ValidationException::withMessages(['lines' => 'Ada menu yang sudah tidak dijual. Muat ulang daftar menu.']);
+                }
+                if ($product->stock !== null && $product->stock < $line['qty']) {
+                    throw ValidationException::withMessages([
+                        'lines' => "Stok {$product->name} tinggal {$product->stock}.",
+                    ]);
+                }
+
+                $amount = $product->price * $line['qty'];
+                $total += $amount;
+                $items[] = [
+                    'product_id' => $product->id,
+                    'name' => $product->name,
+                    'price' => $product->price,
+                    'qty' => $line['qty'],
+                    'amount' => $amount,
+                ];
+
+                if ($product->stock !== null) {
+                    $product->forceFill(['stock' => $product->stock - $line['qty']])->save();
+                }
+            }
+
+            if ($manualAmount > 0) {
+                $note = trim((string) $manualNote);
+                $items[] = ['product_id' => null, 'name' => $note === '' ? 'Lain-lain' : $note, 'price' => $manualAmount, 'qty' => 1, 'amount' => $manualAmount];
+                $total += $manualAmount;
+            }
+
+            if ($total < 100) {
+                throw ValidationException::withMessages(['lines' => 'Pesanan masih kosong.']);
+            }
+
+            return $this->purchase($cashier, $student, $total, $clientUuid, $items);
+        });
+    }
+
+    /**
+     * @param  list<array{name: string, amount: int, product_id?: int|null, price?: int, qty?: int}>|null  $items
      */
     public function purchase(
         User $cashier,
@@ -222,6 +299,7 @@ final class CanteenPosService
                 studentName: $student->nickname ?? $student->name,
                 total: $transaction->total,
                 balanceAfter: $balanceAfter,
+                itemsSummary: self::summarizeItems($transaction->items),
             ),
         );
 
@@ -289,6 +367,8 @@ final class CanteenPosService
                 );
             }
 
+            $this->restoreStock($locked);
+
             $locked->forceFill([
                 'status' => CanteenTransactionStatus::Reversed,
                 'reversed_at' => now(),
@@ -303,5 +383,43 @@ final class CanteenPosService
 
             return $locked;
         });
+    }
+
+    /** Mengembalikan stok menu yang terjual pada transaksi yang dibatalkan. */
+    private function restoreStock(CanteenTransaction $transaction): void
+    {
+        $quantities = [];
+        foreach ($transaction->items ?? [] as $item) {
+            $productId = $item['product_id'] ?? null;
+            if ($productId !== null) {
+                $quantities[$productId] = ($quantities[$productId] ?? 0) + ($item['qty'] ?? 1);
+            }
+        }
+        if ($quantities === []) {
+            return;
+        }
+
+        $products = CanteenProduct::query()->whereIn('id', array_keys($quantities))->whereNotNull('stock')
+            ->orderBy('id')->lockForUpdate()->get();
+        foreach ($products as $product) {
+            $product->forceFill(['stock' => (int) $product->stock + $quantities[$product->id]])->save();
+        }
+    }
+
+    /**
+     * Ringkasan untuk notifikasi wali, mis. "Nasi goreng ×1, Es teh ×2". Maksimal tiga nama.
+     *
+     * @param  list<array{name: string, amount: int, product_id?: int|null, price?: int, qty?: int}>|null  $items
+     */
+    public static function summarizeItems(?array $items): ?string
+    {
+        if ($items === null || $items === []) {
+            return null;
+        }
+
+        $parts = array_map(static fn (array $i): string => $i['name'].' ×'.($i['qty'] ?? 1), array_slice($items, 0, 3));
+        $more = count($items) - 3;
+
+        return implode(', ', $parts).($more > 0 ? " dan {$more} lainnya" : '');
     }
 }
