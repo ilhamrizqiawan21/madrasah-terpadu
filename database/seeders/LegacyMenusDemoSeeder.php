@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace Database\Seeders;
 
+use App\Enums\AlumniActivity;
+use App\Enums\AlumniIncomeRange;
+use App\Enums\CurriculumRelevance;
 use App\Enums\EmploymentStatus;
 use App\Enums\Gender;
 use App\Enums\MeetingAudience;
@@ -11,6 +14,7 @@ use App\Enums\MutationType;
 use App\Enums\StaffAssignmentType;
 use App\Enums\StudentStatus;
 use App\Models\AcademicYear;
+use App\Models\AlumniTracerResponse;
 use App\Models\Classroom;
 use App\Models\Enrollment;
 use App\Models\Guardian;
@@ -53,6 +57,7 @@ class LegacyMenusDemoSeeder extends Seeder
         $this->studentFamilies();
         $this->guardianCards();
         $this->mutations($units, $admin);
+        $this->alumni($admin);
     }
 
     private function staffProfiles(Unit $unit): void
@@ -201,5 +206,27 @@ class LegacyMenusDemoSeeder extends Seeder
             'reason' => 'Pindah domisili',
             'recorded_by' => $admin->id,
         ]);
+    }
+
+    private function alumni(User $admin): void
+    {
+        $rows = [
+            [AlumniActivity::Study, 'MTs Negeri 1 Kolaka', 'Kelas unggulan', AlumniIncomeRange::None, CurriculumRelevance::Very, 'Program tahfidz sangat membantu.'],
+        ];
+
+        Student::query()->where('status', StudentStatus::Graduated->value)->orderBy('id')->limit(5)->get()
+            ->each(function (Student $student, int $i) use ($rows, $admin): void {
+                [$activity, $institution, $program, $income, $relevance, $feedback] = $rows[$i % count($rows)];
+                AlumniTracerResponse::query()->firstOrCreate(['student_id' => $student->id], [
+                    'graduation_year' => (int) CarbonImmutable::now('Asia/Makassar')->year,
+                    'activity' => $activity,
+                    'institution' => $institution,
+                    'program' => $program,
+                    'income_range' => $income,
+                    'relevance' => $relevance,
+                    'feedback' => $feedback,
+                    'recorded_by' => $admin->id,
+                ]);
+            });
     }
 }

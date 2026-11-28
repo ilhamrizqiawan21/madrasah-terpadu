@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Enums\Permission;
+use App\Http\Controllers\Admin\AlumniTracerController;
 use App\Http\Controllers\Admin\StudentCardController;
 use App\Http\Controllers\Admin\StudentController;
 use App\Http\Controllers\Admin\StudentImportController;
@@ -88,3 +89,15 @@ Route::middleware('permission:'.Permission::StudentsManage->value)->group(functi
             Route::post('keluar', 'storeOut')->name('store-out');
         });
 });
+
+// Data & Survei Alumni (tracer study, alur aplikasi lama).
+Route::middleware('permission:'.Permission::StudentsManage->value)
+    ->prefix('alumni')
+    ->name('alumni.')
+    ->controller(AlumniTracerController::class)
+    ->group(function (): void {
+        Route::get('/', 'index')->name('index');
+        Route::get('survei', 'create')->name('create');
+        Route::post('survei', 'store')->name('store');
+        Route::delete('{response}', 'destroy')->whereNumber('response')->name('destroy');
+    });

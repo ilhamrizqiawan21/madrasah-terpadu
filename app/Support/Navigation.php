@@ -148,8 +148,8 @@ final class Navigation
                     ['label' => 'Siswa', 'route' => 'admin.students.index', 'permission' => $staff],
                     ['label' => 'Orang Tua / Wali', 'route' => 'admin.guardians.index', 'permission' => Permission::GuardiansManage->value],
                     ['label' => 'Mutasi Siswa', 'route' => 'admin.students.mutations.index', 'permission' => Permission::StudentsManage->value],
-                    self::soon('Data Alumni', 'alumni', Permission::StudentsManage->value, 'Rekap jenjang lanjutan atau karier lulusan dari survei alumni.'),
-                    self::soon('Survei Alumni', 'survei-alumni', Permission::StudentsManage->value, 'Formulir survei yang diisi alumni.'),
+                    ['label' => 'Data Alumni', 'route' => 'admin.alumni.index', 'permission' => Permission::StudentsManage->value],
+                    ['label' => 'Survei Alumni', 'route' => 'admin.alumni.create', 'permission' => Permission::StudentsManage->value],
                 ],
             ],
             [
