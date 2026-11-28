@@ -65,6 +65,8 @@ type Props<T extends Row> = {
     toForm: (row: T) => Record<string, string>;
     defaults: Record<string, string>;
     emptyDescription: string;
+    /** Tombol tambahan di kanan judul, mis. Cetak. */
+    headerActions?: ReactNode;
 };
 
 const ALL = 'semua';
@@ -88,6 +90,7 @@ export function MasterCrudPage<T extends Row>({
     toForm,
     defaults,
     emptyDescription,
+    headerActions,
 }: Props<T>) {
     const [search, setSearch] = useState(String(filters.search ?? ''));
     const [loading, setLoading] = useState(false);
@@ -190,7 +193,16 @@ export function MasterCrudPage<T extends Row>({
                 <PageHeader
                     title={title}
                     description={description}
-                    actions={addButton}
+                    actions={
+                        headerActions ? (
+                            <>
+                                {headerActions}
+                                {addButton}
+                            </>
+                        ) : (
+                            addButton
+                        )
+                    }
                 />
 
                 <div className="flex flex-wrap gap-2">

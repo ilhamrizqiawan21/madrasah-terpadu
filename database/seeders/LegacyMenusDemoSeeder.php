@@ -16,6 +16,7 @@ use App\Enums\StudentStatus;
 use App\Models\AcademicYear;
 use App\Models\AlumniTracerResponse;
 use App\Models\Building;
+use App\Models\CanteenProduct;
 use App\Models\ClassGroup;
 use App\Models\Classroom;
 use App\Models\Enrollment;
@@ -25,6 +26,7 @@ use App\Models\Guardian;
 use App\Models\LessonPeriod;
 use App\Models\Major;
 use App\Models\Meeting;
+use App\Models\ProductCategory;
 use App\Models\Room;
 use App\Models\StaffProfile;
 use App\Models\Student;
@@ -69,6 +71,7 @@ class LegacyMenusDemoSeeder extends Seeder
         $this->academicMasters($units);
         $this->lessonPeriods($units);
         $this->extracurriculars($units);
+        $this->canteenMenu($units);
     }
 
     private function staffProfiles(Unit $unit): void
@@ -303,6 +306,36 @@ class LegacyMenusDemoSeeder extends Seeder
 
         foreach ([['Pramuka', 'Kak Rahmat'], ['Tahfidz', 'Ust. Hamzah'], ['Futsal', 'Coach Andi']] as [$name, $coach]) {
             Extracurricular::query()->firstOrCreate(['unit_id' => $unit->id, 'name' => $name], ['coach_type' => 'external', 'coach_name' => $coach]);
+        }
+    }
+
+    /**
+     * @param  Collection<int, Unit>  $units
+     */
+    private function canteenMenu($units): void
+    {
+        $unit = $units->first();
+        if ($unit === null) {
+            return;
+        }
+
+        $menu = [
+            'Makanan berat' => [['Nasi goreng telur', 8000, 20], ['Nasi ayam geprek', 10000, 15], ['Mi goreng', 6000, null]],
+            'Minuman' => [['Es teh manis', 3000, null], ['Susu kurma dingin', 5000, 12], ['Air mineral', 2000, null]],
+            'Snack' => [['Roti cokelat', 3000, 25], ['Pisang goreng', 2000, 0]],
+        ];
+
+        foreach ($menu as $categoryName => $items) {
+            $category = ProductCategory::query()->firstOrCreate(['unit_id' => $unit->id, 'module' => 'canteen', 'name' => $categoryName]);
+            foreach ($items as [$name, $price, $stock]) {
+                CanteenProduct::query()->firstOrCreate(['unit_id' => $unit->id, 'name' => $name], [
+                    'product_category_id' => $category->id, 'price' => $price, 'stock' => $stock, 'is_active' => true,
+                ]);
+            }
+        }
+
+        foreach (['Seragam & atribut', 'Alat tulis & buku'] as $name) {
+            ProductCategory::query()->firstOrCreate(['unit_id' => $unit->id, 'module' => 'cooperative', 'name' => $name]);
         }
     }
 }

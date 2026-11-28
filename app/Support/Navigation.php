@@ -277,8 +277,8 @@ final class Navigation
                 'items' => [
                     ['label' => 'Saldo Siswa', 'route' => 'admin.wallets.index', 'permission' => Permission::WalletManage->value, 'feature' => Feature::Wallet],
                     self::soon('Riwayat Isi Saldo', 'riwayat-isi-saldo', Permission::WalletManage->value, 'Riwayat isi saldo tunai dan online seluruh siswa.', null, Feature::Wallet),
-                    self::soon('Kategori Menu', 'kategori-produk', Permission::WalletManage->value, 'Kategori menu kantin.', null, Feature::Wallet),
-                    self::soon('Daftar Menu', 'menu-kantin', Permission::WalletManage->value, 'Daftar menu dan harga kantin.', null, Feature::Wallet),
+                    ['label' => 'Kategori Menu', 'route' => 'admin.canteen-categories.index', 'permission' => Permission::WalletManage->value, 'feature' => Feature::Wallet],
+                    ['label' => 'Daftar Menu', 'route' => 'admin.canteen-products.index', 'permission' => Permission::WalletManage->value, 'feature' => Feature::Wallet],
                     ['label' => 'Kasir Kantin', 'route' => 'canteen.index', 'permission' => Permission::CanteenPos->value, 'feature' => Feature::Wallet],
                 ],
             ],
