@@ -21,6 +21,7 @@ use App\Models\Classroom;
 use App\Models\Enrollment;
 use App\Models\GradeLevel;
 use App\Models\Guardian;
+use App\Models\LessonPeriod;
 use App\Models\Major;
 use App\Models\Meeting;
 use App\Models\Room;
@@ -65,6 +66,7 @@ class LegacyMenusDemoSeeder extends Seeder
         $this->alumni($admin);
         $this->facilities($units);
         $this->academicMasters($units);
+        $this->lessonPeriods($units);
     }
 
     private function staffProfiles(Unit $unit): void
@@ -265,6 +267,25 @@ class LegacyMenusDemoSeeder extends Seeder
                 ClassGroup::query()->firstOrCreate(['unit_id' => $unit->id, 'name' => $group]);
             }
             Major::query()->firstOrCreate(['unit_id' => $unit->id, 'name' => 'Reguler']);
+        }
+    }
+
+    /**
+     * @param  Collection<int, Unit>  $units
+     */
+    private function lessonPeriods($units): void
+    {
+        $slots = [
+            ['JP 1', '07:30', '08:05', false], ['JP 2', '08:05', '08:40', false], ['JP 3', '08:40', '09:15', false],
+            ['Istirahat', '09:15', '09:30', true], ['JP 4', '09:30', '10:05', false], ['JP 5', '10:05', '10:40', false],
+        ];
+
+        foreach ($units as $unit) {
+            foreach ($slots as $order => [$name, $start, $end, $break]) {
+                LessonPeriod::query()->firstOrCreate(['unit_id' => $unit->id, 'name' => $name], [
+                    'starts_at' => $start, 'ends_at' => $end, 'sort_order' => $order + 1, 'is_break' => $break,
+                ]);
+            }
         }
     }
 }

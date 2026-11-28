@@ -2,9 +2,11 @@
 
 declare(strict_types=1);
 
+use App\Enums\Feature;
 use App\Enums\Permission;
 use App\Http\Controllers\Admin\AcademicMasterController;
 use App\Http\Controllers\Admin\FacilityController;
+use App\Http\Controllers\Admin\LessonScheduleController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -36,4 +38,19 @@ Route::middleware('permission:'.Permission::ClassroomsManage->value)
         Route::post('/', 'store')->name('store');
         Route::put('{id}', 'update')->whereNumber('id')->name('update');
         Route::delete('{id}', 'destroy')->whereNumber('id')->name('destroy');
+    });
+
+// Jam Pelajaran & Jadwal Pelajaran Mingguan (kunci fitur lesson_schedule).
+Route::middleware(['permission:'.Permission::ClassroomsManage->value, 'feature:'.Feature::LessonSchedule->value])
+    ->prefix('akademik')
+    ->controller(LessonScheduleController::class)
+    ->group(function (): void {
+        Route::get('jam-pelajaran', 'periods')->name('lesson-periods.index');
+        Route::post('jam-pelajaran', 'storePeriod')->name('lesson-periods.store');
+        Route::put('jam-pelajaran/{period}', 'updatePeriod')->whereNumber('period')->name('lesson-periods.update');
+        Route::delete('jam-pelajaran/{period}', 'destroyPeriod')->whereNumber('period')->name('lesson-periods.destroy');
+
+        Route::get('jadwal', 'schedule')->name('lesson-schedules.index');
+        Route::post('jadwal', 'plot')->name('lesson-schedules.plot');
+        Route::post('jadwal/kosongkan', 'clear')->name('lesson-schedules.clear');
     });

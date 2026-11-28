@@ -7,6 +7,7 @@ import { DataTable } from '@/components/app/data-table';
 import { FormDialog } from '@/components/app/form-dialog';
 import { PageHeader } from '@/components/app/page-header';
 import { RowActions } from '@/components/app/row-actions';
+import { TimeInput } from '@/components/app/time-input';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -308,6 +309,13 @@ export function MasterCrudPage<T extends Row>({
                                         ))}
                                     </SelectContent>
                                 </Select>
+                            ) : field.type === 'time' ? (
+                                <TimeInput
+                                    id={`master-${field.key}`}
+                                    value={form.data[field.key] ?? ''}
+                                    onChange={(v) => form.setData(field.key, v)}
+                                    required={field.required}
+                                />
                             ) : (
                                 <Input
                                     id={`master-${field.key}`}
