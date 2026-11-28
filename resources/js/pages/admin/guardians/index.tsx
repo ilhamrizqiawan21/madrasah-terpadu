@@ -410,7 +410,7 @@ export default function GuardiansIndex({
         form.clearErrors('children');
     };
 
-    const setField = <K extends 'name' | 'phone' | 'address' | 'relation'>(
+    const setField = <K extends Exclude<keyof GuardianForm, 'children'>>(
         key: K,
         value: GuardianForm[K],
     ): void => {
