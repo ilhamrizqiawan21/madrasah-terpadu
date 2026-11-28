@@ -16,9 +16,12 @@ use App\Enums\StudentStatus;
 use App\Models\AcademicYear;
 use App\Models\AlumniTracerResponse;
 use App\Models\Building;
+use App\Models\ClassGroup;
 use App\Models\Classroom;
 use App\Models\Enrollment;
+use App\Models\GradeLevel;
 use App\Models\Guardian;
+use App\Models\Major;
 use App\Models\Meeting;
 use App\Models\Room;
 use App\Models\StaffProfile;
@@ -61,6 +64,7 @@ class LegacyMenusDemoSeeder extends Seeder
         $this->mutations($units, $admin);
         $this->alumni($admin);
         $this->facilities($units);
+        $this->academicMasters($units);
     }
 
     private function staffProfiles(Unit $unit): void
@@ -243,6 +247,24 @@ class LegacyMenusDemoSeeder extends Seeder
             foreach ([['R01', 'Ruang Kelas 1', 28], ['R02', 'Ruang Kelas 2', 28], ['LAB', 'Laboratorium Komputer', 20]] as [$code, $name, $capacity]) {
                 Room::query()->firstOrCreate(['building_id' => $building->id, 'code' => $code], ['name' => $name, 'capacity' => $capacity]);
             }
+        }
+    }
+
+    /**
+     * @param  Collection<int, Unit>  $units
+     */
+    private function academicMasters($units): void
+    {
+        $levels = ['MI' => ['1', '2', '3', '4', '5', '6'], 'RA' => ['A', 'B'], 'TPQ' => ['Jilid 1', 'Jilid 2', 'Jilid 3']];
+
+        foreach ($units as $unit) {
+            foreach ($levels[$unit->code] ?? ['1'] as $order => $name) {
+                GradeLevel::query()->firstOrCreate(['unit_id' => $unit->id, 'name' => $name], ['sort_order' => $order + 1]);
+            }
+            foreach (['A', 'B'] as $group) {
+                ClassGroup::query()->firstOrCreate(['unit_id' => $unit->id, 'name' => $group]);
+            }
+            Major::query()->firstOrCreate(['unit_id' => $unit->id, 'name' => 'Reguler']);
         }
     }
 }

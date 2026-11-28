@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Enums\Permission;
+use App\Http\Controllers\Admin\AcademicMasterController;
 use App\Http\Controllers\Admin\FacilityController;
 use Illuminate\Support\Facades\Route;
 
@@ -22,4 +23,17 @@ Route::middleware('permission:'.Permission::ClassroomsManage->value)
         Route::post('ruangan', 'storeRoom')->name('rooms.store');
         Route::put('ruangan/{room}', 'updateRoom')->whereNumber('room')->name('rooms.update');
         Route::delete('ruangan/{room}', 'destroyRoom')->whereNumber('room')->name('rooms.destroy');
+    });
+
+// Tingkat Kelas, Rombel (nama kelompok), Jurusan: satu halaman generik.
+Route::middleware('permission:'.Permission::ClassroomsManage->value)
+    ->prefix('akademik/master/{kind}')
+    ->where(['kind' => 'tingkat|rombel|jurusan'])
+    ->name('academic-masters.')
+    ->controller(AcademicMasterController::class)
+    ->group(function (): void {
+        Route::get('/', 'index')->name('index');
+        Route::post('/', 'store')->name('store');
+        Route::put('{id}', 'update')->whereNumber('id')->name('update');
+        Route::delete('{id}', 'destroy')->whereNumber('id')->name('destroy');
     });
