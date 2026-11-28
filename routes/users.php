@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Enums\Permission;
+use App\Http\Controllers\Admin\RolePermissionController;
 use App\Http\Controllers\Admin\StaffUserController;
 use App\Services\Users\StaffUserService;
 use Illuminate\Support\Facades\Route;
@@ -25,4 +26,14 @@ Route::middleware('permission:'.Permission::UsersManage->value)
         Route::put('{staffUser}', 'update')->whereNumber('staffUser')->name('update');
         Route::patch('{staffUser}/status', 'updateStatus')->whereNumber('staffUser')->name('status.update');
         Route::post('{staffUser}/reset-kata-sandi', 'resetPassword')->whereNumber('staffUser')->name('password.reset');
+    });
+
+// Peran & Hak Akses: izin per peran (alur aplikasi lama, kolom Lihat/Kelola).
+Route::middleware('permission:'.Permission::UsersManage->value)
+    ->prefix('hak-akses')
+    ->name('roles.')
+    ->controller(RolePermissionController::class)
+    ->group(function (): void {
+        Route::get('/', 'index')->name('index');
+        Route::put('{role}', 'update')->where('role', '[a-z_]+')->name('update');
     });

@@ -142,7 +142,7 @@ final class Navigation
                 'label' => 'Pengguna',
                 'icon' => 'users',
                 'items' => [
-                    self::soon('Peran & Hak Akses', 'hak-akses', Permission::UsersManage->value, 'Pengaturan izin per peran pengguna.'),
+                    ['label' => 'Peran & Hak Akses', 'route' => 'admin.roles.index', 'permission' => Permission::UsersManage->value],
                     ['label' => 'Guru & Staf', 'route' => 'admin.users.index', 'permission' => Permission::UsersManage->value],
                     self::soon('Undangan Rapat', 'rapat', Permission::UsersManage->value, 'Undangan rapat guru dan staf beserta notulen.'),
                     ['label' => 'Siswa', 'route' => 'admin.students.index', 'permission' => $staff],

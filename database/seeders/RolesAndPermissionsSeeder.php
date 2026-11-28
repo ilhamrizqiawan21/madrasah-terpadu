@@ -17,16 +17,27 @@ class RolesAndPermissionsSeeder extends Seeder
     {
         app(PermissionRegistrar::class)->forgetCachedPermissions();
 
+        $newPermissions = [];
         foreach (PermissionEnum::cases() as $permission) {
-            Permission::findOrCreate($permission->value, 'web');
+            if (Permission::findOrCreate($permission->value, 'web')->wasRecentlyCreated) {
+                $newPermissions[] = $permission->value;
+            }
         }
 
+        // Seeder dijalankan di setiap rilis. Izin peran yang sudah ada diatur admin lewat
+        // Peran & Hak Akses, jadi hanya peran baru (atau izin baru) yang menerima bawaan.
+        // Admin selalu memegang semua izin.
         foreach ($this->rolePermissions() as $roleValue => $permissions) {
+            $names = array_map(static fn (PermissionEnum $permission): string => $permission->value, $permissions);
             $role = Role::findOrCreate($roleValue, 'web');
-            $role->syncPermissions(array_map(
-                static fn (PermissionEnum $permission): string => $permission->value,
-                $permissions,
-            ));
+
+            if ($roleValue === RoleEnum::Admin->value || $role->wasRecentlyCreated) {
+                $role->syncPermissions($names);
+
+                continue;
+            }
+
+            $role->givePermissionTo(array_values(array_intersect($names, $newPermissions)));
         }
 
         app(PermissionRegistrar::class)->forgetCachedPermissions();
