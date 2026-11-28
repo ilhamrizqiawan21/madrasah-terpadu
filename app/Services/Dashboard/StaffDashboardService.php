@@ -8,10 +8,14 @@ use App\Domain\Attendance\AttendanceClassifier;
 use App\Enums\ExamResultStatus;
 use App\Enums\ExamStatus;
 use App\Enums\Feature;
+use App\Enums\InvoiceStatus;
 use App\Enums\LeaveRequestStatus;
+use App\Enums\PaymentMethod;
 use App\Enums\Permission;
 use App\Enums\Role;
 use App\Enums\StudentStatus;
+use App\Enums\TransferProofStatus;
+use App\Models\AcademicYear;
 use App\Models\AttendanceDay;
 use App\Models\AuditLog;
 use App\Models\Classroom;
@@ -21,10 +25,13 @@ use App\Models\Exam;
 use App\Models\ExamResult;
 use App\Models\ExamSession;
 use App\Models\HabitLog;
+use App\Models\Invoice;
 use App\Models\LeaveRequest;
+use App\Models\Payment;
 use App\Models\RewardRedemption;
 use App\Models\SchoolHoliday;
 use App\Models\Student;
+use App\Models\TransferProof;
 use App\Models\Unit;
 use App\Models\User;
 use App\Services\Attendance\SchoolCalendarService;
@@ -34,6 +41,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 /**
  * Menyusun bagian Beranda Staf dari keputusan per peran (DESIGN §3), hanya-baca.
@@ -585,5 +593,392 @@ final class StaffDashboardService
         $value = $unit?->attendance_settings['late_after'] ?? null;
 
         return is_string($value) ? str_replace(':', '.', substr($value, 0, 5)) : null;
+    }
+
+    /**
+     * Dasbor keuangan staf (T-617): kas masuk per periode & metode, piutang per jenis & rombel,
+     * tunggakan teratas, pembayaran online belum terekonsiliasi, saldo & top-up dompet, serta per unit.
+     *
+     * @return array{
+     *     scope: 'unit'|'all',
+     *     can_view_all_units: bool,
+     *     unit_code: ?string,
+     *     unit_name: ?string,
+     *     billing_enabled: bool,
+     *     wallet_enabled: bool,
+     *     cash_in: ?array{
+     *         today: array{total: int, count: int, by_method: array{cash: int, transfer: int, midtrans: int}},
+     *         month: array{total: int, count: int, by_method: array{cash: int, transfer: int, midtrans: int}},
+     *         academic_year: array{total: int, count: int, by_method: array{cash: int, transfer: int, midtrans: int}},
+     *         pending_transfer_proofs: int,
+     *     },
+     *     receivables: ?array{
+     *         total: int,
+     *         overdue: int,
+     *         overdue_count: int,
+     *         by_fee_type: list<array{fee_type_id: int, name: string, count: int, total: int, overdue: int}>,
+     *         by_classroom: list<array{classroom_id: ?int, name: string, student_count: int, total: int, overdue: int}>,
+     *         top_arrears: list<array{student_id: int, student_name: string, nis: string, classroom: string, overdue_count: int, overdue_amount: int}>,
+     *     },
+     *     online_unreconciled: array{available: bool, midtrans_enabled: bool, pending_count: int, pending_amount: int, needs_review_count: int},
+     *     wallet: ?array{available: bool, total_balance: int, active_wallets: int, frozen_wallets: int, topup_today: int, topup_month: int},
+     *     by_unit: list<array{code: string, name: string, cash_in_month: int, receivables_total: int, receivables_overdue: int, wallet_balance: int}>,
+     * }
+     */
+    public function finance(?Unit $unit, ?int $yearId, bool $billingOn, bool $walletOn, bool $canViewAllUnits): array
+    {
+        $nowWita = CarbonImmutable::now(AttendanceClassifier::BUSINESS_TIMEZONE);
+        $scopeUnit = $canViewAllUnits && $unit === null ? null : $unit;
+
+        return [
+            'scope' => $scopeUnit === null ? 'all' : 'unit',
+            'can_view_all_units' => $canViewAllUnits,
+            'unit_code' => $scopeUnit?->code,
+            'unit_name' => $scopeUnit?->name,
+            'billing_enabled' => $billingOn,
+            'wallet_enabled' => $walletOn,
+            'cash_in' => $billingOn ? $this->financeCashIn($scopeUnit, $yearId, $nowWita) : null,
+            'receivables' => $billingOn ? $this->financeReceivables($scopeUnit, $yearId, $nowWita) : null,
+            'online_unreconciled' => $this->financeOnlineUnreconciled($scopeUnit),
+            'wallet' => $walletOn ? $this->financeWallet($scopeUnit, $nowWita) : null,
+            'by_unit' => $canViewAllUnits ? $this->financeByUnit($billingOn, $walletOn, $nowWita) : [],
+        ];
+    }
+
+    /**
+     * @return array{
+     *     today: array{total: int, count: int, by_method: array{cash: int, transfer: int, midtrans: int}},
+     *     month: array{total: int, count: int, by_method: array{cash: int, transfer: int, midtrans: int}},
+     *     academic_year: array{total: int, count: int, by_method: array{cash: int, transfer: int, midtrans: int}},
+     *     pending_transfer_proofs: int,
+     * }
+     */
+    private function financeCashIn(?Unit $unit, ?int $yearId, CarbonImmutable $nowWita): array
+    {
+        $year = $yearId !== null ? AcademicYear::query()->find($yearId) : null;
+        $yearStart = ($year !== null ? $year->starts_on : $nowWita->startOfYear())->setTimezone(AttendanceClassifier::BUSINESS_TIMEZONE)->startOfDay();
+        $yearEnd = ($year !== null ? $year->ends_on : $nowWita->endOfYear())->setTimezone(AttendanceClassifier::BUSINESS_TIMEZONE)->endOfDay();
+
+        $summarize = function (CarbonImmutable $fromWita, CarbonImmutable $toWita) use ($unit): array {
+            $rows = Payment::query()
+                ->whereNull('payments.reversed_at')
+                ->whereBetween('payments.paid_at', [$fromWita->utc(), $toWita->utc()])
+                ->when($unit !== null, fn (Builder $q) => $q->whereHas('student', fn (Builder $s) => $s->where('unit_id', $unit->id)))
+                ->selectRaw('payments.method as method, count(*) as tx_count, coalesce(sum(payments.amount), 0) as total_amount')
+                ->groupBy('payments.method')
+                ->get();
+
+            $byMethod = [
+                PaymentMethod::Cash->value => 0,
+                PaymentMethod::Transfer->value => 0,
+                PaymentMethod::Midtrans->value => 0,
+            ];
+            $total = 0;
+            $count = 0;
+
+            foreach ($rows as $row) {
+                $methodKey = (string) $row->getRawOriginal('method');
+                $amount = (int) $row->getAttribute('total_amount');
+                $txCount = (int) $row->getAttribute('tx_count');
+
+                if (array_key_exists($methodKey, $byMethod)) {
+                    $byMethod[$methodKey] += $amount;
+                }
+
+                $total += $amount;
+                $count += $txCount;
+            }
+
+            return [
+                'total' => $total,
+                'count' => $count,
+                'by_method' => [
+                    'cash' => $byMethod[PaymentMethod::Cash->value],
+                    'transfer' => $byMethod[PaymentMethod::Transfer->value],
+                    'midtrans' => $byMethod[PaymentMethod::Midtrans->value],
+                ],
+            ];
+        };
+
+        $pendingProofs = TransferProof::query()
+            ->where('status', TransferProofStatus::Pending->value)
+            ->when($unit !== null, fn (Builder $q) => $q->whereHas('student', fn (Builder $s) => $s->where('unit_id', $unit->id)))
+            ->count();
+
+        return [
+            'today' => $summarize($nowWita->startOfDay(), $nowWita->endOfDay()),
+            'month' => $summarize($nowWita->startOfMonth(), $nowWita->endOfMonth()),
+            'academic_year' => $summarize($yearStart, $yearEnd),
+            'pending_transfer_proofs' => $pendingProofs,
+        ];
+    }
+
+    /**
+     * @return array{
+     *     total: int,
+     *     overdue: int,
+     *     overdue_count: int,
+     *     by_fee_type: list<array{fee_type_id: int, name: string, count: int, total: int, overdue: int}>,
+     *     by_classroom: list<array{classroom_id: ?int, name: string, student_count: int, total: int, overdue: int}>,
+     *     top_arrears: list<array{student_id: int, student_name: string, nis: string, classroom: string, overdue_count: int, overdue_amount: int}>,
+     * }
+     */
+    private function financeReceivables(?Unit $unit, ?int $yearId, CarbonImmutable $nowWita): array
+    {
+        $todayDate = $nowWita->toDateString();
+        $remainingExpr = 'CASE WHEN (invoices.amount - invoices.adjustment_total - invoices.paid_total) > 0 THEN (invoices.amount - invoices.adjustment_total - invoices.paid_total) ELSE 0 END';
+
+        $baseQuery = fn (): Builder => Invoice::query()
+            ->join('students', 'students.id', '=', 'invoices.student_id')
+            ->whereIn('invoices.status', [InvoiceStatus::Unpaid->value, InvoiceStatus::Partial->value])
+            ->when($unit !== null, fn (Builder $q) => $q->where('students.unit_id', $unit->id));
+
+        /** @var object{total_amount: int|string|null, overdue_amount: int|string|null, overdue_count: int|string|null}|null $summary */
+        $summary = $baseQuery()
+            ->selectRaw("coalesce(sum({$remainingExpr}), 0) as total_amount")
+            ->selectRaw("coalesce(sum(CASE WHEN invoices.due_date < ? THEN {$remainingExpr} ELSE 0 END), 0) as overdue_amount", [$todayDate])
+            ->selectRaw('coalesce(sum(CASE WHEN invoices.due_date < ? THEN 1 ELSE 0 END), 0) as overdue_count', [$todayDate])
+            ->toBase()
+            ->first();
+
+        $byFeeType = array_values($baseQuery()
+            ->join('fee_types', 'fee_types.id', '=', 'invoices.fee_type_id')
+            ->selectRaw('fee_types.id as fee_type_id, fee_types.name as fee_name, count(*) as invoice_count')
+            ->selectRaw("coalesce(sum({$remainingExpr}), 0) as total_amount")
+            ->selectRaw("coalesce(sum(CASE WHEN invoices.due_date < ? THEN {$remainingExpr} ELSE 0 END), 0) as overdue_amount", [$todayDate])
+            ->groupBy('fee_types.id', 'fee_types.name')
+            ->orderByDesc('total_amount')
+            ->orderBy('fee_types.name')
+            ->limit(8)
+            ->toBase()
+            ->get()
+            ->map(fn (object $row): array => [
+                'fee_type_id' => (int) $row->fee_type_id,
+                'name' => (string) $row->fee_name,
+                'count' => (int) $row->invoice_count,
+                'total' => (int) $row->total_amount,
+                'overdue' => (int) $row->overdue_amount,
+            ])
+            ->all());
+
+        $byClassroomQuery = $baseQuery();
+        if ($yearId !== null) {
+            $byClassroomQuery
+                ->leftJoin('enrollments', function ($join) use ($yearId): void {
+                    $join->on('enrollments.student_id', '=', 'students.id')
+                        ->where('enrollments.academic_year_id', '=', $yearId);
+                })
+                ->leftJoin('classrooms', 'classrooms.id', '=', 'enrollments.classroom_id');
+        } else {
+            $byClassroomQuery->leftJoin('classrooms', fn ($join) => $join->whereRaw('1 = 0'));
+        }
+
+        $byClassroom = array_values($byClassroomQuery
+            ->selectRaw("classrooms.id as classroom_id, coalesce(classrooms.name, 'Tanpa rombel') as classroom_name, count(distinct students.id) as student_count")
+            ->selectRaw("coalesce(sum({$remainingExpr}), 0) as total_amount")
+            ->selectRaw("coalesce(sum(CASE WHEN invoices.due_date < ? THEN {$remainingExpr} ELSE 0 END), 0) as overdue_amount", [$todayDate])
+            ->groupBy('classrooms.id', 'classrooms.name')
+            ->orderByDesc('overdue_amount')
+            ->orderByDesc('total_amount')
+            ->orderBy('classroom_name')
+            ->limit(10)
+            ->toBase()
+            ->get()
+            ->map(fn (object $row): array => [
+                'classroom_id' => $row->classroom_id !== null ? (int) $row->classroom_id : null,
+                'name' => (string) $row->classroom_name,
+                'student_count' => (int) $row->student_count,
+                'total' => (int) $row->total_amount,
+                'overdue' => (int) $row->overdue_amount,
+            ])
+            ->all());
+
+        $topArrearsRows = $baseQuery()
+            ->whereDate('invoices.due_date', '<', $todayDate)
+            ->selectRaw("students.id as student_id, students.name as student_name, students.nis as nis, count(*) as overdue_count, coalesce(sum({$remainingExpr}), 0) as overdue_amount")
+            ->groupBy('students.id', 'students.name', 'students.nis')
+            ->orderByDesc('overdue_amount')
+            ->orderBy('students.name')
+            ->limit(6)
+            ->toBase()
+            ->get();
+
+        $topStudentIds = $topArrearsRows->pluck('student_id')->map(fn (mixed $id): int => (int) $id)->all();
+        $classroomByStudent = $yearId !== null && $topStudentIds !== []
+            ? Enrollment::query()
+                ->where('academic_year_id', $yearId)
+                ->whereIn('student_id', $topStudentIds)
+                ->with('classroom:id,name')
+                ->get(['student_id', 'classroom_id'])
+                ->mapWithKeys(fn (Enrollment $e): array => [$e->student_id => $e->classroom->name])
+            : collect();
+
+        $topArrears = array_values($topArrearsRows->map(fn (object $row): array => [
+            'student_id' => (int) $row->student_id,
+            'student_name' => (string) $row->student_name,
+            'nis' => (string) $row->nis,
+            'classroom' => (string) $classroomByStudent->get((int) $row->student_id, '-'),
+            'overdue_count' => (int) $row->overdue_count,
+            'overdue_amount' => (int) $row->overdue_amount,
+        ])->all());
+
+        return [
+            'total' => (int) ($summary->total_amount ?? 0),
+            'overdue' => (int) ($summary->overdue_amount ?? 0),
+            'overdue_count' => (int) ($summary->overdue_count ?? 0),
+            'by_fee_type' => $byFeeType,
+            'by_classroom' => $byClassroom,
+            'top_arrears' => $topArrears,
+        ];
+    }
+
+    /**
+     * @return array{available: bool, midtrans_enabled: bool, pending_count: int, pending_amount: int, needs_review_count: int}
+     */
+    private function financeOnlineUnreconciled(?Unit $unit): array
+    {
+        $midtransEnabled = $this->features->enabled(Feature::Midtrans);
+
+        if (! Schema::hasTable('payment_orders')) {
+            return [
+                'available' => false,
+                'midtrans_enabled' => $midtransEnabled,
+                'pending_count' => 0,
+                'pending_amount' => 0,
+                'needs_review_count' => 0,
+            ];
+        }
+
+        $query = DB::table('payment_orders')
+            ->when($unit !== null && Schema::hasTable('payment_order_items'), function ($q) use ($unit): void {
+                $q->whereExists(function ($sub) use ($unit): void {
+                    $sub->selectRaw('1')
+                        ->from('payment_order_items')
+                        ->join('invoices', 'invoices.id', '=', 'payment_order_items.invoice_id')
+                        ->join('students', 'students.id', '=', 'invoices.student_id')
+                        ->whereColumn('payment_order_items.payment_order_id', 'payment_orders.id')
+                        ->where('students.unit_id', $unit->id);
+                });
+            });
+
+        /** @var object{pending_count: int|string|null, pending_amount: int|string|null, needs_review_count: int|string|null}|null $row */
+        $row = $query
+            ->selectRaw("coalesce(sum(CASE WHEN status = 'pending' THEN 1 ELSE 0 END), 0) as pending_count")
+            ->selectRaw("coalesce(sum(CASE WHEN status = 'pending' THEN gross_amount ELSE 0 END), 0) as pending_amount")
+            ->selectRaw("coalesce(sum(CASE WHEN status = 'needs_review' THEN 1 ELSE 0 END), 0) as needs_review_count")
+            ->first();
+
+        return [
+            'available' => true,
+            'midtrans_enabled' => $midtransEnabled,
+            'pending_count' => (int) ($row->pending_count ?? 0),
+            'pending_amount' => (int) ($row->pending_amount ?? 0),
+            'needs_review_count' => (int) ($row->needs_review_count ?? 0),
+        ];
+    }
+
+    /**
+     * @return array{available: bool, total_balance: int, active_wallets: int, frozen_wallets: int, topup_today: int, topup_month: int}
+     */
+    private function financeWallet(?Unit $unit, CarbonImmutable $nowWita): array
+    {
+        if (! Schema::hasTable('wallets') || ! Schema::hasTable('wallet_entries')) {
+            return [
+                'available' => false,
+                'total_balance' => 0,
+                'active_wallets' => 0,
+                'frozen_wallets' => 0,
+                'topup_today' => 0,
+                'topup_month' => 0,
+            ];
+        }
+
+        /** @var object{total_balance: int|string|null, active_wallets: int|string|null, frozen_wallets: int|string|null}|null $walletRow */
+        $walletRow = DB::table('wallets')
+            ->join('students', 'students.id', '=', 'wallets.student_id')
+            ->when($unit !== null, fn ($q) => $q->where('students.unit_id', $unit->id))
+            ->selectRaw('coalesce(sum(wallets.balance), 0) as total_balance')
+            ->selectRaw('coalesce(sum(CASE WHEN wallets.balance > 0 THEN 1 ELSE 0 END), 0) as active_wallets')
+            ->selectRaw('coalesce(sum(CASE WHEN wallets.is_frozen = 1 THEN 1 ELSE 0 END), 0) as frozen_wallets')
+            ->first();
+
+        /** @var object{topup_today: int|string|null, topup_month: int|string|null}|null $entryRow */
+        $entryRow = DB::table('wallet_entries')
+            ->join('wallets', 'wallets.id', '=', 'wallet_entries.wallet_id')
+            ->join('students', 'students.id', '=', 'wallets.student_id')
+            ->where('wallet_entries.type', 'topup')
+            ->whereBetween('wallet_entries.created_at', [$nowWita->startOfMonth()->utc(), $nowWita->endOfMonth()->utc()])
+            ->when($unit !== null, fn ($q) => $q->where('students.unit_id', $unit->id))
+            ->selectRaw('coalesce(sum(CASE WHEN wallet_entries.created_at >= ? AND wallet_entries.created_at <= ? THEN wallet_entries.amount ELSE 0 END), 0) as topup_today', [
+                $nowWita->startOfDay()->utc()->toDateTimeString(),
+                $nowWita->endOfDay()->utc()->toDateTimeString(),
+            ])
+            ->selectRaw('coalesce(sum(wallet_entries.amount), 0) as topup_month')
+            ->first();
+
+        return [
+            'available' => true,
+            'total_balance' => (int) ($walletRow->total_balance ?? 0),
+            'active_wallets' => (int) ($walletRow->active_wallets ?? 0),
+            'frozen_wallets' => (int) ($walletRow->frozen_wallets ?? 0),
+            'topup_today' => (int) ($entryRow->topup_today ?? 0),
+            'topup_month' => (int) ($entryRow->topup_month ?? 0),
+        ];
+    }
+
+    /**
+     * @return list<array{code: string, name: string, cash_in_month: int, receivables_total: int, receivables_overdue: int, wallet_balance: int}>
+     */
+    private function financeByUnit(bool $billingOn, bool $walletOn, CarbonImmutable $nowWita): array
+    {
+        $units = Unit::query()->where('is_active', true)->orderBy('code')->get(['id', 'code', 'name']);
+
+        $cashByUnit = collect();
+        $receivablesByUnit = collect();
+        $walletByUnit = collect();
+
+        if ($billingOn) {
+            $cashByUnit = Payment::query()
+                ->join('students', 'students.id', '=', 'payments.student_id')
+                ->whereNull('payments.reversed_at')
+                ->whereBetween('payments.paid_at', [$nowWita->startOfMonth()->utc(), $nowWita->endOfMonth()->utc()])
+                ->selectRaw('students.unit_id as unit_id, coalesce(sum(payments.amount), 0) as total_amount')
+                ->groupBy('students.unit_id')
+                ->pluck('total_amount', 'unit_id');
+
+            $todayDate = $nowWita->toDateString();
+            $remainingExpr = 'CASE WHEN (invoices.amount - invoices.adjustment_total - invoices.paid_total) > 0 THEN (invoices.amount - invoices.adjustment_total - invoices.paid_total) ELSE 0 END';
+
+            $receivablesByUnit = Invoice::query()
+                ->join('students', 'students.id', '=', 'invoices.student_id')
+                ->whereIn('invoices.status', [InvoiceStatus::Unpaid->value, InvoiceStatus::Partial->value])
+                ->selectRaw("students.unit_id as unit_id, coalesce(sum({$remainingExpr}), 0) as total_amount, coalesce(sum(CASE WHEN invoices.due_date < ? THEN {$remainingExpr} ELSE 0 END), 0) as overdue_amount", [$todayDate])
+                ->groupBy('students.unit_id')
+                ->toBase()
+                ->get()
+                ->keyBy('unit_id');
+        }
+
+        if ($walletOn && Schema::hasTable('wallets')) {
+            $walletByUnit = DB::table('wallets')
+                ->join('students', 'students.id', '=', 'wallets.student_id')
+                ->selectRaw('students.unit_id as unit_id, coalesce(sum(wallets.balance), 0) as total_balance')
+                ->groupBy('students.unit_id')
+                ->pluck('total_balance', 'unit_id');
+        }
+
+        return array_values($units->map(function (Unit $unit) use ($cashByUnit, $receivablesByUnit, $walletByUnit): array {
+            /** @var object{total_amount: int|string, overdue_amount: int|string}|null $rec */
+            $rec = $receivablesByUnit->get($unit->id);
+
+            return [
+                'code' => $unit->code,
+                'name' => $unit->name,
+                'cash_in_month' => (int) ($cashByUnit[$unit->id] ?? 0),
+                'receivables_total' => (int) ($rec->total_amount ?? 0),
+                'receivables_overdue' => (int) ($rec->overdue_amount ?? 0),
+                'wallet_balance' => (int) ($walletByUnit[$unit->id] ?? 0),
+            ];
+        })->all());
     }
 }

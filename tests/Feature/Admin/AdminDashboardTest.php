@@ -5,6 +5,8 @@ declare(strict_types=1);
 use App\Enums\ExamSessionStatus;
 use App\Enums\ExamStatus;
 use App\Enums\Feature;
+use App\Enums\InvoiceStatus;
+use App\Enums\PaymentMethod;
 use App\Enums\Role as RoleEnum;
 use App\Models\AcademicYear;
 use App\Models\AttendanceDay;
@@ -12,7 +14,10 @@ use App\Models\Classroom;
 use App\Models\Enrollment;
 use App\Models\Exam;
 use App\Models\ExamSession;
+use App\Models\FeeType;
+use App\Models\Invoice;
 use App\Models\LeaveRequest;
+use App\Models\Payment;
 use App\Models\Student;
 use App\Models\Unit;
 use App\Models\User;
@@ -270,4 +275,210 @@ test('lonceng perlu tindakan hanya memuat hitungan nyata sesuai izin dan rombel 
 
     $this->actingAs($treasurer)->get(route('admin.dashboard'))
         ->assertInertia(fn (Assert $page) => $page->where('attention', []));
+});
+
+test('dasbor keuangan muncul saat billing atau wallet aktif untuk admin, bendahara, dan kepala unit saja', function (): void {
+    ['unit' => $mi, 'year' => $year] = dashboardSchool();
+    $admin = User::factory()->create();
+    $admin->assignRole(RoleEnum::Admin->value);
+
+    // Bawaan: billing & wallet nonaktif -> foundation tampil, finance null.
+    $this->actingAs($admin)
+        ->get(route('admin.dashboard'))
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('finance', null)
+            ->has('foundation.modules', 8)
+        );
+
+    app(FeatureFlags::class)->update([
+        Feature::Billing->value => true,
+    ], $admin);
+
+    foreach ([RoleEnum::Admin, RoleEnum::Treasurer, RoleEnum::UnitHead] as $role) {
+        $staff = User::factory()->create();
+        $staff->assignRole($role->value);
+
+        $this->actingAs($staff)
+            ->get(route('admin.dashboard'))
+            ->assertInertia(fn (Assert $page) => $page
+                ->where('foundation', null)
+                ->has('finance')
+                ->where('finance.billing_enabled', true)
+            );
+    }
+
+    foreach ([RoleEnum::Teacher, RoleEnum::Counselor] as $role) {
+        $staff = User::factory()->create();
+        $staff->assignRole($role->value);
+
+        $this->actingAs($staff)
+            ->get(route('admin.dashboard'))
+            ->assertInertia(fn (Assert $page) => $page
+                ->where('finance', null)
+                ->where('foundation', null)
+            );
+    }
+});
+
+test('dasbor keuangan menghitung kas masuk, piutang per jenis dan rombel, tunggakan teratas, dan semua unit sesuai ledger', function (): void {
+    $this->travelTo(CarbonImmutable::parse('2026-11-28 10:00', 'Asia/Makassar'));
+
+    $mi = Unit::factory()->create(['code' => 'MI', 'name' => 'Madrasah Ibtidaiyah']);
+    $ra = Unit::factory()->create(['code' => 'RA', 'name' => 'Raudhatul Athfal']);
+    $year = AcademicYear::factory()->active()->create([
+        'starts_on' => '2026-07-01',
+        'ends_on' => '2027-06-30',
+    ]);
+
+    $class1A = Classroom::factory()->for($mi)->for($year)->create(['name' => '1-A']);
+    $class2A = Classroom::factory()->for($mi)->for($year)->create(['name' => '2-A']);
+    $classRa = Classroom::factory()->for($ra)->for($year)->create(['name' => 'RA-A']);
+
+    [$s1] = enrollIn($class1A, 1)->all();
+    [$s2] = enrollIn($class2A, 1)->all();
+    [$sRa] = enrollIn($classRa, 1)->all();
+
+    $sppMi = FeeType::factory()->for($mi)->create(['name' => 'SPP MI']);
+    $gedungMi = FeeType::factory()->for($mi)->create(['name' => 'Uang Gedung MI']);
+    $sppRa = FeeType::factory()->for($ra)->create(['name' => 'SPP RA']);
+
+    // Tagihan MI:
+    // s1: menunggak SPP 200.000 (belum bayar) + Uang Gedung 500.000 (sebagian: diskon 50.000, bayar 150.000 -> sisa 300.000, belum jatuh tempo)
+    Invoice::factory()->for($s1)->for($sppMi)->create([
+        'amount' => 200_000,
+        'adjustment_total' => 0,
+        'paid_total' => 0,
+        'due_date' => '2026-11-10',
+        'status' => InvoiceStatus::Unpaid,
+    ]);
+    Invoice::factory()->for($s1)->for($gedungMi)->create([
+        'amount' => 500_000,
+        'adjustment_total' => 50_000,
+        'paid_total' => 150_000,
+        'due_date' => '2026-12-10',
+        'status' => InvoiceStatus::Partial,
+    ]);
+    // s2: menunggak SPP 350.000 + dibatalkan 100.000 (harus diabaikan)
+    Invoice::factory()->for($s2)->for($sppMi)->create([
+        'amount' => 350_000,
+        'adjustment_total' => 0,
+        'paid_total' => 0,
+        'due_date' => '2026-11-15',
+        'status' => InvoiceStatus::Unpaid,
+    ]);
+    Invoice::factory()->for($s2)->for($sppMi)->create([
+        'period' => '2026-10-01',
+        'amount' => 100_000,
+        'adjustment_total' => 0,
+        'paid_total' => 0,
+        'due_date' => '2026-11-10',
+        'status' => InvoiceStatus::Cancelled,
+    ]);
+    // sRa: menunggak SPP RA 120.000
+    Invoice::factory()->for($sRa)->for($sppRa)->create([
+        'amount' => 120_000,
+        'adjustment_total' => 0,
+        'paid_total' => 0,
+        'due_date' => '2026-11-20',
+        'status' => InvoiceStatus::Unpaid,
+    ]);
+
+    // Pembayaran MI:
+    $admin = User::factory()->create();
+    $admin->assignRole(RoleEnum::Admin->value);
+
+    // 1. Tunai hari ini 150.000
+    Payment::query()->create([
+        'student_id' => $s1->id,
+        'method' => PaymentMethod::Cash,
+        'amount' => 150_000,
+        'paid_at' => CarbonImmutable::parse('2026-11-28 08:30', 'Asia/Makassar')->utc(),
+        'received_by' => $admin->id,
+        'receipt_number' => 'KW-2026-000001',
+        'created_at' => now(),
+    ]);
+    // 2. Transfer bulan ini (bukan hari ini) 250.000
+    Payment::query()->create([
+        'student_id' => $s2->id,
+        'method' => PaymentMethod::Transfer,
+        'amount' => 250_000,
+        'paid_at' => CarbonImmutable::parse('2026-11-05 09:00', 'Asia/Makassar')->utc(),
+        'received_by' => $admin->id,
+        'receipt_number' => 'KW-2026-000002',
+        'created_at' => now(),
+    ]);
+    // 3. Midtrans bulan lalu (tahun ajaran ini) 300.000
+    Payment::query()->create([
+        'student_id' => $s1->id,
+        'method' => PaymentMethod::Midtrans,
+        'amount' => 300_000,
+        'paid_at' => CarbonImmutable::parse('2026-10-10 12:00', 'Asia/Makassar')->utc(),
+        'received_by' => null,
+        'receipt_number' => 'KW-2026-000003',
+        'created_at' => now(),
+    ]);
+    // 4. Pembayaran dibalik (harus diabaikan)
+    Payment::query()->create([
+        'student_id' => $s1->id,
+        'method' => PaymentMethod::Cash,
+        'amount' => 999_000,
+        'paid_at' => CarbonImmutable::parse('2026-11-28 09:00', 'Asia/Makassar')->utc(),
+        'received_by' => $admin->id,
+        'receipt_number' => 'KW-2026-000004',
+        'reversed_at' => now(),
+        'reversal_reason' => 'Salah input',
+        'reversed_by' => $admin->id,
+        'created_at' => now(),
+    ]);
+    // 5. Pembayaran RA bulan ini 100.000
+    Payment::query()->create([
+        'student_id' => $sRa->id,
+        'method' => PaymentMethod::Cash,
+        'amount' => 100_000,
+        'paid_at' => CarbonImmutable::parse('2026-11-28 09:30', 'Asia/Makassar')->utc(),
+        'received_by' => $admin->id,
+        'receipt_number' => 'KW-2026-000005',
+        'created_at' => now(),
+    ]);
+
+    app(FeatureFlags::class)->update([
+        Feature::Billing->value => true,
+        Feature::Wallet->value => true,
+    ], $admin);
+
+    // Scope unit terpilih (MI default karena urut kode: MI < RA)
+    $this->actingAs($admin)
+        ->get(route('admin.dashboard'))
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('finance.scope', 'unit')
+            ->where('finance.unit_code', 'MI')
+            ->where('finance.cash_in.today.total', 150_000)
+            ->where('finance.cash_in.today.by_method.cash', 150_000)
+            ->where('finance.cash_in.month.total', 400_000)
+            ->where('finance.cash_in.month.by_method.transfer', 250_000)
+            ->where('finance.cash_in.academic_year.total', 700_000)
+            ->where('finance.cash_in.academic_year.by_method.midtrans', 300_000)
+            ->where('finance.receivables.total', 850_000)
+            ->where('finance.receivables.overdue', 550_000)
+            ->where('finance.receivables.overdue_count', 2)
+            ->where('finance.receivables.by_fee_type.0.name', 'SPP MI')
+            ->where('finance.receivables.by_fee_type.0.total', 550_000)
+            ->where('finance.receivables.by_classroom.0.name', '2-A')
+            ->where('finance.receivables.by_classroom.0.overdue', 350_000)
+            ->where('finance.receivables.top_arrears.0.student_id', $s2->id)
+            ->where('finance.receivables.top_arrears.0.overdue_amount', 350_000)
+            ->where('finance.receivables.top_arrears.1.student_id', $s1->id)
+            ->where('finance.receivables.top_arrears.1.overdue_amount', 200_000)
+            ->has('finance.by_unit', 2)
+        );
+
+    // Scope semua unit untuk admin/bendahara
+    $this->actingAs($admin)
+        ->get(route('admin.dashboard', ['finance_scope' => 'all']))
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('finance.scope', 'all')
+            ->where('finance.cash_in.today.total', 250_000)
+            ->where('finance.receivables.total', 970_000)
+            ->where('finance.receivables.overdue', 670_000)
+        );
 });

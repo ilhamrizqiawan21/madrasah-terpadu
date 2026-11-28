@@ -1,18 +1,22 @@
-import { Head, Link, usePage } from '@inertiajs/react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import { CalendarOff, CircleCheck, GraduationCap, Upload } from 'lucide-react';
 import AttendanceController from '@/actions/App/Http/Controllers/Admin/AttendanceController';
+import CashierController from '@/actions/App/Http/Controllers/Admin/CashierController';
 import CbtEssayScoreController from '@/actions/App/Http/Controllers/Admin/CbtEssayScoreController';
 import CbtExamController from '@/actions/App/Http/Controllers/Admin/CbtExamController';
 import CbtMonitorController from '@/actions/App/Http/Controllers/Admin/CbtMonitorController';
 import ClassroomController from '@/actions/App/Http/Controllers/Admin/ClassroomController';
 import GuardianController from '@/actions/App/Http/Controllers/Admin/GuardianController';
+import InvoiceController from '@/actions/App/Http/Controllers/Admin/InvoiceController';
 import LeaveRequestController from '@/actions/App/Http/Controllers/Admin/LeaveRequestController';
 import StudentController from '@/actions/App/Http/Controllers/Admin/StudentController';
 import StudentImportController from '@/actions/App/Http/Controllers/Admin/StudentImportController';
 import StudentMutationController from '@/actions/App/Http/Controllers/Admin/StudentMutationController';
 import StudentPromotionController from '@/actions/App/Http/Controllers/Admin/StudentPromotionController';
+import TransferProofController from '@/actions/App/Http/Controllers/Admin/TransferProofController';
 import { DashboardPanel } from '@/components/app/dashboard-panel';
 import { DateText } from '@/components/app/date-text';
+import { MoneyText } from '@/components/app/money-text';
 import type { StatusBadgeVariant } from '@/components/app/status-badge';
 import { StatusBadge } from '@/components/app/status-badge';
 import { Button } from '@/components/ui/button';
@@ -88,6 +92,81 @@ type Exams = {
     }[];
 };
 
+type CashInPeriod = {
+    total: number;
+    count: number;
+    by_method: {
+        cash: number;
+        transfer: number;
+        midtrans: number;
+    };
+};
+
+type FinanceDashboard = {
+    scope: 'unit' | 'all';
+    can_view_all_units: boolean;
+    unit_code: string | null;
+    unit_name: string | null;
+    billing_enabled: boolean;
+    wallet_enabled: boolean;
+    cash_in: {
+        today: CashInPeriod;
+        month: CashInPeriod;
+        academic_year: CashInPeriod;
+        pending_transfer_proofs: number;
+    } | null;
+    receivables: {
+        total: number;
+        overdue: number;
+        overdue_count: number;
+        by_fee_type: {
+            fee_type_id: number;
+            name: string;
+            count: number;
+            total: number;
+            overdue: number;
+        }[];
+        by_classroom: {
+            classroom_id: number | null;
+            name: string;
+            student_count: number;
+            total: number;
+            overdue: number;
+        }[];
+        top_arrears: {
+            student_id: number;
+            student_name: string;
+            nis: string;
+            classroom: string;
+            overdue_count: number;
+            overdue_amount: number;
+        }[];
+    } | null;
+    online_unreconciled: {
+        available: boolean;
+        midtrans_enabled: boolean;
+        pending_count: number;
+        pending_amount: number;
+        needs_review_count: number;
+    };
+    wallet: {
+        available: boolean;
+        total_balance: number;
+        active_wallets: number;
+        frozen_wallets: number;
+        topup_today: number;
+        topup_month: number;
+    } | null;
+    by_unit: {
+        code: string;
+        name: string;
+        cash_in_month: number;
+        receivables_total: number;
+        receivables_overdue: number;
+        wallet_balance: number;
+    }[];
+};
+
 type MutationSummary = {
     id: number;
     type: { value: 'in' | 'out' | 'graduated'; label: string };
@@ -127,6 +206,7 @@ type Props = {
             status: 'held' | 'deferred' | 'out_of_scope' | 'planned';
         }[];
     } | null;
+    finance: FinanceDashboard | null;
     security: {
         failed_logins_24h: number;
         recent_logins: { name: string; at: string }[];
@@ -206,6 +286,7 @@ export default function AdminDashboard({
     queue,
     heldModules,
     foundation,
+    finance,
     security,
     units,
     recentMutations,
@@ -326,6 +407,7 @@ export default function AdminDashboard({
                 </section>
 
                 {foundation && <FoundationRow foundation={foundation} />}
+                {finance && <FinanceSection finance={finance} />}
 
                 {(hasMain || hasSide) && (
                     <div
@@ -1194,6 +1276,596 @@ function FoundationRow({
                     );
                 })}
             </ul>
+        </section>
+    );
+}
+
+/**
+ * Dasbor keuangan nyata di beranda staf (T-617): muncul otomatis saat `billing` atau `wallet` aktif,
+ * menggantikan kartu "keuangan masih di aplikasi lama".
+ */
+function FinanceSection({ finance }: { finance: FinanceDashboard }) {
+    const scopeLabel =
+        finance.scope === 'all'
+            ? 'Semua unit'
+            : finance.unit_code
+              ? `${finance.unit_code}${finance.unit_name ? ` — ${finance.unit_name}` : ''}`
+              : 'Unit terpilih';
+
+    const switchScope = (nextScope: 'unit' | 'all') => {
+        router.get(
+            dashboard(),
+            nextScope === 'all' ? { finance_scope: 'all' } : {},
+            { preserveScroll: true, preserveState: true },
+        );
+    };
+
+    const cashIn = finance.cash_in;
+    const receivables = finance.receivables;
+    const online = finance.online_unreconciled;
+    const wallet = finance.wallet;
+
+    return (
+        <section aria-labelledby="finance-title" className="space-y-4">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+                <div>
+                    <h2 id="finance-title" className="text-base font-semibold">
+                        Keuangan sekolah
+                    </h2>
+                    <p className="text-xs text-muted-foreground">
+                        Cakupan: {scopeLabel}
+                    </p>
+                </div>
+
+                <div className="flex flex-wrap items-center gap-2">
+                    {finance.can_view_all_units && (
+                        <div
+                            role="group"
+                            aria-label="Cakupan unit keuangan"
+                            className="inline-flex rounded-md border border-border bg-card p-0.5"
+                        >
+                            <button
+                                type="button"
+                                onClick={() => switchScope('unit')}
+                                aria-pressed={finance.scope === 'unit'}
+                                className={cn(
+                                    'rounded px-2.5 py-1 text-xs font-medium transition-colors',
+                                    finance.scope === 'unit'
+                                        ? 'bg-primary text-primary-foreground'
+                                        : 'text-muted-foreground hover:text-foreground',
+                                )}
+                            >
+                                Unit terpilih
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => switchScope('all')}
+                                aria-pressed={finance.scope === 'all'}
+                                className={cn(
+                                    'rounded px-2.5 py-1 text-xs font-medium transition-colors',
+                                    finance.scope === 'all'
+                                        ? 'bg-primary text-primary-foreground'
+                                        : 'text-muted-foreground hover:text-foreground',
+                                )}
+                            >
+                                Semua unit
+                            </button>
+                        </div>
+                    )}
+
+                    {finance.billing_enabled && (
+                        <>
+                            {cashIn && cashIn.pending_transfer_proofs > 0 && (
+                                <Button size="sm" variant="outline" asChild>
+                                    <Link
+                                        href={TransferProofController.index()}
+                                    >
+                                        <span className="inline-block size-2 rounded-full bg-accent-attention" />
+                                        Bukti transfer (
+                                        {numberFormatter.format(
+                                            cashIn.pending_transfer_proofs,
+                                        )}
+                                        )
+                                    </Link>
+                                </Button>
+                            )}
+                            <Button size="sm" variant="outline" asChild>
+                                <Link href={InvoiceController.index()}>
+                                    Daftar tagihan
+                                </Link>
+                            </Button>
+                            <Button size="sm" asChild>
+                                <Link href={CashierController.index()}>
+                                    Buka kasir
+                                </Link>
+                            </Button>
+                        </>
+                    )}
+                </div>
+            </div>
+
+            {cashIn && (
+                <DashboardPanel
+                    title="Kas masuk"
+                    meta="Pembayaran sah per periode dan metode (WITA)"
+                >
+                    <div className="grid gap-4 sm:grid-cols-3">
+                        {(
+                            [
+                                { key: 'today', label: 'Hari ini' },
+                                { key: 'month', label: 'Bulan ini' },
+                                { key: 'academic_year', label: 'Tahun ajaran' },
+                            ] as const
+                        ).map(({ key, label }) => {
+                            const period = cashIn[key];
+
+                            return (
+                                <div
+                                    key={key}
+                                    className="rounded-lg border border-border bg-muted/30 p-3.5"
+                                >
+                                    <div className="flex items-baseline justify-between gap-2">
+                                        <span className="text-xs font-medium text-muted-foreground">
+                                            {label}
+                                        </span>
+                                        <span className="text-xs text-muted-foreground tabular-nums">
+                                            {numberFormatter.format(
+                                                period.count,
+                                            )}{' '}
+                                            transaksi
+                                        </span>
+                                    </div>
+                                    <p className="mt-1 text-xl font-semibold">
+                                        <MoneyText amount={period.total} />
+                                    </p>
+                                    <dl className="mt-3 space-y-1 border-t border-border pt-2 text-xs">
+                                        <div className="flex justify-between gap-2">
+                                            <dt className="text-muted-foreground">
+                                                Tunai
+                                            </dt>
+                                            <dd>
+                                                <MoneyText
+                                                    amount={
+                                                        period.by_method.cash
+                                                    }
+                                                />
+                                            </dd>
+                                        </div>
+                                        <div className="flex justify-between gap-2">
+                                            <dt className="text-muted-foreground">
+                                                Transfer
+                                            </dt>
+                                            <dd>
+                                                <MoneyText
+                                                    amount={
+                                                        period.by_method
+                                                            .transfer
+                                                    }
+                                                />
+                                            </dd>
+                                        </div>
+                                        <div className="flex justify-between gap-2">
+                                            <dt className="text-muted-foreground">
+                                                Midtrans
+                                            </dt>
+                                            <dd>
+                                                <MoneyText
+                                                    amount={
+                                                        period.by_method
+                                                            .midtrans
+                                                    }
+                                                />
+                                            </dd>
+                                        </div>
+                                    </dl>
+                                </div>
+                            );
+                        })}
+                    </div>
+                </DashboardPanel>
+            )}
+
+            {receivables && (
+                <div className="grid items-start gap-6 lg:grid-cols-3">
+                    <div className="space-y-6 lg:col-span-2">
+                        <DashboardPanel
+                            title="Piutang tagihan"
+                            meta="Sisa tagihan aktif per jenis tagihan dan rombel"
+                            action={{
+                                label: 'Lihat semua',
+                                href: InvoiceController.index(),
+                            }}
+                        >
+                            <div className="grid gap-3 border-b border-border pb-4 sm:grid-cols-2">
+                                <div className="rounded-lg border border-border bg-muted/30 px-3.5 py-2.5">
+                                    <p className="text-xs text-muted-foreground">
+                                        Total piutang aktif
+                                    </p>
+                                    <p className="mt-0.5 text-lg font-semibold">
+                                        <MoneyText amount={receivables.total} />
+                                    </p>
+                                </div>
+                                <div className="rounded-lg border border-border bg-muted/30 px-3.5 py-2.5">
+                                    <p className="text-xs text-muted-foreground">
+                                        Sudah jatuh tempo (
+                                        {numberFormatter.format(
+                                            receivables.overdue_count,
+                                        )}{' '}
+                                        tagihan)
+                                    </p>
+                                    <p
+                                        className={cn(
+                                            'mt-0.5 text-lg font-semibold',
+                                            receivables.overdue > 0 &&
+                                                'text-destructive',
+                                        )}
+                                    >
+                                        <MoneyText
+                                            amount={receivables.overdue}
+                                        />
+                                    </p>
+                                </div>
+                            </div>
+
+                            {receivables.by_fee_type.length === 0 &&
+                            receivables.by_classroom.length === 0 ? (
+                                <p className="pt-4 text-sm text-muted-foreground">
+                                    Belum ada piutang tagihan aktif pada cakupan
+                                    ini.
+                                </p>
+                            ) : (
+                                <div className="mt-4 grid gap-5 md:grid-cols-2">
+                                    <div>
+                                        <h3 className="mb-2 text-xs font-semibold text-muted-foreground">
+                                            Per jenis tagihan
+                                        </h3>
+                                        <div className="overflow-x-auto">
+                                            <table className="w-full text-sm">
+                                                <thead className="text-xs text-muted-foreground">
+                                                    <tr className="border-b border-border">
+                                                        <th className="py-1.5 pr-2 text-left font-medium">
+                                                            Jenis
+                                                        </th>
+                                                        <th className="px-2 py-1.5 text-right font-medium">
+                                                            Sisa
+                                                        </th>
+                                                        <th className="py-1.5 pl-2 text-right font-medium">
+                                                            Menunggak
+                                                        </th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody className="divide-y divide-border">
+                                                    {receivables.by_fee_type.map(
+                                                        (row) => (
+                                                            <tr
+                                                                key={
+                                                                    row.fee_type_id
+                                                                }
+                                                            >
+                                                                <td className="py-2 pr-2 font-medium">
+                                                                    {row.name}
+                                                                </td>
+                                                                <td className="px-2 py-2 text-right">
+                                                                    <MoneyText
+                                                                        amount={
+                                                                            row.total
+                                                                        }
+                                                                    />
+                                                                </td>
+                                                                <td
+                                                                    className={cn(
+                                                                        'py-2 pl-2 text-right',
+                                                                        row.overdue >
+                                                                            0 &&
+                                                                            'text-destructive',
+                                                                    )}
+                                                                >
+                                                                    <MoneyText
+                                                                        amount={
+                                                                            row.overdue
+                                                                        }
+                                                                    />
+                                                                </td>
+                                                            </tr>
+                                                        ),
+                                                    )}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <h3 className="mb-2 text-xs font-semibold text-muted-foreground">
+                                            Per rombel
+                                        </h3>
+                                        <div className="overflow-x-auto">
+                                            <table className="w-full text-sm">
+                                                <thead className="text-xs text-muted-foreground">
+                                                    <tr className="border-b border-border">
+                                                        <th className="py-1.5 pr-2 text-left font-medium">
+                                                            Rombel
+                                                        </th>
+                                                        <th className="px-2 py-1.5 text-right font-medium">
+                                                            Sisa
+                                                        </th>
+                                                        <th className="py-1.5 pl-2 text-right font-medium">
+                                                            Menunggak
+                                                        </th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody className="divide-y divide-border">
+                                                    {receivables.by_classroom.map(
+                                                        (row) => (
+                                                            <tr
+                                                                key={
+                                                                    row.classroom_id ??
+                                                                    'none'
+                                                                }
+                                                            >
+                                                                <td className="py-2 pr-2 font-medium">
+                                                                    {row.name}
+                                                                </td>
+                                                                <td className="px-2 py-2 text-right">
+                                                                    <MoneyText
+                                                                        amount={
+                                                                            row.total
+                                                                        }
+                                                                    />
+                                                                </td>
+                                                                <td
+                                                                    className={cn(
+                                                                        'py-2 pl-2 text-right',
+                                                                        row.overdue >
+                                                                            0 &&
+                                                                            'text-destructive',
+                                                                    )}
+                                                                >
+                                                                    <MoneyText
+                                                                        amount={
+                                                                            row.overdue
+                                                                        }
+                                                                    />
+                                                                </td>
+                                                            </tr>
+                                                        ),
+                                                    )}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+                        </DashboardPanel>
+                    </div>
+
+                    <DashboardPanel
+                        title="Tunggakan teratas"
+                        meta="Siswa dengan tagihan jatuh tempo terbesar"
+                        tone={
+                            receivables.top_arrears.length > 0
+                                ? 'attention'
+                                : 'default'
+                        }
+                    >
+                        {receivables.top_arrears.length === 0 ? (
+                            <p className="text-sm text-muted-foreground">
+                                Tidak ada tagihan jatuh tempo pada cakupan ini.
+                            </p>
+                        ) : (
+                            <ul className="divide-y divide-border">
+                                {receivables.top_arrears.map((item) => (
+                                    <li
+                                        key={item.student_id}
+                                        className="flex items-center justify-between gap-3 py-2.5 first:pt-0 last:pb-0"
+                                    >
+                                        <div className="min-w-0">
+                                            <Link
+                                                href={InvoiceController.studentCard(
+                                                    {
+                                                        student:
+                                                            item.student_id,
+                                                    },
+                                                )}
+                                                className="block truncate text-sm font-medium hover:text-primary hover:underline"
+                                            >
+                                                {item.student_name}
+                                            </Link>
+                                            <p className="text-xs text-muted-foreground">
+                                                {item.nis} · {item.classroom} ·{' '}
+                                                {numberFormatter.format(
+                                                    item.overdue_count,
+                                                )}{' '}
+                                                tagihan
+                                            </p>
+                                        </div>
+                                        <span className="shrink-0 text-sm font-semibold text-destructive">
+                                            <MoneyText
+                                                amount={item.overdue_amount}
+                                            />
+                                        </span>
+                                    </li>
+                                ))}
+                            </ul>
+                        )}
+                    </DashboardPanel>
+                </div>
+            )}
+
+            <div className="grid gap-6 md:grid-cols-2">
+                <DashboardPanel
+                    title="Pembayaran online"
+                    meta="Order Midtrans yang menunggu konfirmasi atau rekonsiliasi"
+                >
+                    {!online.available ? (
+                        <p className="text-sm text-muted-foreground">
+                            {online.midtrans_enabled
+                                ? 'Tabel pembayaran online belum tersedia.'
+                                : 'Pembayaran online (Midtrans) belum diaktifkan.'}
+                        </p>
+                    ) : online.pending_count === 0 &&
+                      online.needs_review_count === 0 ? (
+                        <p className="text-sm text-muted-foreground">
+                            Semua pembayaran online sudah terekonsiliasi.
+                        </p>
+                    ) : (
+                        <dl className="grid grid-cols-2 gap-3 text-sm">
+                            <div className="rounded-lg border border-border bg-muted/30 px-3 py-2.5">
+                                <dt className="text-xs text-muted-foreground">
+                                    Menunggu konfirmasi
+                                </dt>
+                                <dd className="mt-0.5 font-semibold tabular-nums">
+                                    {numberFormatter.format(
+                                        online.pending_count,
+                                    )}{' '}
+                                    order ·{' '}
+                                    <MoneyText amount={online.pending_amount} />
+                                </dd>
+                            </div>
+                            <div className="rounded-lg border border-border bg-muted/30 px-3 py-2.5">
+                                <dt className="text-xs text-muted-foreground">
+                                    Perlu tinjauan
+                                </dt>
+                                <dd
+                                    className={cn(
+                                        'mt-0.5 font-semibold tabular-nums',
+                                        online.needs_review_count > 0 &&
+                                            'text-destructive',
+                                    )}
+                                >
+                                    {numberFormatter.format(
+                                        online.needs_review_count,
+                                    )}{' '}
+                                    order
+                                </dd>
+                            </div>
+                        </dl>
+                    )}
+                </DashboardPanel>
+
+                {wallet && (
+                    <DashboardPanel
+                        title="Dompet kantin"
+                        meta="Saldo mengendap dan isi saldo (top-up) siswa"
+                    >
+                        {!wallet.available ? (
+                            <p className="text-sm text-muted-foreground">
+                                Data dompet kantin belum tersedia.
+                            </p>
+                        ) : (
+                            <dl className="grid grid-cols-2 gap-3 text-sm sm:grid-cols-3">
+                                <div className="rounded-lg border border-border bg-muted/30 px-3 py-2.5">
+                                    <dt className="text-xs text-muted-foreground">
+                                        Saldo mengendap
+                                    </dt>
+                                    <dd className="mt-0.5 font-semibold">
+                                        <MoneyText
+                                            amount={wallet.total_balance}
+                                        />
+                                    </dd>
+                                </div>
+                                <div className="rounded-lg border border-border bg-muted/30 px-3 py-2.5">
+                                    <dt className="text-xs text-muted-foreground">
+                                        Top-up hari ini
+                                    </dt>
+                                    <dd className="mt-0.5 font-semibold">
+                                        <MoneyText
+                                            amount={wallet.topup_today}
+                                        />
+                                    </dd>
+                                </div>
+                                <div className="rounded-lg border border-border bg-muted/30 px-3 py-2.5">
+                                    <dt className="text-xs text-muted-foreground">
+                                        Top-up bulan ini
+                                    </dt>
+                                    <dd className="mt-0.5 font-semibold">
+                                        <MoneyText
+                                            amount={wallet.topup_month}
+                                        />
+                                    </dd>
+                                </div>
+                            </dl>
+                        )}
+                    </DashboardPanel>
+                )}
+            </div>
+
+            {finance.by_unit.length > 0 && (
+                <DashboardPanel
+                    title="Ringkasan keuangan per unit"
+                    meta="Kas masuk bulan ini dan piutang aktif per unit"
+                    bodyClassName="p-0 sm:p-0"
+                >
+                    <div className="overflow-x-auto">
+                        <table className="w-full min-w-[520px] text-sm">
+                            <thead className="text-xs text-muted-foreground">
+                                <tr className="border-b border-border">
+                                    <th className="px-4 py-2 text-left font-medium sm:px-5">
+                                        Unit
+                                    </th>
+                                    <th className="px-3 py-2 text-right font-medium">
+                                        Kas masuk bulan ini
+                                    </th>
+                                    <th className="px-3 py-2 text-right font-medium">
+                                        Piutang aktif
+                                    </th>
+                                    <th className="px-4 py-2 text-right font-medium sm:px-5">
+                                        Menunggak
+                                    </th>
+                                    {finance.wallet_enabled && (
+                                        <th className="px-4 py-2 text-right font-medium sm:px-5">
+                                            Saldo dompet
+                                        </th>
+                                    )}
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-border">
+                                {finance.by_unit.map((unit) => (
+                                    <tr key={unit.code}>
+                                        <td className="px-4 py-2.5 sm:px-5">
+                                            <div className="font-medium">
+                                                {unit.code}
+                                            </div>
+                                            <div className="text-xs text-muted-foreground">
+                                                {unit.name}
+                                            </div>
+                                        </td>
+                                        <td className="px-3 py-2.5 text-right">
+                                            <MoneyText
+                                                amount={unit.cash_in_month}
+                                            />
+                                        </td>
+                                        <td className="px-3 py-2.5 text-right">
+                                            <MoneyText
+                                                amount={unit.receivables_total}
+                                            />
+                                        </td>
+                                        <td
+                                            className={cn(
+                                                'px-4 py-2.5 text-right sm:px-5',
+                                                unit.receivables_overdue > 0 &&
+                                                    'font-medium text-destructive',
+                                            )}
+                                        >
+                                            <MoneyText
+                                                amount={
+                                                    unit.receivables_overdue
+                                                }
+                                            />
+                                        </td>
+                                        {finance.wallet_enabled && (
+                                            <td className="px-4 py-2.5 text-right sm:px-5">
+                                                <MoneyText
+                                                    amount={unit.wallet_balance}
+                                                />
+                                            </td>
+                                        )}
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                </DashboardPanel>
+            )}
         </section>
     );
 }

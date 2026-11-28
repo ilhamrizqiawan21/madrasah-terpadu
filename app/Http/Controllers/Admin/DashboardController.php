@@ -52,6 +52,13 @@ class DashboardController extends Controller
         $attendanceOn = $this->features->enabled(Feature::Attendance) && $user->can(Permission::AttendanceView->value);
         $isAdmin = $user->hasRole(Role::Admin->value);
         $cbtOn = $this->features->enabled(Feature::Cbt) && $user->can(Permission::CbtView->value);
+        $billingOn = $this->features->enabled(Feature::Billing);
+        $walletOn = $this->features->enabled(Feature::Wallet);
+        $canViewAllFinanceUnits = $isAdmin || $user->hasRole(Role::Treasurer->value);
+        $canViewFinance = $canViewAllFinanceUnits || $user->hasRole(Role::UnitHead->value);
+        $financeOn = $billingOn || $walletOn;
+        $financeScopeAll = $canViewAllFinanceUnits && $request->query('finance_scope') === 'all';
+        $financeUnit = $financeScopeAll ? null : $unit;
 
         return Inertia::render('admin/dashboard', [
             'summary' => [
@@ -72,8 +79,8 @@ class DashboardController extends Controller
             'dataGaps' => $canManageStudents ? $this->dashboard->dataGaps($unit, $yearId) : null,
             'queue' => $isAdmin ? $this->dashboard->queueHealth() : null,
             'heldModules' => $isAdmin ? $this->dashboard->heldModules() : [],
-            // Susunan kartu dasbor yayasan aplikasi lama; isi jujur: modul yang belum ada diberi status, bukan angka (ADR-021, U-12).
-            'foundation' => ($isAdmin || $user->hasRole(Role::Treasurer->value)) ? [
+            // Susunan kartu dasbor yayasan aplikasi lama; digantikan oleh dasbor keuangan nyata saat billing/wallet aktif (T-617).
+            'foundation' => (! $financeOn && $canViewAllFinanceUnits) ? [
                 'legacy_url' => (string) config('sekolah.legacy_finance_url'),
                 'modules' => [
                     ['key' => 'cash-in', 'label' => 'Kas masuk', 'detail' => 'SPP, BOS termin, penerimaan lain', 'status' => 'held'],
@@ -86,6 +93,9 @@ class DashboardController extends Controller
                     ['key' => 'dormitory', 'label' => 'Hunian asrama', 'detail' => 'Kamar dan keterisian', 'status' => 'planned'],
                 ],
             ] : null,
+            'finance' => ($financeOn && $canViewFinance)
+                ? $this->dashboard->finance($financeUnit, $yearId, $billingOn, $walletOn, $canViewAllFinanceUnits)
+                : null,
             'security' => $isAdmin ? $this->dashboard->security() : null,
             'units' => $isAdmin && $attendanceOn ? $this->dashboard->unitComparison($yearId) : null,
             'recentMutations' => $canManageStudents ? $this->recentMutations($unit) : [],

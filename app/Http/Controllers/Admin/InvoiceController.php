@@ -11,12 +11,13 @@ use App\Models\AcademicYear;
 use App\Models\Classroom;
 use App\Models\FeeType;
 use App\Models\Invoice;
+use App\Models\InvoiceAdjustment;
+use App\Models\PaymentAllocation;
 use App\Models\Student;
 use App\Models\Unit;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Schema;
 use Inertia\Inertia;
@@ -180,10 +181,11 @@ class InvoiceController extends Controller
 
         $adjustments = [];
         if (Schema::hasTable('invoice_adjustments')) {
-            $adjustments = DB::table('invoice_adjustments')
+            $adjustments = InvoiceAdjustment::query()
                 ->leftJoin('users', 'users.id', '=', 'invoice_adjustments.created_by')
                 ->where('invoice_id', $invoice->id)
                 ->orderByDesc('invoice_adjustments.id')
+                ->toBase()
                 ->get([
                     'invoice_adjustments.id',
                     'invoice_adjustments.type',
@@ -206,11 +208,12 @@ class InvoiceController extends Controller
 
         $payments = [];
         if (Schema::hasTable('payment_allocations') && Schema::hasTable('payments')) {
-            $payments = DB::table('payment_allocations')
+            $payments = PaymentAllocation::query()
                 ->join('payments', 'payments.id', '=', 'payment_allocations.payment_id')
                 ->leftJoin('users', 'users.id', '=', 'payments.received_by')
                 ->where('payment_allocations.invoice_id', $invoice->id)
                 ->orderByDesc('payments.paid_at')
+                ->toBase()
                 ->get([
                     'payments.id',
                     'payments.receipt_number',
