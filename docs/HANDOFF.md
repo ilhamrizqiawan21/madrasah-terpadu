@@ -23,7 +23,7 @@ Aturan: singkat dan faktual. Jangan menyalin isi TODO/ADR; tautkan saja. Hapus b
 
 ## Terakhir diperbarui
 
-2026-11-28 · Gemini — Fase 6 (**P-05 Tagihan & kasir** + **T-608**): **T-601**–**T-608** selesai dan di-commit. Sebelumnya: Claude (2026-11-27) — beranda, navigasi ADR-028, Fase 12 ADR-029, polesan CRUD.
+2026-11-28 · Gemini — Fase 6: **T-601**–**T-609** selesai dan di-commit. Sebelumnya: Claude (2026-11-27) — beranda, navigasi ADR-028, Fase 12 ADR-029, polesan CRUD.
 
 ## Keadaan sekarang
 
@@ -55,12 +55,12 @@ Aturan: singkat dan faktual. Jangan menyalin isi TODO/ADR; tautkan saja. Hapus b
 
 ## Sedang dikerjakan
 
-Fase 6: **T-601**–**T-608** selesai (menunggu tinjauan sebelum lanjut **T-609 Pengingat jatuh tempo** / **T-610 Saldo awal migrasi**).
+Fase 6: **T-601**–**T-609** selesai (menunggu tinjauan sebelum lanjut **T-610 Saldo awal migrasi**).
 
 ## Langkah berikutnya
 
-1. Tinjau **T-608** lalu lanjutkan **T-609 Pengingat jatuh tempo** atau **T-610 Saldo awal migrasi**.
-2. Jalankan migrasi `2026_11_28_000001` s.d. `2026_11_28_000004` pada DB lokal/staging saat fitur `billing` diaktifkan.
+1. Tinjau **T-609** lalu lanjutkan **T-610 Saldo awal migrasi** (kemudian **T-615**, **T-616**, **T-617**, dan **T-611–T-614**).
+2. Jalankan migrasi `2026_11_28_000001` s.d. `2026_11_28_000005` pada DB lokal/staging saat fitur `billing` diaktifkan.
 
 ## Arahan pemilik yang berlaku
 
