@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace App\Services\Billing;
 
 use App\Domain\Billing\BillingPeriod;
+use App\Domain\Billing\InvoiceStatusResolver;
 use App\Enums\BillingTargetType;
 use App\Enums\FeeRecurrence;
+use App\Enums\InvoiceAdjustmentType;
 use App\Enums\InvoiceStatus;
 use App\Enums\StudentStatus;
 use App\Models\AcademicYear;
@@ -14,7 +16,9 @@ use App\Models\BillingRun;
 use App\Models\Classroom;
 use App\Models\FeeType;
 use App\Models\Invoice;
+use App\Models\InvoiceAdjustment;
 use App\Models\Student;
+use App\Models\StudentDiscount;
 use App\Models\User;
 use App\Services\Audit\AuditLogger;
 use Carbon\CarbonImmutable;
@@ -228,7 +232,7 @@ final class BillingRunService
         $createdTotal = 0;
 
         foreach (array_chunk($candidates, 100) as $chunk) {
-            DB::transaction(function () use ($chunk, $run, $feeType, &$createdCount, &$createdTotal): void {
+            DB::transaction(function () use ($actor, $chunk, $run, $feeType, &$createdCount, &$createdTotal): void {
                 $studentIds = array_values(array_unique(array_column($chunk, 'student_id')));
                 $periodLookup = array_flip(array_values(array_unique(array_column($chunk, 'period'))));
 
@@ -245,13 +249,21 @@ final class BillingRunService
                     }
                 }
 
+                $discountsByStudent = StudentDiscount::query()
+                    ->where('fee_type_id', $feeType->id)
+                    ->whereIn('student_id', $studentIds)
+                    ->where('is_active', true)
+                    ->orderBy('id')
+                    ->get()
+                    ->groupBy('student_id');
+
                 foreach ($chunk as $item) {
                     $key = "{$item['student_id']}:{$item['period']}";
                     if (isset($existingMap[$key])) {
                         continue;
                     }
 
-                    Invoice::query()->create([
+                    $invoice = Invoice::query()->create([
                         'student_id' => $item['student_id'],
                         'fee_type_id' => $item['fee_type_id'],
                         'billing_run_id' => $run->id,
@@ -264,9 +276,48 @@ final class BillingRunService
                         'status' => InvoiceStatus::Unpaid,
                     ]);
 
+                    $periodDate = CarbonImmutable::parse($item['period']);
+                    $appliedDiscount = 0;
+
+                    /** @var Collection<int, StudentDiscount> $studentDiscounts */
+                    $studentDiscounts = $discountsByStudent->get($item['student_id'], new Collection);
+                    foreach ($studentDiscounts as $discount) {
+                        if (! $discount->isValidOn($periodDate)) {
+                            continue;
+                        }
+
+                        $remainingBudget = max(0, $invoice->amount - $appliedDiscount);
+                        if ($remainingBudget === 0) {
+                            break;
+                        }
+
+                        $cut = min($remainingBudget, $discount->computeAmount($invoice->amount));
+                        if ($cut <= 0) {
+                            continue;
+                        }
+
+                        InvoiceAdjustment::query()->create([
+                            'invoice_id' => $invoice->id,
+                            'type' => InvoiceAdjustmentType::Discount,
+                            'amount' => $cut,
+                            'reason' => "Potongan otomatis: {$discount->reason}",
+                            'created_by' => $actor->id,
+                            'created_at' => now(),
+                        ]);
+
+                        $appliedDiscount += $cut;
+                    }
+
+                    if ($appliedDiscount > 0) {
+                        $invoice->update([
+                            'adjustment_total' => $appliedDiscount,
+                            'status' => InvoiceStatusResolver::resolve($invoice->amount, $appliedDiscount, 0),
+                        ]);
+                    }
+
                     $existingMap[$key] = true;
                     $createdCount++;
-                    $createdTotal += $item['amount'];
+                    $createdTotal += max(0, $item['amount'] - $appliedDiscount);
                 }
             });
         }

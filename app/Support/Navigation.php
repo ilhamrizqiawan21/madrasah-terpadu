@@ -262,7 +262,7 @@ final class Navigation
                         'plan' => 'Paket P-05 Tagihan & kasir',
                     ],
                     [
-                        'label' => 'Diskon & beasiswa', 'soon' => 'diskon', 'permission' => Permission::FeeTypesManage->value, 'feature' => Feature::Billing,
+                        'label' => 'Diskon & beasiswa', 'route' => 'admin.discounts.index', 'permission' => Permission::FeeTypesManage->value, 'feature' => Feature::Billing,
                         'description' => 'Potongan berulang per siswa (persen atau nominal) yang diterapkan otomatis saat tagihan terbit.',
                         'plan' => 'Fase 6, U-12 (b)',
                     ],
