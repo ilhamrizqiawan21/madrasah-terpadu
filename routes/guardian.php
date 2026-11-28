@@ -19,6 +19,7 @@ use App\Http\Controllers\Guardian\LeaveRequestController;
 use App\Http\Controllers\Guardian\MemorizationController;
 use App\Http\Controllers\Guardian\NotificationInboxController;
 use App\Http\Controllers\Guardian\NotificationPreferenceController;
+use App\Http\Controllers\Guardian\TransferProofController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -62,6 +63,12 @@ Route::prefix('anak/{student}')
             Route::get('pembayaran/{payment}/kuitansi', [ReceiptController::class, 'guardian'])
                 ->whereNumber('payment')
                 ->name('students.payments.receipt');
+            Route::post('tagihan/{invoice}/bukti-transfer', [TransferProofController::class, 'store'])
+                ->whereNumber('invoice')
+                ->name('students.invoices.transfer-proof.store');
+            Route::get('bukti-transfer/{transferProof}/berkas', [TransferProofController::class, 'file'])
+                ->whereNumber('transferProof')
+                ->name('students.transfer-proofs.file');
         });
 
         Route::middleware('feature:'.Feature::Cbt->value)->group(function (): void {

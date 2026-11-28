@@ -1,12 +1,18 @@
-import { Head } from '@inertiajs/react';
-import { CreditCard, FileDown } from 'lucide-react';
-import type { ReactNode } from 'react';
+import { Head, useForm } from '@inertiajs/react';
+import { CreditCard, FileDown, Upload } from 'lucide-react';
+import type { FormEvent, ReactNode } from 'react';
+import { useState } from 'react';
 import ReceiptController from '@/actions/App/Http/Controllers/Billing/ReceiptController';
+import TransferProofController from '@/actions/App/Http/Controllers/Guardian/TransferProofController';
 import { DateText } from '@/components/app/date-text';
 import { EmptyState } from '@/components/app/empty-state';
+import { FormDialog } from '@/components/app/form-dialog';
 import { MoneyText } from '@/components/app/money-text';
 import { StatusBadge } from '@/components/app/status-badge';
+import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import GuardianLayout from '@/layouts/guardian-layout';
 
 type OpenInvoice = {
@@ -52,6 +58,56 @@ export default function GuardianBilling({
     familyTotalRemaining,
     midtransEnabled,
 }: Props) {
+    const [uploading, setUploading] = useState<{
+        studentId: number;
+        invoice: OpenInvoice;
+    } | null>(null);
+
+    const proofForm = useForm<{
+        amount: string;
+        notes: string;
+        photo: File | null;
+    }>({
+        amount: '',
+        notes: '',
+        photo: null,
+    });
+
+    function openUpload(studentId: number, invoice: OpenInvoice) {
+        proofForm.clearErrors();
+        proofForm.setData({
+            amount: String(invoice.remaining),
+            notes: '',
+            photo: null,
+        });
+        setUploading({ studentId, invoice });
+    }
+
+    function submitProof(e: FormEvent<HTMLFormElement>) {
+        e.preventDefault();
+        if (!uploading) {
+            return;
+        }
+        proofForm.transform((data) => ({
+            ...data,
+            amount: Number(data.amount || 0),
+        }));
+        proofForm.post(
+            TransferProofController.store.url([
+                uploading.studentId,
+                uploading.invoice.id,
+            ]),
+            {
+                forceFormData: true,
+                preserveScroll: true,
+                onSuccess: () => {
+                    setUploading(null);
+                    proofForm.reset();
+                },
+            },
+        );
+    }
+
     return (
         <GuardianLayout>
             <Head title="Tagihan" />
@@ -150,9 +206,28 @@ export default function GuardianBilling({
                                                 </div>
                                             </div>
 
-                                            {midtransEnabled &&
-                                                inv.status === 'unpaid' && (
-                                                    <div className="mt-3 flex justify-end">
+                                            <div className="mt-3 flex flex-wrap justify-end gap-2">
+                                                <Button
+                                                    type="button"
+                                                    variant="outline"
+                                                    size="sm"
+                                                    className="min-h-11"
+                                                    onClick={() =>
+                                                        openUpload(
+                                                            child.id,
+                                                            inv,
+                                                        )
+                                                    }
+                                                >
+                                                    <Upload
+                                                        className="size-4"
+                                                        strokeWidth={1.75}
+                                                    />
+                                                    Unggah bukti transfer
+                                                </Button>
+
+                                                {midtransEnabled &&
+                                                    inv.status === 'unpaid' && (
                                                         <Button
                                                             type="button"
                                                             size="sm"
@@ -167,8 +242,8 @@ export default function GuardianBilling({
                                                             />
                                                             Bayar online
                                                         </Button>
-                                                    </div>
-                                                )}
+                                                    )}
+                                            </div>
                                         </div>
                                     ))}
                                 </div>
@@ -236,6 +311,78 @@ export default function GuardianBilling({
                     ))
                 )}
             </div>
+
+            <FormDialog
+                open={uploading !== null}
+                onOpenChange={(open) => {
+                    if (!open) {
+                        setUploading(null);
+                    }
+                }}
+                title="Unggah bukti transfer"
+                description={
+                    uploading
+                        ? `${uploading.invoice.description} (sisa Rp ${uploading.invoice.remaining.toLocaleString('id-ID')})`
+                        : ''
+                }
+                onSubmit={submitProof}
+                processing={proofForm.processing}
+                submitLabel="Kirim bukti"
+            >
+                <div className="space-y-4">
+                    <div className="space-y-1.5">
+                        <Label htmlFor="proof-amount">
+                            Nominal transfer (Rp)
+                        </Label>
+                        <Input
+                            id="proof-amount"
+                            type="number"
+                            min={1}
+                            max={uploading?.invoice.remaining}
+                            value={proofForm.data.amount}
+                            onChange={(e) =>
+                                proofForm.setData('amount', e.target.value)
+                            }
+                            className="text-right tabular-nums"
+                            required
+                        />
+                        <InputError message={proofForm.errors.amount} />
+                    </div>
+
+                    <div className="space-y-1.5">
+                        <Label htmlFor="proof-photo">
+                            Foto bukti transfer (JPG/PNG, maks 2 MB)
+                        </Label>
+                        <Input
+                            id="proof-photo"
+                            type="file"
+                            accept="image/jpeg,image/png,image/webp"
+                            onChange={(e) =>
+                                proofForm.setData(
+                                    'photo',
+                                    e.target.files?.[0] ?? null,
+                                )
+                            }
+                            required
+                        />
+                        <InputError message={proofForm.errors.photo} />
+                    </div>
+
+                    <div className="space-y-1.5">
+                        <Label htmlFor="proof-notes">Catatan (opsional)</Label>
+                        <Input
+                            id="proof-notes"
+                            value={proofForm.data.notes}
+                            onChange={(e) =>
+                                proofForm.setData('notes', e.target.value)
+                            }
+                            placeholder="Mis. Transfer dari rekening BRI"
+                            maxLength={255}
+                        />
+                        <InputError message={proofForm.errors.notes} />
+                    </div>
+                </div>
+            </FormDialog>
         </GuardianLayout>
     );
 }

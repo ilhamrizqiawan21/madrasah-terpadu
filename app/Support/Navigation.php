@@ -272,7 +272,7 @@ final class Navigation
                         'plan' => 'Paket P-05 Tagihan & kasir',
                     ],
                     [
-                        'label' => 'Bukti transfer', 'soon' => 'bukti-transfer', 'permission' => Permission::PaymentsReconcile->value, 'feature' => Feature::Billing,
+                        'label' => 'Bukti transfer', 'route' => 'admin.transfer-proofs.index', 'permission' => Permission::PaymentsReconcile->value, 'feature' => Feature::Billing,
                         'description' => 'Wali mengunggah bukti transfer; bendahara memverifikasi dan melunasi tagihan.',
                         'plan' => 'Fase 6, U-12 (c)',
                     ],

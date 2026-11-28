@@ -11,6 +11,7 @@ use App\Http\Controllers\Admin\InvoiceAdjustmentController;
 use App\Http\Controllers\Admin\InvoiceController;
 use App\Http\Controllers\Admin\OpeningBalanceController;
 use App\Http\Controllers\Admin\StudentDiscountController;
+use App\Http\Controllers\Admin\TransferProofController;
 use App\Http\Controllers\Billing\ReceiptController;
 use Illuminate\Support\Facades\Route;
 
@@ -80,4 +81,13 @@ Route::prefix('keuangan')->group(function (): void {
     Route::get('pembayaran/{payment}/kuitansi', [ReceiptController::class, 'staff'])
         ->middleware(['permission:'.Permission::InvoicesView->value.'|'.Permission::PaymentsReceive->value, 'feature:'.Feature::Billing->value])
         ->name('payments.receipt');
+
+    Route::controller(TransferProofController::class)
+        ->middleware(['permission:'.Permission::PaymentsReconcile->value, 'feature:'.Feature::Billing->value])
+        ->group(function (): void {
+            Route::get('bukti-transfer', 'index')->name('transfer-proofs.index');
+            Route::get('bukti-transfer/{transferProof}/berkas', 'file')->name('transfer-proofs.file');
+            Route::post('bukti-transfer/{transferProof}/setujui', 'approve')->name('transfer-proofs.approve');
+            Route::post('bukti-transfer/{transferProof}/tolak', 'reject')->name('transfer-proofs.reject');
+        });
 });
