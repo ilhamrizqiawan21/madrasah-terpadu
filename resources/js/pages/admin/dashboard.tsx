@@ -20,6 +20,8 @@ import { MoneyText } from '@/components/app/money-text';
 import type { StatusBadgeVariant } from '@/components/app/status-badge';
 import { StatusBadge } from '@/components/app/status-badge';
 import { Button } from '@/components/ui/button';
+import type { YayasanDashboardData } from '@/components/dashboard/yayasan-dashboard';
+import { YayasanDashboard } from '@/components/dashboard/yayasan-dashboard';
 import StaffLayout from '@/layouts/staff-layout';
 import { formatDate, formatLongDate, formatTime } from '@/lib/format';
 import { cn } from '@/lib/utils';
@@ -197,6 +199,7 @@ type Props = {
     } | null;
     queue: { pending_jobs: number; failed_jobs: number } | null;
     heldModules: string[];
+    yayasan: YayasanDashboardData | null;
     foundation: {
         legacy_url: string;
         modules: {
@@ -285,6 +288,7 @@ export default function AdminDashboard({
     dataGaps,
     queue,
     heldModules,
+    yayasan,
     foundation,
     finance,
     security,
@@ -406,8 +410,16 @@ export default function AdminDashboard({
                     )}
                 </section>
 
-                {foundation && <FoundationRow foundation={foundation} />}
-                {finance && <FinanceSection finance={finance} />}
+                {yayasan ? (
+                    <YayasanDashboard data={yayasan} />
+                ) : (
+                    <>
+                        {foundation && (
+                            <FoundationRow foundation={foundation} />
+                        )}
+                        {finance && <FinanceSection finance={finance} />}
+                    </>
+                )}
 
                 {(hasMain || hasSide) && (
                     <div
@@ -435,7 +447,7 @@ export default function AdminDashboard({
                                         }
                                     />
                                 )}
-                                {units && units.length > 1 && (
+                                {!yayasan && units && units.length > 1 && (
                                     <UnitsPanel units={units} />
                                 )}
                                 {exams && (

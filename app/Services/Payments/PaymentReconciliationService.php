@@ -66,8 +66,10 @@ final class PaymentReconciliationService
      */
     public function reconcileDate(CarbonImmutable $dateWita): array
     {
-        $start = $dateWita->timezone('Asia/Makassar')->startOfDay()->utc();
-        $end = $dateWita->timezone('Asia/Makassar')->endOfDay()->utc();
+        // created_at disimpan dalam zona aplikasi; batas hari WITA dikonversi ke zona yang sama.
+        $appTz = (string) config('app.timezone');
+        $start = $dateWita->timezone('Asia/Makassar')->startOfDay()->setTimezone($appTz);
+        $end = $dateWita->timezone('Asia/Makassar')->endOfDay()->setTimezone($appTz);
 
         $checked = 0;
         $discrepancies = [];

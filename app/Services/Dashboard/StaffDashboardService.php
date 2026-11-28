@@ -865,7 +865,8 @@ final class StaffDashboardService
         $row = $query
             ->selectRaw("coalesce(sum(CASE WHEN status = 'pending' THEN 1 ELSE 0 END), 0) as pending_count")
             ->selectRaw("coalesce(sum(CASE WHEN status = 'pending' THEN gross_amount ELSE 0 END), 0) as pending_amount")
-            ->selectRaw("coalesce(sum(CASE WHEN status = 'needs_review' THEN 1 ELSE 0 END), 0) as needs_review_count")
+            // Order bermasalah ditandai lewat review_reason (T-703), bukan status tersendiri.
+            ->selectRaw('coalesce(sum(CASE WHEN review_reason IS NOT NULL AND reviewed_at IS NULL THEN 1 ELSE 0 END), 0) as needs_review_count')
             ->first();
 
         return [

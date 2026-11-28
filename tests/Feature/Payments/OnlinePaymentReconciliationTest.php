@@ -187,3 +187,22 @@ test('rekonsiliasi dijadwalkan harian pukul 01.00 WITA', function (): void {
         ->and($event->expression)->toBe('0 1 * * *')
         ->and($event->timezone)->toBe('Asia/Makassar');
 });
+
+test('rekonsiliasi mencakup order sampai pukul 23.59 WITA pada tanggalnya', function (): void {
+    $this->travelTo(now('Asia/Makassar')->setDate(2026, 11, 27)->setTime(23, 30));
+    $late = reconTestOrder('INV-REC-MALAM', '2026-05-01');
+    $this->travelTo(now('Asia/Makassar')->setDate(2026, 11, 28)->setTime(0, 30));
+    $nextDay = reconTestOrder('INV-REC-BESOK', '2026-06-01');
+
+    Http::fake(['api.sandbox.midtrans.com/*' => Http::response([
+        'status_code' => '201', 'transaction_status' => 'pending', 'gross_amount' => '120000.00',
+    ])]);
+
+    $this->artisan('payments:reconcile', ['date' => '2026-11-27'])
+        ->expectsOutputToContain('1 order dicek')
+        ->assertSuccessful();
+
+    Http::assertSent(fn ($r): bool => str_contains($r->url(), 'INV-REC-MALAM'));
+    Http::assertNotSent(fn ($r): bool => str_contains($r->url(), 'INV-REC-BESOK'));
+    expect($late->fresh())->not->toBeNull()->and($nextDay->fresh())->not->toBeNull();
+});

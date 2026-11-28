@@ -15,8 +15,10 @@ use App\Models\Student;
 use App\Models\StudentMutation;
 use App\Models\Unit;
 use App\Models\User;
+use App\Services\Dashboard\FoundationDashboardService;
 use App\Services\Dashboard\StaffDashboardService;
 use App\Services\Features\FeatureFlags;
+use App\Support\Navigation;
 use App\Support\SchoolContext;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
@@ -32,6 +34,7 @@ class DashboardController extends Controller
     public function __construct(
         private readonly StaffDashboardService $dashboard,
         private readonly FeatureFlags $features,
+        private readonly FoundationDashboardService $foundation,
     ) {}
 
     public function __invoke(Request $request): Response
@@ -96,6 +99,16 @@ class DashboardController extends Controller
             'finance' => ($financeOn && $canViewFinance)
                 ? $this->dashboard->finance($financeUnit, $yearId, $billingOn, $walletOn, $canViewAllFinanceUnits)
                 : null,
+            // Dasbor Yayasan (susunan dasbor aplikasi lama) untuk admin & bendahara: filter unit + periode sendiri.
+            'yayasan' => $canViewAllFinanceUnits ? [
+                ...$this->foundation->build(
+                    $this->foundationUnit($request),
+                    $request->string('periode')->toString(),
+                    $request->string('dari')->toString() ?: null,
+                    $request->string('sampai')->toString() ?: null,
+                ),
+                'pending_modules' => $this->pendingModules($user),
+            ] : null,
             'security' => $isAdmin ? $this->dashboard->security() : null,
             'units' => $isAdmin && $attendanceOn ? $this->dashboard->unitComparison($yearId) : null,
             'recentMutations' => $canManageStudents ? $this->recentMutations($unit) : [],
@@ -109,6 +122,46 @@ class DashboardController extends Controller
                 'manage_cbt' => $cbtOn && $user->can(Permission::CbtManage->value),
             ],
         ]);
+    }
+
+    private function foundationUnit(Request $request): ?Unit
+    {
+        $code = $request->string('unit')->toString();
+
+        return $code === '' || $code === 'all'
+            ? null
+            : Unit::query()->where('code', $code)->where('is_active', true)->first();
+    }
+
+    /**
+     * Komponen dasbor lama yang modulnya belum dibangun; tautan hanya bila pengguna boleh membuka halaman "Segera"-nya.
+     *
+     * @return list<array{key: string, label: string, detail: string, href: ?string}>
+     */
+    private function pendingModules(User $user): array
+    {
+        $modules = [
+            ['cash_out', 'Kas keluar', 'Operasional, gaji, dan belanja per unit', 'buku-kas'],
+            ['bos', 'Dana BOS & RKAS', 'Saldo kas BOS, termin, dan SPJ', 'bos-rkas'],
+            ['zis', 'Kas ZIS', 'Zakat, infak, dan penyalurannya', 'zis'],
+            ['ppdb', 'Penerimaan PPDB', 'Pendaftar dan yang menjadi siswa', 'ppdb-pendaftar'],
+            ['dormitory', 'Hunian asrama', 'Keterisian kamar asrama', 'asrama'],
+            ['assets', 'Aset & perpustakaan', 'Kondisi aset dan buku terlambat', 'inventaris'],
+        ];
+
+        return array_map(function (array $m) use ($user): array {
+            $item = Navigation::soonItem($m[3]);
+            $allowed = $item !== null
+                && $user->can($item['permission'])
+                && ($item['feature'] === null || $this->features->enabled($item['feature']));
+
+            return [
+                'key' => $m[0],
+                'label' => $m[1],
+                'detail' => $m[2],
+                'href' => $allowed ? route('admin.soon', ['module' => $m[3]], absolute: false) : null,
+            ];
+        }, $modules);
     }
 
     private function activeStudents(?Unit $unit): int

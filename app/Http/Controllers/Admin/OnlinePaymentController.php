@@ -45,8 +45,8 @@ class OnlinePaymentController extends Controller
         $to = $this->parseDate($request->string('to')->toString());
 
         $base = PaymentOrder::query()
-            ->when($from !== null, fn (Builder $q) => $q->where('created_at', '>=', $from?->startOfDay()->utc()))
-            ->when($to !== null, fn (Builder $q) => $q->where('created_at', '<=', $to?->endOfDay()->utc()))
+            ->when($from !== null, fn (Builder $q) => $q->where('created_at', '>=', $from?->startOfDay()->setTimezone((string) config('app.timezone'))))
+            ->when($to !== null, fn (Builder $q) => $q->where('created_at', '<=', $to?->endOfDay()->setTimezone((string) config('app.timezone'))))
             ->when($search !== '', fn (Builder $q) => $q->where(fn (Builder $inner) => $inner
                 ->where('order_id', 'like', '%'.$search.'%')
                 ->orWhereHas('student', fn (Builder $s) => $s->where('name', 'like', '%'.$search.'%'))));
