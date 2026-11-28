@@ -28,6 +28,9 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->encryptCookies(except: ['appearance', 'sidebar_state']);
 
+        // Midtrans tidak membawa token CSRF; keasliannya diperiksa lewat signature (PAYMENTS §4).
+        $middleware->validateCsrfTokens(except: ['webhooks/midtrans']);
+
         $middleware->alias([
             'role' => RoleMiddleware::class,
             'permission' => PermissionMiddleware::class,

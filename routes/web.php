@@ -13,6 +13,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Gate\GateController;
 use App\Http\Controllers\PushSubscriptionController;
 use App\Http\Controllers\PwaController;
+use App\Http\Controllers\Webhooks\MidtransWebhookController;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Route;
 
@@ -25,6 +26,11 @@ Route::get('branding/{asset}', BrandingAssetController::class)
 
 Route::get('manifest.webmanifest', [PwaController::class, 'manifest'])->name('pwa.manifest');
 Route::get('sw.js', [PwaController::class, 'serviceWorker'])->name('pwa.sw');
+
+// Notifikasi Midtrans (T-703): tanpa sesi/CSRF, dibuktikan signature (PAYMENTS §4).
+Route::post('webhooks/midtrans', MidtransWebhookController::class)
+    ->middleware('throttle:120,1')
+    ->name('webhooks.midtrans');
 
 Route::middleware(['auth:web'])->group(function (): void {
     Route::get('dashboard', DashboardController::class)->name('dashboard');

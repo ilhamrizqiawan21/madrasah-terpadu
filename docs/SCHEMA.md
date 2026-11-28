@@ -207,7 +207,7 @@ Indeks (`status`,`expires_at`), (`student_id`,`created_at`), (`review_reason`,`r
 
 ### `payment_notifications` (T-703) — append-only, log mentah
 
-`order_id`, `transaction_status`, `status_code`, `signature_valid bool`, `payload json`, `processed_at null`, `process_result string null`, `received_at`.
+`order_id string(64) null`, `transaction_status string(30) null`, `status_code string(5) null`, `signature_valid bool`, `payload json`, `processed_at null`, `process_result string(30) null` (`paid|paid_overpaid|paid_needs_review|duplicate|pending|challenge|expired|failed|ignored|needs_review|amount_mismatch|invalid_transition|not_found|unknown_status|unknown_order`), `received_at`. Indeks (`order_id`,`received_at`). Migration `2026_11_28_000014`. Baris tidak pernah dihapus/diubah selain `processed_at`+`process_result` yang diisi sekali oleh `MidtransNotificationProcessor`.
 
 ## F. Dompet kantin (Fase 8)
 

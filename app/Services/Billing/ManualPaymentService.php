@@ -26,6 +26,7 @@ final class ManualPaymentService
     public function __construct(
         private readonly AuditLogger $audit,
         private readonly GuardianNotifier $notifier,
+        private readonly ReceiptNumberSequence $receipts,
     ) {}
 
     /**
@@ -109,7 +110,7 @@ final class ManualPaymentService
 
             $now = now();
             $year = (int) $now->timezone('Asia/Makassar')->year;
-            $receiptNumber = $this->nextReceiptNumber($year);
+            $receiptNumber = $this->receipts->next($year);
 
             $payment = Payment::query()->create([
                 'student_id' => $student->id,
@@ -172,27 +173,5 @@ final class ManualPaymentService
         );
 
         return $payment;
-    }
-
-    private function nextReceiptNumber(int $year): string
-    {
-        DB::table('receipt_sequences')->insertOrIgnore([
-            'year' => $year,
-            'last_number' => 0,
-        ]);
-
-        /** @var object{last_number: int}|null $row */
-        $row = DB::table('receipt_sequences')
-            ->where('year', $year)
-            ->lockForUpdate()
-            ->first();
-
-        $next = ($row !== null ? (int) $row->last_number : 0) + 1;
-
-        DB::table('receipt_sequences')
-            ->where('year', $year)
-            ->update(['last_number' => $next]);
-
-        return sprintf('KW-%d-%06d', $year, $next);
     }
 }

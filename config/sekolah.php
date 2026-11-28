@@ -55,6 +55,9 @@ return [
     'payments' => [
         // Pending Snap orders expire after this many hours.
         'order_expiry_hours' => 24,
+        // ADR-009 (menunggu U-05): kelebihan bayar online saat tagihan sudah lunas di kasir masuk
+        // saldo kantin siswa. false = hanya diberi tanda tinjau, pengembalian diputuskan bendahara.
+        'overpayment_to_wallet' => (bool) env('PAYMENTS_OVERPAYMENT_TO_WALLET', true),
         'enabled_payments' => [
             'other_qris', 'gopay', 'shopeepay',
             'bca_va', 'bni_va', 'bri_va', 'permata_va', 'echannel',

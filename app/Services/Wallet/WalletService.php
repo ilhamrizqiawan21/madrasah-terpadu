@@ -144,9 +144,12 @@ final class WalletService
         Student $student,
         int $signedAmount,
         string $idempotencyKey,
-        User $actor,
+        ?User $actor,
         string $reason,
+        ?string $referenceType = null,
+        ?int $referenceId = null,
     ): WalletEntry {
+        // $actor null = penyesuaian sistem, mis. kelebihan bayar Midtrans (ADR-009).
         if ($signedAmount === 0) {
             throw ValidationException::withMessages([
                 'amount' => 'Nominal penyesuaian tidak boleh nol.',
@@ -167,8 +170,8 @@ final class WalletService
             idempotencyKey: $idempotencyKey,
             actor: $actor,
             description: "Penyesuaian: {$cleanReason}",
-            referenceType: null,
-            referenceId: null,
+            referenceType: $referenceType,
+            referenceId: $referenceId,
             enforcePurchaseGuards: false,
             preventNegativeBalance: $signedAmount < 0,
         );
