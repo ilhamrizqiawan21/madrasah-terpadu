@@ -2,6 +2,7 @@ import { Head, router, useForm } from '@inertiajs/react';
 import { Lock, Unlock } from 'lucide-react';
 import type { FormEvent } from 'react';
 import { useState } from 'react';
+import PaymentController from '@/actions/App/Http/Controllers/Guardian/PaymentController';
 import WalletController from '@/actions/App/Http/Controllers/Guardian/WalletController';
 import { ConfirmDialog } from '@/components/app/confirm-dialog';
 import { DateText } from '@/components/app/date-text';
@@ -42,6 +43,7 @@ type Props = {
         expires_on: string;
     }[];
     entries: PaginatedResource<EntryRow>;
+    topUp: { min: number; max: number; presets: number[] } | null;
 };
 
 export default function GuardianWallet({
@@ -49,8 +51,19 @@ export default function GuardianWallet({
     wallet,
     vouchers,
     entries,
+    topUp,
 }: Props) {
     const [freezeOpen, setFreezeOpen] = useState(false);
+
+    const topUpForm = useForm({ amount: '' });
+
+    function submitTopUp(e: FormEvent) {
+        e.preventDefault();
+        topUpForm.transform((data) => ({ amount: Number(data.amount || 0) }));
+        topUpForm.post(PaymentController.topUp.url(student.id), {
+            preserveScroll: true,
+        });
+    }
 
     const limitForm = useForm({
         daily_limit: String(wallet.daily_limit),
@@ -139,6 +152,86 @@ export default function GuardianWallet({
                         </Button>
                     </div>
                 </section>
+
+                {topUp && (
+                    <section className="rounded-xl border border-border bg-card p-4 shadow-xs">
+                        <h2 className="text-sm font-semibold">
+                            Isi saldo online
+                        </h2>
+                        <form onSubmit={submitTopUp} className="mt-3 space-y-3">
+                            <div
+                                role="group"
+                                aria-label="Pilih nominal cepat"
+                                className="grid grid-cols-3 gap-2"
+                            >
+                                {topUp.presets.map((preset) => {
+                                    const active =
+                                        topUpForm.data.amount ===
+                                        String(preset);
+
+                                    return (
+                                        <Button
+                                            key={preset}
+                                            type="button"
+                                            variant={
+                                                active ? 'default' : 'outline'
+                                            }
+                                            aria-pressed={active}
+                                            className="min-h-11"
+                                            onClick={() =>
+                                                topUpForm.setData(
+                                                    'amount',
+                                                    String(preset),
+                                                )
+                                            }
+                                        >
+                                            <MoneyText amount={preset} />
+                                        </Button>
+                                    );
+                                })}
+                            </div>
+                            <div className="space-y-1.5">
+                                <Label htmlFor="topup-amount">
+                                    Atau isi nominal sendiri (
+                                    <MoneyText amount={topUp.min} />
+                                    {' – '}
+                                    <MoneyText amount={topUp.max} />)
+                                </Label>
+                                <Input
+                                    id="topup-amount"
+                                    type="number"
+                                    inputMode="numeric"
+                                    min={topUp.min}
+                                    max={topUp.max}
+                                    step={1000}
+                                    value={topUpForm.data.amount}
+                                    onChange={(e) =>
+                                        topUpForm.setData(
+                                            'amount',
+                                            e.target.value,
+                                        )
+                                    }
+                                    className="min-h-11 text-right tabular-nums"
+                                />
+                                <InputError message={topUpForm.errors.amount} />
+                            </div>
+                            <p className="text-xs text-muted-foreground">
+                                Saldo bertambah setelah Midtrans mengonfirmasi
+                                pembayaran.
+                            </p>
+                            <Button
+                                type="submit"
+                                className="min-h-11 w-full"
+                                disabled={
+                                    topUpForm.processing ||
+                                    topUpForm.data.amount === ''
+                                }
+                            >
+                                Isi saldo
+                            </Button>
+                        </form>
+                    </section>
+                )}
 
                 <section className="rounded-xl border border-border bg-card p-4 shadow-xs">
                     <h2 className="text-sm font-semibold">

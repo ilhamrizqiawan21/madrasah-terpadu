@@ -8,6 +8,7 @@ use App\Enums\PaymentOrderPurpose;
 use App\Enums\PaymentOrderStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Guardian\StorePaymentOrderRequest;
+use App\Http\Requests\Guardian\StoreWalletTopupOrderRequest;
 use App\Models\Guardian;
 use App\Models\PaymentOrder;
 use App\Models\PaymentOrderItem;
@@ -37,6 +38,20 @@ class PaymentController extends Controller
             $this->guardianOf($request),
             $student,
             $request->invoiceIds(),
+        );
+
+        return to_route('guardian.payments.show', $order);
+    }
+
+    /**
+     * Isi saldo kantin online (T-805). Saldo bertambah hanya setelah webhook settlement.
+     */
+    public function topUp(StoreWalletTopupOrderRequest $request, Student $student): RedirectResponse
+    {
+        $order = $this->orders->createForTopUp(
+            $this->guardianOf($request),
+            $student,
+            $request->integer('amount'),
         );
 
         return to_route('guardian.payments.show', $order);

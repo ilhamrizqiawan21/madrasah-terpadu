@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Guardian;
 
+use App\Enums\Feature;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Guardian\UpdateWalletLimitRequest;
 use App\Models\CanteenVoucher;
 use App\Models\Student;
 use App\Models\User;
 use App\Models\WalletEntry;
+use App\Services\Features\FeatureFlags;
 use App\Services\Wallet\WalletService;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\RedirectResponse;
@@ -24,6 +26,7 @@ class WalletController extends Controller
 {
     public function __construct(
         private readonly WalletService $walletService,
+        private readonly FeatureFlags $features,
     ) {}
 
     public function index(Request $request, Student $student): Response
@@ -78,6 +81,12 @@ class WalletController extends Controller
             ],
             'vouchers' => $vouchers,
             'entries' => $entries,
+            // Isi saldo online (T-805): tampil hanya bila pembayaran Midtrans aktif.
+            'topUp' => $this->features->enabled(Feature::Midtrans) ? [
+                'min' => (int) config('sekolah.wallet.min_top_up', 10_000),
+                'max' => (int) config('sekolah.wallet.max_top_up', 1_000_000),
+                'presets' => [20_000, 50_000, 100_000],
+            ] : null,
         ]);
     }
 

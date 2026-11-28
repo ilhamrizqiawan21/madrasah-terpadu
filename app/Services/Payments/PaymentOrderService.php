@@ -223,8 +223,11 @@ final class PaymentOrderService
             $this->audit->record('payment_order.snap_failed', $order, null, ['order_id' => $order->order_id]);
             Log::warning('Snap Midtrans gagal dibuat.', ['order_id' => $order->order_id, 'error' => $e->getMessage()]);
 
+            // Kunci galat mengikuti form pemanggil: portal tagihan membaca `payment`, form isi saldo `amount`.
+            $field = $order->purpose === PaymentOrderPurpose::WalletTopup ? 'amount' : 'payment';
+
             throw ValidationException::withMessages([
-                'payment' => 'Gagal menghubungi layanan pembayaran. Silakan coba lagi beberapa saat lagi.',
+                $field => 'Gagal menghubungi layanan pembayaran. Silakan coba lagi beberapa saat lagi.',
             ]);
         }
 

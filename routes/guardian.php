@@ -105,6 +105,9 @@ Route::prefix('anak/{student}')
             Route::get('dompet', [WalletController::class, 'index'])->name('students.wallet.index');
             Route::patch('dompet/limit', [WalletController::class, 'updateLimit'])->name('students.wallet.limit');
             Route::patch('dompet/beku', [WalletController::class, 'toggleFreeze'])->name('students.wallet.freeze');
+            Route::post('dompet/isi-saldo', [PaymentController::class, 'topUp'])
+                ->middleware(['feature:'.Feature::Midtrans->value, 'throttle:10,1'])
+                ->name('students.wallet.topup');
         });
 
         Route::middleware('feature:'.Feature::Attitude->value)->group(function (): void {
