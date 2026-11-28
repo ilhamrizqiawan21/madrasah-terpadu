@@ -152,7 +152,7 @@ class DashboardController extends Controller
         return array_map(function (array $m) use ($user): array {
             $item = Navigation::soonItem($m[3]);
             $allowed = $item !== null
-                && $user->can($item['permission'])
+                && $user->canAny(explode('|', $item['permission']))
                 && ($item['feature'] === null || $this->features->enabled($item['feature']));
 
             return [

@@ -52,7 +52,7 @@ final class Navigation
             $visibleItems = [];
 
             foreach ($group['items'] as $item) {
-                if (! $user->can($item['permission'])) {
+                if (! $user->canAny(explode('|', $item['permission']))) {
                     continue;
                 }
 
@@ -171,7 +171,7 @@ final class Navigation
                     ['label' => 'Jadwal Pelajaran', 'route' => 'admin.lesson-schedules.index', 'permission' => Permission::ClassroomsManage->value, 'feature' => Feature::LessonSchedule],
                     ['label' => 'Kenaikan Kelas', 'route' => 'admin.students.promotions.index', 'permission' => Permission::StudentsManage->value],
                     ['label' => 'Kelulusan & SKL', 'route' => 'admin.graduations.index', 'permission' => Permission::StudentsManage->value],
-                    self::soon('Supervisi Modul Ajar', 'supervisi', $staff, 'Unggah modul ajar dan catatan supervisi kepala unit.'),
+                    ['label' => 'Supervisi Modul Ajar', 'route' => 'admin.teaching-modules.index', 'permission' => Permission::TeachingModulesUpload->value.'|'.Permission::TeachingModulesReview->value],
                     ['label' => 'Anggota & Nilai Ekskul', 'route' => 'admin.extracurriculars.members', 'permission' => Permission::ClassroomsManage->value],
                     self::soon('Peminjaman Ruangan', 'pinjam-ruangan', $staff, 'Reservasi ruangan dan laboratorium.'),
                 ],

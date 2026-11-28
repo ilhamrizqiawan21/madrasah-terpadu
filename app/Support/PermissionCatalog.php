@@ -29,6 +29,9 @@ final class PermissionCatalog
             ['label' => 'Akademik', 'rows' => [
                 self::row('Tahun Ajaran', null, P::AcademicYearsManage),
                 self::row('Rombel', null, P::ClassroomsManage),
+                self::row('Unggah modul ajar (RPP)', null, P::TeachingModulesUpload),
+                self::row('Supervisi modul ajar', null, P::TeachingModulesReview),
+                self::row('Booking ruangan & lab', null, P::RoomsBook),
             ]],
             ['label' => 'E-Learning', 'rows' => [
                 self::row('Ujian milik sendiri', P::CbtView, P::CbtTeach),

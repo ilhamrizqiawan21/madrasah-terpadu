@@ -77,6 +77,8 @@ class RolesAndPermissionsSeeder extends Seeder
                 PermissionEnum::AttitudeLock,
                 PermissionEnum::CbtView,
                 PermissionEnum::CbtTeach,
+                PermissionEnum::TeachingModulesUpload,
+                PermissionEnum::RoomsBook,
             ],
             RoleEnum::Counselor->value => [
                 PermissionEnum::StudentsView,
@@ -91,6 +93,8 @@ class RolesAndPermissionsSeeder extends Seeder
             ],
             RoleEnum::UnitHead->value => [
                 PermissionEnum::StudentsView,
+                PermissionEnum::TeachingModulesReview,
+                PermissionEnum::RoomsBook,
                 PermissionEnum::AttendanceView,
                 PermissionEnum::InvoicesView,
                 PermissionEnum::BehaviorView,

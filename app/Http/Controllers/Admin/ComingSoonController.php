@@ -27,7 +27,7 @@ class ComingSoonController extends Controller
 
         $item = Navigation::soonItem($module);
         abort_if($item === null, 404);
-        abort_unless($user->can($item['permission']), 403);
+        abort_unless($user->canAny(explode('|', $item['permission'])), 403);
         // Modul yang dimatikan lewat Kunci fitur tetap 404, sama seperti rute modul jadi (T-211).
         abort_if($item['feature'] !== null && ! $this->features->enabled($item['feature']), 404);
 

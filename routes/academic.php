@@ -10,6 +10,7 @@ use App\Http\Controllers\Admin\FacilityController;
 use App\Http\Controllers\Admin\GraduationController;
 use App\Http\Controllers\Admin\LearningObjectiveController;
 use App\Http\Controllers\Admin\LessonScheduleController;
+use App\Http\Controllers\Admin\TeachingModuleController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -94,4 +95,21 @@ Route::middleware('permission:'.Permission::StudentsManage->value)
         Route::get('/', 'index')->name('graduations.index');
         Route::put('{student}', 'decide')->whereNumber('student')->name('graduations.decide');
         Route::get('{student}/skl', 'letter')->whereNumber('student')->name('graduations.letter');
+    });
+
+// Supervisi Modul Ajar (RPP): guru mengunggah, kepala unit meninjau.
+Route::prefix('akademik/supervisi-modul')
+    ->controller(TeachingModuleController::class)
+    ->group(function (): void {
+        Route::middleware('permission:'.Permission::TeachingModulesUpload->value.'|'.Permission::TeachingModulesReview->value)->group(function (): void {
+            Route::get('/', 'index')->name('teaching-modules.index');
+            Route::get('{module}/berkas', 'download')->whereNumber('module')->name('teaching-modules.download');
+            Route::delete('{module}', 'destroy')->whereNumber('module')->name('teaching-modules.destroy');
+        });
+        Route::middleware('permission:'.Permission::TeachingModulesUpload->value)->group(function (): void {
+            Route::post('/', 'store')->name('teaching-modules.store');
+            Route::post('{module}/revisi', 'resubmit')->whereNumber('module')->name('teaching-modules.resubmit');
+        });
+        Route::put('{module}/supervisi', 'review')->whereNumber('module')
+            ->middleware('permission:'.Permission::TeachingModulesReview->value)->name('teaching-modules.review');
     });

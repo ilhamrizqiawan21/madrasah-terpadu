@@ -15,6 +15,9 @@ enum Permission: string
     case UnitsManage = 'units.manage';
     case AcademicYearsManage = 'academic_years.manage';
     case ClassroomsManage = 'classrooms.manage';
+    case TeachingModulesUpload = 'teaching_modules.upload';
+    case TeachingModulesReview = 'teaching_modules.review';
+    case RoomsBook = 'rooms.book';
     case StudentsView = 'students.view';
     case StudentsManage = 'students.manage';
     case GuardiansManage = 'guardians.manage';
@@ -68,6 +71,9 @@ enum Permission: string
             self::UnitsManage => 'Kelola unit sekolah',
             self::AcademicYearsManage => 'Kelola tahun ajaran',
             self::ClassroomsManage => 'Kelola rombel',
+            self::TeachingModulesUpload => 'Unggah modul ajar',
+            self::TeachingModulesReview => 'Supervisi modul ajar',
+            self::RoomsBook => 'Booking ruangan & lab',
             self::StudentsView => 'Lihat data siswa',
             self::StudentsManage => 'Kelola data siswa',
             self::GuardiansManage => 'Kelola data wali',
