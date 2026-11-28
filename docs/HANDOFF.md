@@ -66,6 +66,32 @@ Pemilik memandu menu demi menu; nama menu dibuat ramah. Yang disamakan **alur**,
 - Pola: halaman master sederhana pakai `MasterCrudPage` (field `text|number|time|select|textarea`); layout halaman Inertia wajib fungsi panah (`Page.layout = (page) => page`).
 - PPDB dilewati atas arahan pemilik. `app/Services/Quran/MemorizationProgressService.php` punya perubahan Pint yang belum di-commit (bukan dari tugas ini).
 
+## Keuangan, Kantin, Akuntansi & Kas — milik Claude (2026-11-28)
+
+Pembagian kerja (playbook `docs/LEGACY_DUPLICATION.md`): **Claude = Keuangan Siswa, Pembayaran online, Kantin, Akuntansi & Kas**; Gemini = grup menu lainnya. Arahan pemilik: modul uang adalah titik berat klien, hasilnya harus **lebih baik** dari aplikasi lama (bukan sekadar meniru).
+
+**Kantin (selesai):**
+- Kategori Menu + Daftar Menu (`3c4c8c6`): kategori dipakai bersama Koperasi (kolom `module`), menu punya harga, stok porsi opsional, status dijual/disembunyikan.
+- Kasir Kantin berbasis menu (`05fc4a4`): keranjang → tempel kartu → konfirmasi (saldo, voucher, sisa limit, pembagian bayar) → struk 58 mm. Total dihitung server, stok dikunci & dikurangi dalam transaksi yang sama, klik ganda aman, koreksi mengembalikan stok, notifikasi wali menyebut menu yang dibeli.
+- Riwayat Isi Saldo (`7cfce87`): periode, unit, rombel, metode; setor tunai; batal setoran tunai (alasan wajib, sekali, tidak boleh membuat saldo minus, wali diberi tahu); ekspor PDF/Excel.
+- Perbaikan halaman Saldo Siswa putih (`9d29747`): paginasi dikirim `{data, meta}`.
+
+**Akuntansi & Kas — Tahap 1 selesai (`95b44ed`, ADR-030 `419cba6`):**
+- Satu buku besar `cash_entries` append-only per unit; koreksi = entri pembalik (`reverses_entry_id`, alasan). Semua tulis lewat `App\Services\Accounting\CashLedgerService`.
+- Kategori Akun (COA, `cash_accounts` in/out), Alokasi Dana (`cash_account_allocations`), Buku Kas Umum (saldo awal/akhir, saldo berjalan, saldo per sumber dana, tunai/bank, PDF/Excel), Pemasukan Lain.
+- Pengeluaran wajib menyebut sumber dana; ditolak bila melebihi saldo sumbernya atau dilarang Alokasi Dana. Pemasukan yang dananya sudah terpakai tidak bisa dikoreksi.
+- Izin baru `cash_book.manage`, `payroll.manage` (bendahara + admin). Kunci fitur `cash_book` (lokal sudah dinyalakan). `App\Support\PeriodRange` + komponen `PeriodFilter` = pilihan periode bersama halaman keuangan.
+- Migrasi Claude memakai nomor `2026_11_28_1000NN` (Gemini `0000NN`).
+
+**Berikutnya (menunggu arahan pemilik, berhenti di sini atas permintaan 2026-11-28):**
+1. BOS: Termin (pencairan → entri masuk otomatis), RKAS (pagu kegiatan ≤ dana termin), BKU BOS / SPJ K7 (belanja per kegiatan, realisasi ≤ pagu).
+2. ZIS: penerimaan (muzakki: siswa/wali/pegawai/umum; kategori infaq/shodaqoh/zakat mal/zakat fitrah) dan penyaluran (mustahik), saldo per kategori tidak boleh minus.
+3. Penggajian: komponen gaji per pegawai per bulan, bayar satuan/massal → BKU, slip A4, batal slip = pembalik.
+4. Posting otomatis pembayaran SPP & isi saldo ke Buku Kas Umum.
+5. Kartu SPP (Keuangan Siswa) masih "Segera".
+
+**Belum dicek di browser:** simpan form Pemasukan Lain & Catat Pengeluaran (logika sudah dites). Struktur halaman aplikasi lama untuk BOS/ZIS/Penggajian sudah dibaca (hanya-baca) — rinciannya di ADR-030.
+
 ## Sedang dikerjakan
 
 Menunggu arahan grup menu berikutnya dari pemilik (urutan sidebar setelah Akademik: E-Learning).
