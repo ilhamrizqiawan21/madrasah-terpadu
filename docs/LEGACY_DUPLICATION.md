@@ -82,3 +82,10 @@ Aplikasi lama `amaljayaberkah.id` adalah **produksi dengan data siswa nyata**.
 
 `app/Support/Navigation.php`, `tests/Feature/Navigation/ComingSoonTest.php`, `app/Enums/Permission.php`, `app/Support/PermissionCatalog.php`, `database/seeders/RolesAndPermissionsSeeder.php`, `database/seeders/LegacyMenusDemoSeeder.php`, `resources/js/components/app/*`, `resources/js/layouts/staff-layout.tsx`, `routes/web.php`.
 Sebelum mengubah: `git pull` tidak dipakai (tanpa branch), jadi cek `git status`/`git diff` agar tidak menimpa perubahan agen lain yang belum di-commit.
+
+### Bekerja bersamaan di folder yang sama (tanpa branch)
+
+- **Nomor migration dipisah**: Gemini memakai `2026_11_28_0000NN` (lanjut dari `000030`); Claude memakai `2026_11_28_1000NN`. Jangan memakai nomor milik agen lain.
+- **Stage per bagian, bukan per berkas**, untuk berkas bersama: sebelum commit jalankan `git diff --cached` dan pastikan tidak ada baris milik agen lain (mis. item menu yang rutenya belum di-commit). Bila terbawa, keluarkan dari index tanpa mengubah berkas kerja (`git restore --staged <berkas>`), lalu stage ulang hanya bagian sendiri.
+- Jangan memakai perintah git yang membuang perubahan berkas kerja (stash, checkout berkas, reset keras) dan jangan menjalankan formatter ke seluruh repo: itu bisa menghapus pekerjaan agen lain yang belum di-commit.
+- Tes navigasi bisa gagal karena halaman agen lain belum ada di build (`Unable to locate file in Vite manifest`). Jalankan `npm run build` ulang; bila tetap gagal karena berkas agen lain, catat di laporan, jangan diperbaiki.
