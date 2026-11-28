@@ -158,8 +158,8 @@ final class Navigation
                 'icon' => 'graduation-cap',
                 'items' => [
                     ['label' => 'Tahun Ajaran', 'route' => 'admin.academic-years.index', 'permission' => Permission::AcademicYearsManage->value],
-                    self::soon('Gedung', 'gedung', $settings, 'Gedung sekolah per unit.'),
-                    self::soon('Ruangan & Lab', 'ruangan', $settings, 'Ruang kelas dan laboratorium per gedung.'),
+                    ['label' => 'Gedung', 'route' => 'admin.buildings.index', 'permission' => Permission::ClassroomsManage->value],
+                    ['label' => 'Ruangan & Lab', 'route' => 'admin.rooms.index', 'permission' => Permission::ClassroomsManage->value],
                     self::soon('Tingkat Kelas', 'tingkat-kelas', Permission::ClassroomsManage->value, 'Tingkat kelas per unit (mis. Kelas 1–6).'),
                     ['label' => 'Rombel', 'route' => 'admin.classrooms.index', 'permission' => Permission::ClassroomsManage->value],
                     self::soon('Jurusan', 'jurusan', Permission::ClassroomsManage->value, 'Jurusan atau peminatan.'),

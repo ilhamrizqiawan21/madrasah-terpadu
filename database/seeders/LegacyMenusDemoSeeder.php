@@ -15,10 +15,12 @@ use App\Enums\StaffAssignmentType;
 use App\Enums\StudentStatus;
 use App\Models\AcademicYear;
 use App\Models\AlumniTracerResponse;
+use App\Models\Building;
 use App\Models\Classroom;
 use App\Models\Enrollment;
 use App\Models\Guardian;
 use App\Models\Meeting;
+use App\Models\Room;
 use App\Models\StaffProfile;
 use App\Models\Student;
 use App\Models\StudentMutation;
@@ -58,6 +60,7 @@ class LegacyMenusDemoSeeder extends Seeder
         $this->guardianCards();
         $this->mutations($units, $admin);
         $this->alumni($admin);
+        $this->facilities($units);
     }
 
     private function staffProfiles(Unit $unit): void
@@ -228,5 +231,18 @@ class LegacyMenusDemoSeeder extends Seeder
                     'recorded_by' => $admin->id,
                 ]);
             });
+    }
+
+    /**
+     * @param  Collection<int, Unit>  $units
+     */
+    private function facilities($units): void
+    {
+        foreach ($units as $unit) {
+            $building = Building::query()->firstOrCreate(['unit_id' => $unit->id, 'code' => 'GD-'.$unit->code], ['name' => 'Gedung Utama '.$unit->code]);
+            foreach ([['R01', 'Ruang Kelas 1', 28], ['R02', 'Ruang Kelas 2', 28], ['LAB', 'Laboratorium Komputer', 20]] as [$code, $name, $capacity]) {
+                Room::query()->firstOrCreate(['building_id' => $building->id, 'code' => $code], ['name' => $name, 'capacity' => $capacity]);
+            }
+        }
     }
 }
