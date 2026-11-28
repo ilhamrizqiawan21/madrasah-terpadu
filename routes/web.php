@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\ComingSoonController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\SchoolContextController;
 use App\Http\Controllers\BrandingAssetController;
+use App\Http\Controllers\Canteen\CanteenPosController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Gate\GateController;
 use App\Http\Controllers\PushSubscriptionController;
@@ -86,13 +87,17 @@ Route::middleware(['auth:web'])->group(function (): void {
 
     Route::prefix('kantin')
         ->name('canteen.')
+        ->controller(CanteenPosController::class)
         ->middleware('role:'.implode('|', [
             Role::CanteenCashier->value,
             Role::Treasurer->value,
             Role::Admin->value,
         ]))
         ->group(function (): void {
-            Route::inertia('/', 'canteen/index')->name('index');
+            Route::get('/', 'index')->name('index');
+            Route::post('scan', 'lookup')->middleware('throttle:120,1')->name('lookup');
+            Route::post('transaksi', 'purchase')->middleware('throttle:120,1')->name('purchase');
+            Route::post('transaksi/{transaction}/balik', 'reverse')->name('reverse');
         });
 });
 

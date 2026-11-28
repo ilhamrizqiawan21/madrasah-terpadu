@@ -23,7 +23,7 @@ Aturan: singkat dan faktual. Jangan menyalin isi TODO/ADR; tautkan saja. Hapus b
 
 ## Terakhir diperbarui
 
-2026-11-28 · Gemini — Fase 8: **T-801**, **T-802** selesai dan di-commit. Fase 6 selesai seluruhnya (**T-601**–**T-617**).
+2026-11-28 · Gemini — Fase 8: **T-801**, **T-802**, **T-803** selesai dan di-commit. Fase 6 selesai seluruhnya (**T-601**–**T-617**).
 
 ## Keadaan sekarang
 
@@ -55,7 +55,7 @@ Aturan: singkat dan faktual. Jangan menyalin isi TODO/ADR; tautkan saja. Hapus b
 
 ## Sedang dikerjakan
 
-Fase 8 (Dompet kantin): **T-801**, **T-802** selesai; lanjut **T-803–T-807**.
+Fase 8 (Dompet kantin): **T-801**–**T-803** selesai; lanjut **T-804**, **T-806**, **T-807** (dan **T-805** setelah Fase 7).
 
 ## Langkah berikutnya
 
