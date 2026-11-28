@@ -203,7 +203,15 @@ export default function StudentMutations({
             label: 'Jenis',
             align: 'center',
             render: (row) => (
-                <StatusBadge variant={typeVariant[row.type.value]}>
+                <StatusBadge
+                    variant={typeVariant[row.type.value]}
+                    className={
+                        row.type.value === 'out'
+                            ? // Kuning solid sesuai arahan pemilik; teks gelap menjaga kontras.
+                              'border-accent-attention bg-accent-attention text-accent-attention-foreground dark:text-accent-attention-foreground'
+                            : undefined
+                    }
+                >
                     {row.type.label}
                 </StatusBadge>
             ),
