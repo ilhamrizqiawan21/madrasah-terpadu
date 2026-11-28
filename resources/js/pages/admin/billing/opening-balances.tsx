@@ -114,7 +114,7 @@ export default function OpeningBalancesPage() {
         <StaffLayout
             breadcrumbs={[
                 {
-                    title: 'Keuangan',
+                    title: 'Keuangan Siswa',
                     href: OpeningBalanceController.index.url(),
                 },
                 {

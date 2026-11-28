@@ -227,7 +227,7 @@ export default function AcademicYearsIndex({
         <StaffLayout
             breadcrumbs={[
                 {
-                    title: 'Data Induk',
+                    title: 'Akademik',
                     href: AcademicYearController.index(),
                 },
                 {

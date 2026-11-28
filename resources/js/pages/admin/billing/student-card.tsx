@@ -47,7 +47,10 @@ export default function StudentBillingCardPage({
     return (
         <StaffLayout
             breadcrumbs={[
-                { title: 'Keuangan', href: InvoiceController.index.url() },
+                {
+                    title: 'Keuangan Siswa',
+                    href: InvoiceController.index.url(),
+                },
                 { title: 'Tagihan', href: InvoiceController.index.url() },
                 {
                     title: student.name,

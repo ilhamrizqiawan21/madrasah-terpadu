@@ -142,7 +142,7 @@ export default function RubricsIndex({ versions }: Props) {
 RubricsIndex.layout = (page: ReactNode) => (
     <StaffLayout
         breadcrumbs={[
-            { title: 'Ibadah', href: '#' },
+            { title: 'Kesiswaan & Asrama', href: '#' },
             { title: 'Rubrik hafalan', href: RubricController.index.url() },
         ]}
     >

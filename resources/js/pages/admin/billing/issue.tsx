@@ -301,7 +301,10 @@ export default function BillingIssuePage({
     return (
         <StaffLayout
             breadcrumbs={[
-                { title: 'Keuangan', href: BillingRunController.create.url() },
+                {
+                    title: 'Keuangan Siswa',
+                    href: BillingRunController.create.url(),
+                },
                 {
                     title: 'Terbitkan tagihan',
                     href: BillingRunController.create.url(),

@@ -269,7 +269,7 @@ export default function TransferProofsIndex({
         <StaffLayout
             breadcrumbs={[
                 {
-                    title: 'Keuangan',
+                    title: 'Keuangan Siswa',
                     href: TransferProofController.index.url(),
                 },
                 {

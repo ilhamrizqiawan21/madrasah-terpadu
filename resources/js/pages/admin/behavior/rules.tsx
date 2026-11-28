@@ -728,7 +728,7 @@ export default function PointRulesIndex({
 PointRulesIndex.layout = (page: ReactNode) => (
     <StaffLayout
         breadcrumbs={[
-            { title: 'Kesiswaan', href: '#' },
+            { title: 'Kesiswaan & Asrama', href: '#' },
             { title: 'Aturan poin', href: PointRuleController.index.url() },
         ]}
     >

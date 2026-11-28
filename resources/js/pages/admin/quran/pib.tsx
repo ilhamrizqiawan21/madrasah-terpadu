@@ -596,7 +596,7 @@ export default function PibIndex({
 PibIndex.layout = (page: ReactNode) => (
     <StaffLayout
         breadcrumbs={[
-            { title: 'Ibadah', href: '#' },
+            { title: 'Kesiswaan & Asrama', href: '#' },
             { title: 'Praktik ibadah (PIB)', href: PibController.index.url() },
         ]}
     >

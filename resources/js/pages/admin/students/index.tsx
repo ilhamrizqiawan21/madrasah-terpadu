@@ -579,7 +579,7 @@ export default function StudentsIndex({
     return (
         <StaffLayout
             breadcrumbs={[
-                { title: 'Data Induk', href: StudentController.index() },
+                { title: 'Pengguna', href: StudentController.index() },
                 { title: 'Siswa', href: StudentController.index() },
             ]}
         >

@@ -520,7 +520,7 @@ export default function MemorizationMaterialsIndex({
 MemorizationMaterialsIndex.layout = (page: ReactNode) => (
     <StaffLayout
         breadcrumbs={[
-            { title: 'Ibadah', href: '#' },
+            { title: 'Kesiswaan & Asrama', href: '#' },
             {
                 title: 'Materi hadits & doa',
                 href: MemorizationMaterialController.index.url(),

@@ -616,7 +616,7 @@ export default function DisciplineIndex({
 DisciplineIndex.layout = (page: ReactNode) => (
     <StaffLayout
         breadcrumbs={[
-            { title: 'Kesiswaan', href: '#' },
+            { title: 'Kesiswaan & Asrama', href: '#' },
             {
                 title: 'Tindak lanjut & ambang',
                 href: DisciplineController.index.url(),

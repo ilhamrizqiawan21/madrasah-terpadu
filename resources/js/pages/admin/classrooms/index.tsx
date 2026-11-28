@@ -422,7 +422,7 @@ export default function ClassroomsIndex({
     return (
         <StaffLayout
             breadcrumbs={[
-                { title: 'Data Induk', href: ClassroomController.index() },
+                { title: 'Akademik', href: ClassroomController.index() },
                 { title: 'Rombel', href: ClassroomController.index() },
             ]}
         >

@@ -231,7 +231,7 @@ export default function StudentMutations({
     return (
         <StaffLayout
             breadcrumbs={[
-                { title: 'Data Induk', href: StudentController.index() },
+                { title: 'Pengguna', href: StudentController.index() },
                 { title: 'Siswa', href: StudentController.index() },
                 {
                     title: 'Mutasi siswa',

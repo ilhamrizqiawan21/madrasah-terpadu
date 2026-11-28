@@ -195,7 +195,10 @@ export default function CashierIndex({
     return (
         <StaffLayout
             breadcrumbs={[
-                { title: 'Keuangan', href: CashierController.index.url() },
+                {
+                    title: 'Keuangan Siswa',
+                    href: CashierController.index.url(),
+                },
                 {
                     title: 'Kasir pembayaran',
                     href: CashierController.index.url(),

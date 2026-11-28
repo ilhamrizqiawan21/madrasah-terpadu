@@ -692,7 +692,7 @@ export default function MemorizationTargetsIndex({
 MemorizationTargetsIndex.layout = (page: ReactNode) => (
     <StaffLayout
         breadcrumbs={[
-            { title: 'Ibadah', href: '#' },
+            { title: 'Kesiswaan & Asrama', href: '#' },
             {
                 title: 'Target hafalan',
                 href: MemorizationTargetController.index.url(),

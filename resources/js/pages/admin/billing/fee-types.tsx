@@ -323,7 +323,10 @@ export default function FeeTypesIndex({
     return (
         <StaffLayout
             breadcrumbs={[
-                { title: 'Keuangan', href: FeeTypeController.index.url() },
+                {
+                    title: 'Keuangan Siswa',
+                    href: FeeTypeController.index.url(),
+                },
                 { title: 'Jenis tagihan', href: FeeTypeController.index.url() },
             ]}
         >

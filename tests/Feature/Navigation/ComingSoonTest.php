@@ -36,7 +36,8 @@ test('menu segera membuka halaman sedang disiapkan, bukan beranda', function ():
         ->get(route('admin.soon', ['module' => 'inventaris']))
         ->assertInertia(fn (Assert $page) => $page
             ->component('admin/coming-soon')
-            ->where('module.label', 'Inventaris aset')
+            ->where('module.label', 'Inventaris')
+            ->where('module.group', 'Fasilitas')
         );
 });
 

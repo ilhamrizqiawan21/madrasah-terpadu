@@ -566,7 +566,7 @@ export default function HabitItemsIndex({
 HabitItemsIndex.layout = (page: ReactNode) => (
     <StaffLayout
         breadcrumbs={[
-            { title: 'Ibadah', href: '#' },
+            { title: 'Kesiswaan & Asrama', href: '#' },
             { title: 'Item pembiasaan', href: HabitItemController.index.url() },
         ]}
     >

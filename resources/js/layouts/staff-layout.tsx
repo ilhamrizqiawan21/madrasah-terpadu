@@ -11,13 +11,19 @@ import {
     ChevronRight,
     ChevronsUpDown,
     ClipboardCheck,
+    Globe,
+    GraduationCap,
     HeartHandshake,
     House,
     Inbox,
+    Landmark,
+    LifeBuoy,
+    MonitorPlay,
     MoonStar,
     Package,
     Settings,
     Store,
+    UserPlus,
     Users,
     Wallet,
 } from 'lucide-react';
@@ -91,7 +97,13 @@ type AttentionItem = {
 };
 
 const groupIcons: Record<string, LucideIcon> = {
+    'user-plus': UserPlus,
     users: Users,
+    'graduation-cap': GraduationCap,
+    'monitor-play': MonitorPlay,
+    landmark: Landmark,
+    'life-buoy': LifeBuoy,
+    globe: Globe,
     'book-open': BookOpen,
     'calendar-check': CalendarCheck,
     'heart-handshake': HeartHandshake,

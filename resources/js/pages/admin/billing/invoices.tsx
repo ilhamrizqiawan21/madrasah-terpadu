@@ -271,7 +271,10 @@ export default function InvoicesIndex({
     return (
         <StaffLayout
             breadcrumbs={[
-                { title: 'Keuangan', href: InvoiceController.index.url() },
+                {
+                    title: 'Keuangan Siswa',
+                    href: InvoiceController.index.url(),
+                },
                 { title: 'Tagihan', href: InvoiceController.index.url() },
             ]}
         >

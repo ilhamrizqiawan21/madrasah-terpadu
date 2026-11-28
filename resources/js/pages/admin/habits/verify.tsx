@@ -423,7 +423,7 @@ export default function HabitVerifyIndex({
 HabitVerifyIndex.layout = (page: ReactNode) => (
     <StaffLayout
         breadcrumbs={[
-            { title: 'Ibadah', href: '#' },
+            { title: 'Kesiswaan & Asrama', href: '#' },
             {
                 title: 'Verifikasi pembiasaan',
                 href: HabitVerificationController.index.url(),

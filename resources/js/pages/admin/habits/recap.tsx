@@ -217,7 +217,7 @@ export default function HabitRecapIndex({
 HabitRecapIndex.layout = (page: ReactNode) => (
     <StaffLayout
         breadcrumbs={[
-            { title: 'Ibadah', href: '#' },
+            { title: 'Kesiswaan & Asrama', href: '#' },
             {
                 title: 'Rekap pembiasaan',
                 href: HabitRecapController.index.url(),

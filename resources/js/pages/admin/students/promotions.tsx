@@ -203,7 +203,7 @@ export default function StudentPromotions({
     return (
         <StaffLayout
             breadcrumbs={[
-                { title: 'Data Induk', href: StudentController.index() },
+                { title: 'Akademik', href: StudentController.index() },
                 { title: 'Siswa', href: StudentController.index() },
                 {
                     title: 'Kenaikan kelas',

@@ -710,7 +710,7 @@ export default function GuardiansIndex({
     return (
         <StaffLayout
             breadcrumbs={[
-                { title: 'Data Induk', href: StudentController.index() },
+                { title: 'Pengguna', href: StudentController.index() },
                 { title: 'Wali', href: GuardianController.index() },
             ]}
         >

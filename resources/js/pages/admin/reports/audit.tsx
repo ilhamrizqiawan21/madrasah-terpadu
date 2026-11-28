@@ -359,9 +359,9 @@ export default function AuditLogPage({
 AuditLogPage.layout = (page: ReactNode) => (
     <StaffLayout
         breadcrumbs={[
-            { title: 'Laporan', href: '#' },
+            { title: 'Pengaturan', href: '#' },
             {
-                title: 'Jejak audit',
+                title: 'Log Aktivitas',
                 href: AuditLogController.index.url(),
             },
         ]}

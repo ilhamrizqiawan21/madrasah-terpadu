@@ -471,7 +471,7 @@ export default function CbtExamsIndex({
         <StaffLayout
             breadcrumbs={[
                 { title: 'Beranda', href: AdminDashboardController.url() },
-                { title: 'Ujian', href: CbtExamController.index.url() },
+                { title: 'E-Learning', href: CbtExamController.index.url() },
                 { title: 'Daftar ujian', href: CbtExamController.index.url() },
             ]}
         >

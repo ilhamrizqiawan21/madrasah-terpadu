@@ -156,7 +156,7 @@ export default function StudentShow(props: Props) {
     return (
         <StaffLayout
             breadcrumbs={[
-                { title: 'Data Induk', href: dashboard() },
+                { title: 'Pengguna', href: dashboard() },
                 { title: 'Siswa', href: StudentController.index() },
                 { title: student.name, href: '' },
             ]}

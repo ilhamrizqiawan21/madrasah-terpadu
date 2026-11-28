@@ -286,7 +286,7 @@ export default function DiscountsIndex({
         <StaffLayout
             breadcrumbs={[
                 {
-                    title: 'Keuangan',
+                    title: 'Keuangan Siswa',
                     href: StudentDiscountController.index.url(),
                 },
                 {

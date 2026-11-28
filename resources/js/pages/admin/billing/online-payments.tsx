@@ -255,7 +255,7 @@ export default function OnlinePaymentsIndex({
         <StaffLayout
             breadcrumbs={[
                 {
-                    title: 'Keuangan',
+                    title: 'Keuangan Siswa',
                     href: OnlinePaymentController.index.url(),
                 },
                 {

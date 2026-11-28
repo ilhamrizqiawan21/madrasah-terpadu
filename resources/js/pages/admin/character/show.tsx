@@ -144,7 +144,7 @@ export default function CharacterShow(props: Props) {
     return (
         <StaffLayout
             breadcrumbs={[
-                { title: 'Kesiswaan', href: dashboard() },
+                { title: 'Kesiswaan & Asrama', href: dashboard() },
                 {
                     title: 'Penilaian karakter',
                     href: CharacterAssessmentController.index(),

@@ -795,7 +795,7 @@ export default function BehaviorRecordsIndex({
 BehaviorRecordsIndex.layout = (page: ReactNode) => (
     <StaffLayout
         breadcrumbs={[
-            { title: 'Kesiswaan', href: '#' },
+            { title: 'Kesiswaan & Asrama', href: '#' },
             {
                 title: 'Catatan perilaku',
                 href: BehaviorRecordController.index.url(),

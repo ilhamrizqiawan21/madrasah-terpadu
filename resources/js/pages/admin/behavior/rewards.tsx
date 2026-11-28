@@ -875,7 +875,7 @@ export default function RewardsIndex({
 RewardsIndex.layout = (page: ReactNode) => (
     <StaffLayout
         breadcrumbs={[
-            { title: 'Kesiswaan', href: '#' },
+            { title: 'Kesiswaan & Asrama', href: '#' },
             { title: 'Reward & voucher', href: RewardController.index.url() },
         ]}
     >

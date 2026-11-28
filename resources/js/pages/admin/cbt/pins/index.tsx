@@ -226,7 +226,10 @@ export default function CbtStudentPinsIndex({
         <StaffLayout
             breadcrumbs={[
                 { title: 'Beranda', href: AdminDashboardController.url() },
-                { title: 'Ujian', href: CbtStudentPinController.index.url() },
+                {
+                    title: 'E-Learning',
+                    href: CbtStudentPinController.index.url(),
+                },
                 {
                     title: 'PIN ujian siswa',
                     href: CbtStudentPinController.index.url(),

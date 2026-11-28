@@ -26,7 +26,7 @@ test('guru tidak menerima grup menu keuangan pada navigasi server', function ():
             $navigation = $page->toArray()['props']['navigation'];
             $keys = array_column($navigation, 'key');
 
-            expect($keys)->toContain('data-induk', 'presensi', 'kesiswaan', 'ibadah')
+            expect($keys)->toContain('pengguna', 'absensi', 'kesiswaan', 'e-learning')
                 ->not->toContain('keuangan', 'laporan', 'pengaturan');
         });
 });
