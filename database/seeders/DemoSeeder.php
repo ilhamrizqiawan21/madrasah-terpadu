@@ -171,5 +171,7 @@ class DemoSeeder extends Seeder
                 $guardianCounter++;
             }
         }
+
+        $this->call(LegacyMenusDemoSeeder::class);
     }
 }

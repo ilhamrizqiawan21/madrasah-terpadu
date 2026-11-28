@@ -278,7 +278,7 @@ export default function StudentMutations({
                         <>
                             <Button
                                 type="button"
-                                variant="outline"
+                                variant="soft"
                                 onClick={() => window.print()}
                             >
                                 <Printer className="size-4" />
@@ -286,7 +286,7 @@ export default function StudentMutations({
                             </Button>
                             <Button
                                 type="button"
-                                variant="outline"
+                                variant="warning"
                                 onClick={() => setOpenOut(true)}
                             >
                                 <ArrowUpRight className="size-4" />

@@ -777,7 +777,7 @@ export default function GuardiansIndex({
                         <>
                             <Button
                                 type="button"
-                                variant="outline"
+                                variant="soft"
                                 onClick={() => window.print()}
                             >
                                 <Printer

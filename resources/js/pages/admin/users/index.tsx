@@ -642,7 +642,7 @@ export default function StaffUsersIndex({
                         <>
                             <Button
                                 type="button"
-                                variant="outline"
+                                variant="soft"
                                 onClick={() => window.print()}
                             >
                                 <Printer

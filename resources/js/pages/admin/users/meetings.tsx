@@ -244,7 +244,7 @@ export default function MeetingsIndex({
                         <>
                             <Button
                                 type="button"
-                                variant="outline"
+                                variant="soft"
                                 onClick={() => window.print()}
                             >
                                 <Printer

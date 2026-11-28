@@ -14,7 +14,13 @@ const buttonVariants = cva(
         destructive:
           "bg-destructive text-white shadow-xs hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40",
         outline:
-          "border border-input bg-background shadow-xs hover:bg-accent hover:text-accent-foreground",
+          "border border-input bg-card shadow-xs hover:bg-accent hover:text-accent-foreground",
+        // Aksi peringatan/keluar (mis. Mutasi keluar): kuning solid, teks gelap agar kontras.
+        warning:
+          "bg-accent-attention text-accent-attention-foreground shadow-xs hover:bg-accent-attention/85",
+        // Aksi sekunder berwarna (mis. Cetak): tinta warna utama, tidak bersaing dengan tombol utama.
+        soft:
+          "border border-primary/20 bg-primary/10 text-primary shadow-xs hover:bg-primary/15",
         secondary:
           "bg-secondary text-secondary-foreground shadow-xs hover:bg-secondary/80",
         ghost: "hover:bg-accent hover:text-accent-foreground",
