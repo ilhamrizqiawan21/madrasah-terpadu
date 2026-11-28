@@ -6,6 +6,7 @@ use App\Enums\Feature;
 use App\Enums\Permission;
 use App\Http\Controllers\Admin\BillingRunController;
 use App\Http\Controllers\Admin\CashierController;
+use App\Http\Controllers\Admin\ExamPeriodController;
 use App\Http\Controllers\Admin\FeeTypeController;
 use App\Http\Controllers\Admin\InvoiceAdjustmentController;
 use App\Http\Controllers\Admin\InvoiceController;
@@ -89,5 +90,20 @@ Route::prefix('keuangan')->group(function (): void {
             Route::get('bukti-transfer/{transferProof}/berkas', 'file')->name('transfer-proofs.file');
             Route::post('bukti-transfer/{transferProof}/setujui', 'approve')->name('transfer-proofs.approve');
             Route::post('bukti-transfer/{transferProof}/tolak', 'reject')->name('transfer-proofs.reject');
+        });
+
+    Route::controller(ExamPeriodController::class)
+        ->middleware(['permission:'.Permission::InvoicesView->value, 'feature:'.Feature::ExamEligibility->value])
+        ->group(function (): void {
+            Route::get('kelayakan-ujian', 'index')->name('exam-periods.index');
+        });
+
+    Route::controller(ExamPeriodController::class)
+        ->middleware(['permission:'.Permission::InvoicesIssue->value, 'feature:'.Feature::ExamEligibility->value])
+        ->group(function (): void {
+            Route::post('kelayakan-ujian', 'store')->name('exam-periods.store');
+            Route::put('kelayakan-ujian/{examPeriod}', 'update')->name('exam-periods.update');
+            Route::patch('kelayakan-ujian/{examPeriod}/aktifkan', 'activate')->name('exam-periods.activate');
+            Route::patch('kelayakan-ujian/{examPeriod}/tutup', 'close')->name('exam-periods.close');
         });
 });

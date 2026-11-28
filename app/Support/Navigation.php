@@ -282,7 +282,7 @@ final class Navigation
                         'plan' => 'Paket P-08 Midtrans wali',
                     ],
                     [
-                        'label' => 'Kelayakan ujian', 'soon' => 'kelayakan-ujian', 'permission' => Permission::InvoicesView->value, 'feature' => Feature::ExamEligibility,
+                        'label' => 'Kelayakan ujian', 'route' => 'admin.exam-periods.index', 'permission' => Permission::InvoicesView->value, 'feature' => Feature::ExamEligibility,
                         'description' => 'Syarat lunas per periode ujian, dispensasi, dan daftar siswa yang belum layak.',
                         'plan' => 'Paket P-15 Kelayakan ujian',
                     ],

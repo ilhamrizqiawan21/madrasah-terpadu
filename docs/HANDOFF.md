@@ -23,7 +23,7 @@ Aturan: singkat dan faktual. Jangan menyalin isi TODO/ADR; tautkan saja. Hapus b
 
 ## Terakhir diperbarui
 
-2026-11-28 · Gemini — Fase 6: **T-601**–**T-610**, **T-615**, **T-616**, **T-617** selesai dan di-commit. Sebelumnya: Claude (2026-11-27) — beranda, navigasi ADR-028, Fase 12 ADR-029, polesan CRUD.
+2026-11-28 · Gemini — Fase 6: **T-601**–**T-611**, **T-615**–**T-617** selesai dan di-commit. Sebelumnya: Claude (2026-11-27) — beranda, navigasi ADR-028, Fase 12 ADR-029, polesan CRUD.
 
 ## Keadaan sekarang
 
@@ -55,11 +55,11 @@ Aturan: singkat dan faktual. Jangan menyalin isi TODO/ADR; tautkan saja. Hapus b
 
 ## Sedang dikerjakan
 
-Fase 6: **T-601**–**T-610**, **T-615**–**T-617** selesai (sisa Fase 6: **T-611–T-614 Kelayakan ujian**).
+Fase 6: **T-601**–**T-611**, **T-615**–**T-617** selesai (lanjut **T-612–T-614 Kelayakan ujian**).
 
 ## Langkah berikutnya
 
-1. Lanjutkan **T-611–T-614 Kelayakan ujian** (Paket P-15).
+1. Lanjutkan **T-612–T-614 Kelayakan ujian** (Paket P-15).
 2. Jalankan migrasi `2026_11_28_000001` s.d. `2026_11_28_000007` pada DB lokal/staging saat fitur `billing` diaktifkan.
 
 ## Arahan pemilik yang berlaku
