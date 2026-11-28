@@ -10,6 +10,7 @@ use App\Enums\ExamRequirementScope;
 use App\Enums\Feature;
 use App\Enums\InvoiceStatus;
 use App\Models\Exam;
+use App\Models\ExamEligibilityOverride;
 use App\Models\ExamPeriod;
 use App\Models\ExamPeriodRequirement;
 use App\Models\Invoice;
@@ -129,6 +130,16 @@ final class ExamEligibilityResolver
             return true;
         }
 
+        $hasDispensation = ExamEligibilityOverride::query()
+            ->where('exam_period_id', $period->id)
+            ->where('student_id', $student->id)
+            ->whereNull('revoked_at')
+            ->exists();
+
+        if ($hasDispensation) {
+            return true;
+        }
+
         $feeTypeIds = $period->requirements->pluck('fee_type_id')->all();
         if ($feeTypeIds === []) {
             return true;
@@ -140,6 +151,6 @@ final class ExamEligibilityResolver
             ->where('status', '!=', InvoiceStatus::Cancelled->value)
             ->get();
 
-        return $this->evaluateModels($period->requirements, $invoices)['eligible'];
+        return $this->evaluateModels($period->requirements, $invoices, $hasDispensation)['eligible'];
     }
 }

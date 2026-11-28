@@ -8,11 +8,15 @@ use App\Enums\ExamDelivery;
 use App\Enums\ExamPeriodStatus;
 use App\Enums\ExamRequirementScope;
 use App\Enums\Permission;
+use App\Enums\Role;
+use App\Enums\StudentStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\ExamPeriodRequest;
+use App\Models\ExamEligibilityOverride;
 use App\Models\ExamPeriod;
 use App\Models\ExamPeriodRequirement;
 use App\Models\FeeType;
+use App\Models\Student;
 use App\Models\Unit;
 use App\Models\User;
 use App\Services\Billing\ExamPeriodService;
@@ -52,9 +56,14 @@ class ExamPeriodController extends Controller
             : null;
 
         $statusFilter = $request->string('status')->trim()->toString();
+        $canGrantDispensation = $user->hasRole(Role::Admin->value);
 
         $periods = ExamPeriod::query()
             ->with(['unit:id,code,name', 'requirements.feeType:id,name,recurrence'])
+            ->when($canGrantDispensation, fn (Builder $q) => $q->with(['overrides' => fn ($oq) => $oq
+                ->whereNull('revoked_at')
+                ->with(['student:id,name,nis', 'granter:id,name'])
+                ->orderByDesc('granted_at')]))
             ->when($selectedUnit !== null, fn (Builder $q) => $q->where('unit_id', $selectedUnit->id))
             ->when($statusFilter !== '', fn (Builder $q) => $q->where('status', $statusFilter))
             ->orderByDesc('starts_on')
@@ -87,6 +96,17 @@ class ExamPeriodController extends Controller
                     ],
                     'period_until' => $req->period_until?->toDateString(),
                 ])->all()),
+                'overrides' => $canGrantDispensation
+                    ? array_values($period->overrides->map(fn (ExamEligibilityOverride $override): array => [
+                        'id' => $override->id,
+                        'student_id' => $override->student_id,
+                        'student_name' => $override->student->name,
+                        'student_nis' => $override->student->nis,
+                        'reason' => $override->reason,
+                        'granted_by_name' => $override->granter->name,
+                        'granted_at' => $override->granted_at->toIso8601String(),
+                    ])->all())
+                    : [],
             ]);
 
         $feeTypes = FeeType::query()
@@ -114,6 +134,16 @@ class ExamPeriodController extends Controller
                 'status' => $statusFilter,
             ],
             'canManage' => $user->can(Permission::InvoicesIssue->value),
+            'canGrantDispensation' => $canGrantDispensation,
+            'students' => $canGrantDispensation
+                ? Student::query()
+                    ->where('status', StudentStatus::Active->value)
+                    ->orderBy('name')
+                    ->get(['id', 'unit_id', 'nis', 'name'])
+                    ->map(fn (Student $s): array => ['id' => $s->id, 'unit_id' => $s->unit_id, 'nis' => $s->nis, 'name' => $s->name])
+                    ->values()
+                    ->all()
+                : [],
         ]);
     }
 

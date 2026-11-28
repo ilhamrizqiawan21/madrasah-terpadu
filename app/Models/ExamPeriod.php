@@ -83,4 +83,12 @@ class ExamPeriod extends Model
     {
         return $this->hasMany(ExamPeriodRequirement::class);
     }
+
+    /**
+     * @return HasMany<ExamEligibilityOverride, $this>
+     */
+    public function overrides(): HasMany
+    {
+        return $this->hasMany(ExamEligibilityOverride::class);
+    }
 }

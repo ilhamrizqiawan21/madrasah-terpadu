@@ -1,8 +1,10 @@
 import { Head, router, useForm } from '@inertiajs/react';
-import { CheckCircle2, Lock, Plus, Trash2 } from 'lucide-react';
+import { CheckCircle2, Lock, Plus, ShieldCheck, Trash2 } from 'lucide-react';
 import type { FormEvent } from 'react';
 import { useState } from 'react';
+import ExamDispensationController from '@/actions/App/Http/Controllers/Admin/ExamDispensationController';
 import ExamPeriodController from '@/actions/App/Http/Controllers/Admin/ExamPeriodController';
+import { ConfirmDialog } from '@/components/app/confirm-dialog';
 import type { DataTableColumn } from '@/components/app/data-table';
 import { DataTable } from '@/components/app/data-table';
 import { DateInput } from '@/components/app/date-input';
@@ -40,6 +42,16 @@ type RequirementRow = {
     period_until: string | null;
 };
 
+type OverrideRow = {
+    id: number;
+    student_id: number;
+    student_name: string;
+    student_nis: string;
+    reason: string;
+    granted_by_name: string;
+    granted_at: string;
+};
+
 type ExamPeriodRow = {
     id: number;
     unit_id: number;
@@ -51,6 +63,7 @@ type ExamPeriodRow = {
     ends_on: string;
     status: { value: 'draft' | 'active' | 'closed'; label: string };
     requirements: RequirementRow[];
+    overrides: OverrideRow[];
 };
 
 type RequirementInput = {
@@ -73,6 +86,8 @@ type Props = {
     scopes: { value: 'up_to_period' | 'all_open'; label: string }[];
     filters: { unit: string; status: string };
     canManage: boolean;
+    canGrantDispensation: boolean;
+    students: { id: number; unit_id: number; nis: string; name: string }[];
 };
 
 const ALL_VALUE = 'semua';
@@ -95,10 +110,21 @@ export default function ExamPeriodsIndex({
     scopes,
     filters,
     canManage,
+    canGrantDispensation,
+    students,
 }: Props) {
     const [loading, setLoading] = useState(false);
     const [formOpen, setFormOpen] = useState(false);
     const [editing, setEditing] = useState<ExamPeriodRow | null>(null);
+    const [dispensationPeriod, setDispensationPeriod] =
+        useState<ExamPeriodRow | null>(null);
+    const [revokingOverride, setRevokingOverride] =
+        useState<OverrideRow | null>(null);
+
+    const dispensationForm = useForm({
+        student_id: '',
+        reason: '',
+    });
 
     const defaultUnitId = units[0] ? String(units[0].id) : '';
     const availableFeesFor = (unitIdStr: string) =>
@@ -345,6 +371,36 @@ export default function ExamPeriodsIndex({
                                 </Button>
                             </TooltipTrigger>
                             <TooltipContent>Tutup periode</TooltipContent>
+                        </Tooltip>
+                    )}
+                    {canGrantDispensation && (
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="icon"
+                                    aria-label={`Dispensasi ${row.name}`}
+                                    onClick={() => {
+                                        const unitStudents = students.filter(
+                                            (s) => s.unit_id === row.unit_id,
+                                        );
+                                        dispensationForm.clearErrors();
+                                        dispensationForm.setData({
+                                            student_id: unitStudents[0]
+                                                ? String(unitStudents[0].id)
+                                                : '',
+                                            reason: '',
+                                        });
+                                        setDispensationPeriod(row);
+                                    }}
+                                >
+                                    <ShieldCheck className="size-4" />
+                                </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                                Dispensasi ({row.overrides.length})
+                            </TooltipContent>
                         </Tooltip>
                     )}
                 </RowActions>
@@ -714,6 +770,175 @@ export default function ExamPeriodsIndex({
                     </div>
                 </div>
             </FormDialog>
+
+            {canGrantDispensation && (
+                <FormDialog
+                    open={dispensationPeriod !== null}
+                    onOpenChange={(open) => {
+                        if (!open) {
+                            setDispensationPeriod(null);
+                        }
+                    }}
+                    title={
+                        dispensationPeriod
+                            ? `Dispensasi — ${dispensationPeriod.name}`
+                            : 'Dispensasi ujian'
+                    }
+                    onSubmit={(e) => {
+                        e.preventDefault();
+                        if (!dispensationPeriod) {
+                            return;
+                        }
+                        dispensationForm.post(
+                            ExamDispensationController.store({
+                                examPeriod: dispensationPeriod.id,
+                            }).url,
+                            {
+                                preserveScroll: true,
+                                onSuccess: () => {
+                                    dispensationForm.reset('reason');
+                                    setDispensationPeriod(null);
+                                },
+                            },
+                        );
+                    }}
+                    processing={dispensationForm.processing}
+                    submitLabel="Beri dispensasi"
+                >
+                    <div className="space-y-4">
+                        <div className="space-y-1.5">
+                            <Label htmlFor="disp-student">Siswa</Label>
+                            <Select
+                                value={dispensationForm.data.student_id}
+                                onValueChange={(v) =>
+                                    dispensationForm.setData('student_id', v)
+                                }
+                            >
+                                <SelectTrigger id="disp-student">
+                                    <SelectValue placeholder="Pilih siswa" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {students
+                                        .filter(
+                                            (s) =>
+                                                !dispensationPeriod ||
+                                                s.unit_id ===
+                                                    dispensationPeriod.unit_id,
+                                        )
+                                        .map((s) => (
+                                            <SelectItem
+                                                key={s.id}
+                                                value={String(s.id)}
+                                            >
+                                                {s.nis} — {s.name}
+                                            </SelectItem>
+                                        ))}
+                                </SelectContent>
+                            </Select>
+                            <InputError
+                                message={dispensationForm.errors.student_id}
+                            />
+                        </div>
+
+                        <div className="space-y-1.5">
+                            <Label htmlFor="disp-reason">
+                                Alasan dispensasi
+                            </Label>
+                            <Input
+                                id="disp-reason"
+                                value={dispensationForm.data.reason}
+                                onChange={(e) =>
+                                    dispensationForm.setData(
+                                        'reason',
+                                        e.target.value,
+                                    )
+                                }
+                                placeholder="Mis. Surat pernyataan orang tua"
+                            />
+                            <InputError
+                                message={dispensationForm.errors.reason}
+                            />
+                        </div>
+
+                        {dispensationPeriod &&
+                            dispensationPeriod.overrides.length > 0 && (
+                                <div className="space-y-2 border-t border-border pt-3">
+                                    <p className="text-xs font-semibold text-muted-foreground">
+                                        Dispensasi aktif (
+                                        {dispensationPeriod.overrides.length})
+                                    </p>
+                                    <ul className="max-h-44 space-y-2 overflow-y-auto text-xs">
+                                        {dispensationPeriod.overrides.map(
+                                            (ov) => (
+                                                <li
+                                                    key={ov.id}
+                                                    className="flex items-start justify-between gap-2 rounded-md border border-border bg-muted/30 p-2"
+                                                >
+                                                    <div className="min-w-0">
+                                                        <p className="font-medium">
+                                                            {ov.student_name} (
+                                                            {ov.student_nis})
+                                                        </p>
+                                                        <p className="text-muted-foreground">
+                                                            {ov.reason}
+                                                        </p>
+                                                    </div>
+                                                    <Button
+                                                        type="button"
+                                                        size="sm"
+                                                        variant="outline"
+                                                        onClick={() =>
+                                                            setRevokingOverride(
+                                                                ov,
+                                                            )
+                                                        }
+                                                    >
+                                                        Cabut
+                                                    </Button>
+                                                </li>
+                                            ),
+                                        )}
+                                    </ul>
+                                </div>
+                            )}
+                    </div>
+                </FormDialog>
+            )}
+
+            <ConfirmDialog
+                open={revokingOverride !== null}
+                onOpenChange={(open) => {
+                    if (!open) {
+                        setRevokingOverride(null);
+                    }
+                }}
+                title="Cabut dispensasi ujian?"
+                description={
+                    revokingOverride
+                        ? `Siswa ${revokingOverride.student_name} akan kembali mengikuti syarat kelayakan tagihan.`
+                        : ''
+                }
+                confirmLabel="Cabut dispensasi"
+                variant="destructive"
+                onConfirm={() => {
+                    if (!revokingOverride) {
+                        return;
+                    }
+                    router.post(
+                        ExamDispensationController.revoke({
+                            override: revokingOverride.id,
+                        }),
+                        {},
+                        {
+                            preserveScroll: true,
+                            onSuccess: () => {
+                                setRevokingOverride(null);
+                                setDispensationPeriod(null);
+                            },
+                        },
+                    );
+                }}
+            />
         </StaffLayout>
     );
 }

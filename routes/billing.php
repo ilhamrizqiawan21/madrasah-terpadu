@@ -6,6 +6,7 @@ use App\Enums\Feature;
 use App\Enums\Permission;
 use App\Http\Controllers\Admin\BillingRunController;
 use App\Http\Controllers\Admin\CashierController;
+use App\Http\Controllers\Admin\ExamDispensationController;
 use App\Http\Controllers\Admin\ExamPeriodController;
 use App\Http\Controllers\Admin\FeeTypeController;
 use App\Http\Controllers\Admin\InvoiceAdjustmentController;
@@ -105,5 +106,12 @@ Route::prefix('keuangan')->group(function (): void {
             Route::put('kelayakan-ujian/{examPeriod}', 'update')->name('exam-periods.update');
             Route::patch('kelayakan-ujian/{examPeriod}/aktifkan', 'activate')->name('exam-periods.activate');
             Route::patch('kelayakan-ujian/{examPeriod}/tutup', 'close')->name('exam-periods.close');
+        });
+
+    Route::controller(ExamDispensationController::class)
+        ->middleware(['feature:'.Feature::ExamEligibility->value])
+        ->group(function (): void {
+            Route::post('kelayakan-ujian/{examPeriod}/dispensasi', 'store')->name('exam-periods.dispensations.store');
+            Route::post('kelayakan-ujian/dispensasi/{override}/cabut', 'revoke')->name('exam-periods.dispensations.revoke');
         });
 });
