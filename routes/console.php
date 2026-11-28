@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Jobs\CloseExpiredExamSessions;
 use App\Jobs\MarkDailyAbsences;
+use App\Jobs\SendExamEligibilityReminders;
 use App\Jobs\SendInvoiceDueReminders;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
@@ -25,5 +26,10 @@ Schedule::job(new CloseExpiredExamSessions)
 
 Schedule::job(new SendInvoiceDueReminders)
     ->dailyAt('07:00')
+    ->timezone('Asia/Makassar')
+    ->withoutOverlapping();
+
+Schedule::job(new SendExamEligibilityReminders)
+    ->dailyAt('07:15')
     ->timezone('Asia/Makassar')
     ->withoutOverlapping();

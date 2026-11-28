@@ -23,7 +23,7 @@ Aturan: singkat dan faktual. Jangan menyalin isi TODO/ADR; tautkan saja. Hapus b
 
 ## Terakhir diperbarui
 
-2026-11-28 · Gemini — Fase 6: **T-601**–**T-613**, **T-615**–**T-617** selesai dan di-commit. Sebelumnya: Claude (2026-11-27) — beranda, navigasi ADR-028, Fase 12 ADR-029, polesan CRUD.
+2026-11-28 · Gemini — Fase 6 **SELESAI SELURUHNYA** (**T-601**–**T-617**): Paket P-15 Kelayakan ujian (**T-611**–**T-614**) selesai dan di-commit. Sebelumnya: Claude (2026-11-27) — beranda, navigasi ADR-028, Fase 12 ADR-029, polesan CRUD.
 
 ## Keadaan sekarang
 
@@ -55,12 +55,12 @@ Aturan: singkat dan faktual. Jangan menyalin isi TODO/ADR; tautkan saja. Hapus b
 
 ## Sedang dikerjakan
 
-Fase 6: **T-601**–**T-613**, **T-615**–**T-617** selesai (lanjut **T-614 Kartu & notifikasi wali untuk syarat ujian**).
+Fase 6 (**T-601**–**T-617**) **SELESAI SELURUHNYA** (Paket P-15 Kelayakan ujian selesai).
 
 ## Langkah berikutnya
 
-1. Lanjutkan **T-614 Kartu & notifikasi wali untuk syarat ujian** (tugas terakhir Paket P-15).
-2. Jalankan migrasi `2026_11_28_000001` s.d. `2026_11_28_000007` pada DB lokal/staging saat fitur `billing` diaktifkan.
+1. Lanjutkan **Fase 7 — Pembayaran online Midtrans** (**T-701–T-708**, Paket P-04 & P-08), atau **Fase 8 — Dompet kantin** (**T-801–T-807**, Paket P-10).
+2. Jalankan migrasi `2026_11_28_000001` s.d. `2026_11_28_000010` pada DB lokal/staging saat fitur `billing` / `exam_eligibility` diaktifkan.
 
 ## Arahan pemilik yang berlaku
 

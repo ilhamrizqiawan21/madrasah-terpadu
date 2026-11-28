@@ -31,6 +31,7 @@ class GuardianHomeResource extends JsonResource
             'leave' => $this->resource['leave'],
             'behavior' => $this->resource['behavior'],
             'exams' => $this->resource['exams'],
+            'exam_eligibility' => $this->resource['exam_eligibility'],
             'cards' => $this->resource['cards'],
         ];
     }

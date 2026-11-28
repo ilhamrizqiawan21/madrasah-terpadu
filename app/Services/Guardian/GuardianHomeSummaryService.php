@@ -5,18 +5,25 @@ declare(strict_types=1);
 namespace App\Services\Guardian;
 
 use App\Domain\Attendance\AttendanceClassifier;
+use App\Domain\Billing\InvoiceStatusResolver;
+use App\Domain\Exam\ExamEligibilityResolver;
 use App\Enums\AttendanceStatus;
 use App\Enums\BehaviorRecordStatus;
+use App\Enums\ExamPeriodStatus;
 use App\Enums\ExamResultStatus;
 use App\Enums\ExamStatus;
 use App\Enums\Feature;
+use App\Enums\InvoiceStatus;
 use App\Enums\LeaveRequestStatus;
 use App\Enums\PointAccount;
 use App\Models\AcademicYear;
 use App\Models\AttendanceDay;
 use App\Models\BehaviorRecord;
 use App\Models\Exam;
+use App\Models\ExamEligibilityOverride;
+use App\Models\ExamPeriod;
 use App\Models\ExamResult;
+use App\Models\Invoice;
 use App\Models\LeaveRequest;
 use App\Models\PointEntry;
 use App\Models\SchoolHoliday;
@@ -42,6 +49,7 @@ use Illuminate\Support\Facades\Route;
  *     leave: ?array{id: int, status: string, status_label: string, type_label: string, starts_on: string, ends_on: string, decision_note: ?string},
  *     behavior: ?array{merit: int, violation: int, latest: ?array{title: string, category: string, category_label: string, points: int, occurred_on: string}, href: ?string},
  *     exams: ?array{upcoming: list<array{id: int, title: string, subject: string, status: string, opens_at: string, closes_at: string}>, latest_result: ?array{title: string, subject: string, score: int, computed_at: string}, href: string},
+ *     exam_eligibility: ?array{period_name: string, delivery_label: string, starts_on: string, total_amount: int, invoices: list<array{id: int, description: string, remaining: int, due_date: string}>, href: string},
  *     cards: list<array{key: string, priority: int, title: string, summary: string, tone: string, href: ?string}>
  * }
  */
@@ -58,6 +66,7 @@ final class GuardianHomeSummaryService
     public function __construct(
         private readonly FeatureFlags $features,
         private readonly SchoolCalendarService $calendar,
+        private readonly ExamEligibilityResolver $eligibilityResolver,
     ) {}
 
     public static function cacheKey(int $studentId): string
@@ -123,6 +132,9 @@ final class GuardianHomeSummaryService
                 : null,
             'exams' => $this->features->enabled(Feature::Cbt)
                 ? $this->exams($student, $enrollment?->classroom_id, $now)
+                : null,
+            'exam_eligibility' => $this->features->enabled(Feature::ExamEligibility)
+                ? $this->examEligibility($student)
                 : null,
             'cards' => $todayRecord !== null ? [$this->attendanceCard($student, $todayRecord)] : [],
         ];
@@ -379,5 +391,90 @@ final class GuardianHomeSummaryService
             },
             'href' => route('guardian.students.attendance.index', ['student' => $student->id]),
         ];
+    }
+
+    /**
+     * @return ?array{period_name: string, delivery_label: string, starts_on: string, total_amount: int, invoices: list<array{id: int, description: string, remaining: int, due_date: string}>, href: string}
+     */
+    private function examEligibility(Student $student): ?array
+    {
+        $periods = ExamPeriod::query()
+            ->with('requirements')
+            ->where('unit_id', $student->unit_id)
+            ->where('status', ExamPeriodStatus::Active->value)
+            ->orderBy('starts_on')
+            ->get();
+
+        if ($periods->isEmpty()) {
+            return null;
+        }
+
+        $feeTypeIds = $periods->flatMap(fn (ExamPeriod $p) => $p->requirements->pluck('fee_type_id'))->unique()->values()->all();
+        if ($feeTypeIds === []) {
+            return null;
+        }
+
+        $invoices = Invoice::query()
+            ->where('student_id', $student->id)
+            ->whereIn('fee_type_id', $feeTypeIds)
+            ->where('status', '!=', InvoiceStatus::Cancelled->value)
+            ->orderBy('due_date')
+            ->get();
+
+        $activeOverridePeriodIds = ExamEligibilityOverride::query()
+            ->whereIn('exam_period_id', $periods->pluck('id')->all())
+            ->where('student_id', $student->id)
+            ->whereNull('revoked_at')
+            ->pluck('exam_period_id')
+            ->flip();
+
+        foreach ($periods as $period) {
+            if ($activeOverridePeriodIds->has($period->id)) {
+                continue;
+            }
+
+            $eval = $this->eligibilityResolver->evaluateModels($period->requirements, $invoices);
+            if ($eval['eligible']) {
+                continue;
+            }
+
+            $blockingSet = array_flip($eval['blocking_invoice_ids']);
+            $blockingInvoices = [];
+            $totalAmount = 0;
+
+            foreach ($invoices as $inv) {
+                if (! isset($blockingSet[$inv->id])) {
+                    continue;
+                }
+
+                $remaining = InvoiceStatusResolver::remaining($inv->amount, $inv->adjustment_total, $inv->paid_total);
+                if ($remaining <= 0) {
+                    continue;
+                }
+
+                $totalAmount += $remaining;
+                $blockingInvoices[] = [
+                    'id' => $inv->id,
+                    'description' => $inv->description,
+                    'remaining' => $remaining,
+                    'due_date' => $inv->due_date->toDateString(),
+                ];
+            }
+
+            if ($blockingInvoices === []) {
+                continue;
+            }
+
+            return [
+                'period_name' => $period->name,
+                'delivery_label' => $period->delivery->label(),
+                'starts_on' => $period->starts_on->toDateString(),
+                'total_amount' => $totalAmount,
+                'invoices' => $blockingInvoices,
+                'href' => route('guardian.billing', absolute: false),
+            ];
+        }
+
+        return null;
     }
 }

@@ -8,9 +8,11 @@ import {
 } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { useEffect, useState } from 'react';
+import BillingController from '@/actions/App/Http/Controllers/Guardian/BillingController';
 import LeaveRequestController from '@/actions/App/Http/Controllers/Guardian/LeaveRequestController';
 import { DateText } from '@/components/app/date-text';
 import { EmptyState } from '@/components/app/empty-state';
+import { MoneyText } from '@/components/app/money-text';
 import type { StatusBadgeVariant } from '@/components/app/status-badge';
 import { StatusBadge } from '@/components/app/status-badge';
 import { Button } from '@/components/ui/button';
@@ -89,6 +91,19 @@ type Home = {
             score: number;
             computed_at: string;
         } | null;
+        href: string;
+    } | null;
+    exam_eligibility: {
+        period_name: string;
+        delivery_label: string;
+        starts_on: string;
+        total_amount: number;
+        invoices: {
+            id: number;
+            description: string;
+            remaining: number;
+            due_date: string;
+        }[];
         href: string;
     } | null;
 };
@@ -208,9 +223,14 @@ export default function GuardianHome({ home }: Props) {
         );
     }
 
-    const { student, today, week, leave, behavior, exams } = home;
+    const { student, today, week, leave, behavior, exams, exam_eligibility } =
+        home;
     const hasAnything =
-        today !== null || leave !== null || behavior !== null || exams !== null;
+        today !== null ||
+        leave !== null ||
+        behavior !== null ||
+        exams !== null ||
+        exam_eligibility !== null;
 
     return (
         <GuardianLayout>
@@ -218,6 +238,67 @@ export default function GuardianHome({ home }: Props) {
 
             <div className="space-y-4">
                 <ChildHeader student={student} />
+
+                {exam_eligibility && (
+                    <section
+                        aria-labelledby="exam-elig-title"
+                        className="rounded-xl border border-accent-attention/60 bg-card p-4 shadow-xs"
+                    >
+                        <div className="flex items-start justify-between gap-2">
+                            <div>
+                                <StatusBadge variant="attention">
+                                    Perlu tindakan
+                                </StatusBadge>
+                                <h2
+                                    id="exam-elig-title"
+                                    className="mt-1.5 text-base font-semibold text-foreground"
+                                >
+                                    Syarat ujian: {exam_eligibility.period_name}
+                                </h2>
+                                <p className="text-xs text-muted-foreground">
+                                    {exam_eligibility.delivery_label} · Mulai{' '}
+                                    <DateText
+                                        value={exam_eligibility.starts_on}
+                                    />
+                                </p>
+                            </div>
+                            <div className="text-right">
+                                <span className="text-xs text-muted-foreground">
+                                    Total
+                                </span>
+                                <p className="text-base font-semibold text-foreground">
+                                    <MoneyText
+                                        amount={exam_eligibility.total_amount}
+                                    />
+                                </p>
+                            </div>
+                        </div>
+
+                        <ul className="mt-3 divide-y divide-border border-t border-border text-sm">
+                            {exam_eligibility.invoices.map((inv) => (
+                                <li
+                                    key={inv.id}
+                                    className="flex items-center justify-between gap-2 py-2"
+                                >
+                                    <span className="truncate text-foreground">
+                                        {inv.description}
+                                    </span>
+                                    <span className="shrink-0 font-medium">
+                                        <MoneyText amount={inv.remaining} />
+                                    </span>
+                                </li>
+                            ))}
+                        </ul>
+
+                        <div className="mt-3">
+                            <Button asChild className="min-h-11 w-full">
+                                <Link href={BillingController()}>
+                                    Bayar sekarang
+                                </Link>
+                            </Button>
+                        </div>
+                    </section>
+                )}
 
                 {(installPrompt !== null || showIosHint) && (
                     <section className="flex items-start justify-between gap-3 rounded-xl border border-border bg-card p-4 shadow-xs">
