@@ -33,3 +33,8 @@ Schedule::job(new SendExamEligibilityReminders)
     ->dailyAt('07:15')
     ->timezone('Asia/Makassar')
     ->withoutOverlapping();
+
+Schedule::command('wallet:verify-balances')
+    ->dailyAt('01:00')
+    ->timezone('Asia/Makassar')
+    ->withoutOverlapping();
