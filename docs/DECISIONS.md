@@ -297,6 +297,7 @@ Akun wali dibuat lewat impor/data induk dengan password awal acak. Tidak ada hal
 - **U-05** ADR-009 kelebihan bayar.
 - **U-06** Nama pencatat perilaku terlihat oleh wali. Default: tidak terlihat.
 - **U-13** Celah menu dari pengamatan ulang admin aplikasi lama 2026-11-27 (lihat bagian U-13). Sudah tampil di menu sebagai "Segera" (ADR-028).
+- **U-14** Pelunasan sisa tagihan `partial` lewat Midtrans (lihat bagian U-14).
 - **U-12** Fitur aplikasi lama yang belum ada di rencana (paritas, REUSE_MAP §4). Sebagian diputuskan lewat ADR-021/ADR-022; yang tersisa: format e-rapor resmi, kebutuhan akuntansi lanjutan, cakupan asrama.
 
 ### U-12 — Paritas dengan aplikasi lama (Usulan, 2026-11-27)
@@ -337,3 +338,16 @@ Akun wali dibuat lewat impor/data induk dengan password awal acak. Tidak ada hal
 | j   | Leger hasil belajar                                     | Bergantung format e-rapor (U-12 g)                                                                                 |
 
 **Pertanyaan untuk klien:** urutan prioritas (a)–(j), dan apakah (g)–(i) benar dipakai di aplikasi lama.
+
+### U-14 — Sisa tagihan yang sudah dicicil dibayar online (Usulan, 2026-11-28, T-702)
+
+**Temuan.** Mockup 16 "Wali — Tagihan & pembayaran online" menampilkan tagihan berstatus _Sebagian_ (Uang Pangkal, "sisa dari Rp1.250.000") yang bisa dicentang dan dibayar lewat Snap. Sementara `PAYMENTS.md` §3 langkah 1 hanya mengizinkan tagihan `unpaid` ("tagihan `partial` dibayar di kasir").
+
+**Yang diterapkan sekarang (T-702).** Mengikuti `PAYMENTS.md`: tagihan `partial` tidak bisa dicentang; portal wali menjelaskan bahwa tagihan yang sudah dicicil dilunasi di kasir.
+
+**Opsi.**
+
+1. Tetap seperti sekarang (aturan PAYMENTS). Paling sederhana; wali harus ke kasir untuk sisa cicilan.
+2. **(Rekomendasi)** Izinkan tagihan `partial` dibayar online sebesar **seluruh sisanya** (bukan cicilan baru). Tetap sesuai ADR-010 (lunas penuh per tagihan); risiko kasir menerima pembayaran di sela waktu sama dengan tagihan `unpaid` dan sudah ditangani alur kelebihan bayar (ADR-009). Perubahan: syarat status di `PaymentOrderService::createForInvoices`, satu tes, dan PAYMENTS §3.
+
+**Dampak bila dipilih opsi 2:** perubahan kecil tanpa migrasi; PAYMENTS §3 dan TODO T-702 diperbarui.

@@ -6,9 +6,11 @@ namespace App\Http\Controllers\Guardian;
 
 use App\Enums\Feature;
 use App\Enums\InvoiceStatus;
+use App\Enums\PaymentOrderStatus;
 use App\Http\Controllers\Controller;
 use App\Models\Invoice;
 use App\Models\Payment;
+use App\Models\PaymentOrderItem;
 use App\Models\Student;
 use App\Models\User;
 use App\Services\Features\FeatureFlags;
@@ -68,16 +70,30 @@ class BillingController extends Controller
                 ->get()
                 ->groupBy('student_id');
 
+        // Tagihan yang sedang menunggu pembayaran online tidak bisa dipilih lagi (T-702).
+        $pendingOrderByInvoice = $invoicesByStudent->isEmpty()
+            ? collect()
+            : PaymentOrderItem::query()
+                ->with('order:id,order_id')
+                ->whereIn('invoice_id', $invoicesByStudent->flatten()->pluck('id')->all())
+                ->whereHas('order', static fn ($query) => $query
+                    ->where('status', PaymentOrderStatus::Pending->value)
+                    ->where('expires_at', '>', now()))
+                ->orderBy('id')
+                ->get()
+                ->mapWithKeys(static fn (PaymentOrderItem $item): array => [$item->invoice_id => $item->order->order_id]);
+
         $familyTotalRemaining = 0;
 
         $childPayloads = $children->map(function (Student $child) use (
             $invoicesByStudent,
             $paymentsByStudent,
+            $pendingOrderByInvoice,
             $todayWita,
             &$familyTotalRemaining,
         ): array {
             $openInvoices = $invoicesByStudent->get($child->id, collect())
-                ->map(static function (Invoice $invoice) use ($todayWita): array {
+                ->map(static function (Invoice $invoice) use ($todayWita, $pendingOrderByInvoice): array {
                     $isOverdue = $invoice->due_date->toDateString() < $todayWita;
 
                     return [
@@ -92,6 +108,7 @@ class BillingController extends Controller
                         'status' => $invoice->status->value,
                         'status_label' => $invoice->status->label(),
                         'is_overdue' => $isOverdue,
+                        'pending_order_id' => $pendingOrderByInvoice->get($invoice->id),
                     ];
                 })
                 ->values()

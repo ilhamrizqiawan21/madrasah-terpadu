@@ -1,8 +1,9 @@
-import { Head, useForm } from '@inertiajs/react';
-import { CreditCard, FileDown, Upload } from 'lucide-react';
+import { Head, Link, router, useForm } from '@inertiajs/react';
+import { FileDown, Upload } from 'lucide-react';
 import type { FormEvent, ReactNode } from 'react';
 import { useState } from 'react';
 import ReceiptController from '@/actions/App/Http/Controllers/Billing/ReceiptController';
+import PaymentController from '@/actions/App/Http/Controllers/Guardian/PaymentController';
 import TransferProofController from '@/actions/App/Http/Controllers/Guardian/TransferProofController';
 import { DateText } from '@/components/app/date-text';
 import { EmptyState } from '@/components/app/empty-state';
@@ -11,6 +12,7 @@ import { MoneyText } from '@/components/app/money-text';
 import { StatusBadge } from '@/components/app/status-badge';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import GuardianLayout from '@/layouts/guardian-layout';
@@ -27,6 +29,7 @@ type OpenInvoice = {
     status: string;
     status_label: string;
     is_overdue: boolean;
+    pending_order_id: string | null;
 };
 
 type PaymentItem = {
@@ -58,6 +61,62 @@ export default function GuardianBilling({
     familyTotalRemaining,
     midtransEnabled,
 }: Props) {
+    // Satu order Midtrans = satu anak (PAYMENTS §3), jadi pilihan tagihan dibatasi per anak.
+    const [selection, setSelection] = useState<{
+        studentId: number;
+        invoiceIds: number[];
+    } | null>(null);
+    const [payError, setPayError] = useState<string | null>(null);
+    const [paying, setPaying] = useState(false);
+
+    function toggleInvoice(studentId: number, invoiceId: number) {
+        setPayError(null);
+        setSelection((current) => {
+            if (!current || current.studentId !== studentId) {
+                return { studentId, invoiceIds: [invoiceId] };
+            }
+
+            const invoiceIds = current.invoiceIds.includes(invoiceId)
+                ? current.invoiceIds.filter((id) => id !== invoiceId)
+                : [...current.invoiceIds, invoiceId];
+
+            return invoiceIds.length === 0 ? null : { studentId, invoiceIds };
+        });
+    }
+
+    const selectedChild = selection
+        ? children.find((child) => child.id === selection.studentId)
+        : undefined;
+    const selectedTotal =
+        selection && selectedChild
+            ? selectedChild.open_invoices
+                  .filter((inv) => selection.invoiceIds.includes(inv.id))
+                  .reduce((sum, inv) => sum + inv.remaining, 0)
+            : 0;
+
+    function payNow() {
+        if (!selection) {
+            return;
+        }
+
+        router.post(
+            PaymentController.store.url(selection.studentId),
+            { invoice_ids: selection.invoiceIds },
+            {
+                preserveScroll: true,
+                onStart: () => setPaying(true),
+                onFinish: () => setPaying(false),
+                onError: (errors) => {
+                    setPayError(
+                        errors.invoice_ids ??
+                            errors.payment ??
+                            'Pembayaran belum dapat dibuat. Silakan coba lagi.',
+                    );
+                },
+            },
+        );
+    }
+
     const [uploading, setUploading] = useState<{
         studentId: number;
         invoice: OpenInvoice;
@@ -122,7 +181,7 @@ export default function GuardianBilling({
                     </div>
                     <p className="mt-1 text-xs text-muted-foreground">
                         {midtransEnabled
-                            ? 'Pilih tagihan anak di bawah untuk membayar secara online.'
+                            ? 'Centang tagihan lalu tekan Bayar sekarang. Tagihan yang sudah dicicil dilunasi di kasir sekolah.'
                             : 'Pembayaran online akan aktif setelah integrasi pembayaran dibuka; saat ini pembayaran dilakukan melalui kasir sekolah.'}
                     </p>
                 </div>
@@ -175,10 +234,36 @@ export default function GuardianBilling({
                                             }`}
                                         >
                                             <div className="flex items-start justify-between gap-3">
-                                                <div className="space-y-1">
-                                                    <div className="font-medium text-foreground">
+                                                {midtransEnabled &&
+                                                    inv.status === 'unpaid' &&
+                                                    inv.pending_order_id ===
+                                                        null && (
+                                                        <Checkbox
+                                                            id={`pay-${inv.id}`}
+                                                            className="mt-1 size-5"
+                                                            checked={
+                                                                selection?.studentId ===
+                                                                    child.id &&
+                                                                selection.invoiceIds.includes(
+                                                                    inv.id,
+                                                                )
+                                                            }
+                                                            onCheckedChange={() =>
+                                                                toggleInvoice(
+                                                                    child.id,
+                                                                    inv.id,
+                                                                )
+                                                            }
+                                                            aria-label={`Pilih ${inv.description} untuk dibayar`}
+                                                        />
+                                                    )}
+                                                <div className="min-w-0 flex-1 space-y-1">
+                                                    <label
+                                                        htmlFor={`pay-${inv.id}`}
+                                                        className="block font-medium text-foreground"
+                                                    >
                                                         {inv.description}
-                                                    </div>
+                                                    </label>
                                                     <div className="text-xs text-muted-foreground">
                                                         Jatuh tempo:{' '}
                                                         <DateText
@@ -194,7 +279,12 @@ export default function GuardianBilling({
                                                             }
                                                         />
                                                     </div>
-                                                    {inv.is_overdue ? (
+                                                    {inv.pending_order_id !==
+                                                    null ? (
+                                                        <StatusBadge variant="attention">
+                                                            Menunggu bayar
+                                                        </StatusBadge>
+                                                    ) : inv.is_overdue ? (
                                                         <StatusBadge variant="warning">
                                                             Menunggak
                                                         </StatusBadge>
@@ -227,20 +317,20 @@ export default function GuardianBilling({
                                                 </Button>
 
                                                 {midtransEnabled &&
-                                                    inv.status === 'unpaid' && (
+                                                    inv.pending_order_id !==
+                                                        null && (
                                                         <Button
-                                                            type="button"
+                                                            asChild
                                                             size="sm"
                                                             className="min-h-11"
-                                                            disabled
                                                         >
-                                                            <CreditCard
-                                                                className="size-4"
-                                                                strokeWidth={
-                                                                    1.75
-                                                                }
-                                                            />
-                                                            Bayar online
+                                                            <Link
+                                                                href={PaymentController.finish.url(
+                                                                    inv.pending_order_id,
+                                                                )}
+                                                            >
+                                                                Lihat pembayaran
+                                                            </Link>
                                                         </Button>
                                                     )}
                                             </div>
@@ -311,6 +401,42 @@ export default function GuardianBilling({
                     ))
                 )}
             </div>
+
+            {midtransEnabled && selection && selectedChild && (
+                <>
+                    <div aria-hidden className="h-28" />
+                    <div className="fixed inset-x-0 bottom-14 z-20 border-t border-border bg-card">
+                        <div className="mx-auto max-w-xl space-y-2 px-4 py-3">
+                            <div className="flex items-center justify-between gap-3 text-sm">
+                                <span className="text-muted-foreground">
+                                    {selection.invoiceIds.length} tagihan{' '}
+                                    {selectedChild.name} dipilih
+                                </span>
+                                <MoneyText
+                                    amount={selectedTotal}
+                                    className="font-semibold"
+                                />
+                            </div>
+                            {payError && (
+                                <p
+                                    role="alert"
+                                    className="text-sm text-destructive"
+                                >
+                                    {payError}
+                                </p>
+                            )}
+                            <Button
+                                type="button"
+                                className="min-h-12 w-full text-base"
+                                onClick={payNow}
+                                disabled={paying}
+                            >
+                                Bayar sekarang
+                            </Button>
+                        </div>
+                    </div>
+                </>
+            )}
 
             <FormDialog
                 open={uploading !== null}

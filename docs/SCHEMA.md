@@ -198,11 +198,12 @@ Indeks (`status`,`due_date`), (`student_id`,`status`). Sisa = `amount - adjustme
 
 `order_id string(50) unique` (format `INV-<ulid>` / `TOP-<ulid>`), `purpose string` (`invoices|wallet_topup`), `student_id`, `guardian_id`, `gross_amount bigint`,
 `status string` (`pending|paid|expired|failed|cancelled`), `snap_token null`, `snap_redirect_url null`, `expires_at`, `paid_at null`, `midtrans_transaction_id null`,
-`payment_type string null`, `last_status_payload json null`, timestamps. Indeks (`status`,`expires_at`).
+`payment_type string null`, `last_status_payload json null`, `review_reason string(30) null` (`amount_mismatch|needs_review|overpaid|challenge`, antrean "Perlu ditinjau" T-705/T-707), `reviewed_at null`, `reviewed_by → users null`, timestamps.
+Indeks (`status`,`expires_at`), (`student_id`,`created_at`), (`review_reason`,`reviewed_at`). Migration `2026_11_28_000013`. Ditulis lewat `PaymentOrderService` (buat order, `failed` bila Snap gagal) dan pemroses webhook. Satu order = satu siswa; tagihan yang ada di order `pending` belum kedaluwarsa tidak bisa diorder lagi (dikunci `lockForUpdate` pada baris tagihan).
 
 ### `payment_order_items` (T-702)
 
-`payment_order_id`, `invoice_id null`, `description`, `amount bigint`.
+`payment_order_id` (restrict), `invoice_id null` (restrict; null = top-up), `description string(100)`, `amount bigint`. Indeks `invoice_id`.
 
 ### `payment_notifications` (T-703) — append-only, log mentah
 

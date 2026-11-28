@@ -19,6 +19,7 @@ use App\Http\Controllers\Guardian\LeaveRequestController;
 use App\Http\Controllers\Guardian\MemorizationController;
 use App\Http\Controllers\Guardian\NotificationInboxController;
 use App\Http\Controllers\Guardian\NotificationPreferenceController;
+use App\Http\Controllers\Guardian\PaymentController;
 use App\Http\Controllers\Guardian\TransferProofController;
 use App\Http\Controllers\Guardian\WalletController;
 use Illuminate\Support\Facades\Route;
@@ -45,6 +46,15 @@ Route::get('tagihan', BillingController::class)
     ->middleware('feature:'.Feature::Billing->value)
     ->name('billing');
 
+// Pembayaran online Midtrans (T-702). URL `selesai` juga dipakai sebagai callback finish Snap.
+Route::prefix('pembayaran/{paymentOrder}')
+    ->middleware('feature:'.Feature::Midtrans->value)
+    ->controller(PaymentController::class)
+    ->group(function (): void {
+        Route::get('/', 'show')->name('payments.show');
+        Route::get('selesai', 'finish')->name('payments.finish');
+    });
+
 Route::prefix('anak/{student}')
     ->whereNumber('student')
     ->middleware('guardian.owns-student')
@@ -70,6 +80,9 @@ Route::prefix('anak/{student}')
             Route::get('bukti-transfer/{transferProof}/berkas', [TransferProofController::class, 'file'])
                 ->whereNumber('transferProof')
                 ->name('students.transfer-proofs.file');
+            Route::post('pembayaran', [PaymentController::class, 'store'])
+                ->middleware(['feature:'.Feature::Midtrans->value, 'throttle:10,1'])
+                ->name('students.payments.store');
         });
 
         Route::middleware('feature:'.Feature::Cbt->value)->group(function (): void {
