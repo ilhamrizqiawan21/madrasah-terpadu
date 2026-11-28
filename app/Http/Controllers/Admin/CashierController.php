@@ -8,12 +8,14 @@ use App\Enums\InvoiceStatus;
 use App\Enums\PaymentMethod;
 use App\Enums\StudentStatus;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\Billing\ReversePaymentRequest;
 use App\Http\Requests\Admin\Billing\StoreManualPaymentRequest;
 use App\Models\Invoice;
 use App\Models\Payment;
 use App\Models\Student;
 use App\Models\User;
 use App\Services\Billing\ManualPaymentService;
+use App\Services\Billing\PaymentReversalService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -24,6 +26,7 @@ class CashierController extends Controller
 {
     public function __construct(
         private readonly ManualPaymentService $service,
+        private readonly PaymentReversalService $reversalService,
     ) {}
 
     public function index(Request $request): Response
@@ -95,6 +98,8 @@ class CashierController extends Controller
             ->values()
             ->all();
 
+        $user = $request->user();
+
         return Inertia::render('admin/billing/cashier', [
             'students' => $students,
             'selectedStudent' => $selectedStudent !== null ? [
@@ -109,6 +114,7 @@ class CashierController extends Controller
                 ['value' => PaymentMethod::Cash->value, 'label' => PaymentMethod::Cash->label()],
                 ['value' => PaymentMethod::Transfer->value, 'label' => PaymentMethod::Transfer->label()],
             ],
+            'canReverse' => $user instanceof User && $user->can('reverse', Payment::class),
         ]);
     }
 
@@ -138,5 +144,16 @@ class CashierController extends Controller
         );
 
         return back()->with('success', "Pembayaran tersimpan ({$payment->receipt_number}).");
+    }
+
+    public function reverse(ReversePaymentRequest $request, Payment $payment): RedirectResponse
+    {
+        /** @var User $actor */
+        $actor = $request->user();
+        $validated = $request->validated();
+
+        $this->reversalService->reverse($actor, $payment, (string) $validated['reason']);
+
+        return back()->with('success', "Pembayaran {$payment->receipt_number} berhasil dibalik.");
     }
 }

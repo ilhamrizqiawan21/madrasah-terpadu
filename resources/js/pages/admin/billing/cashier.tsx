@@ -1,10 +1,11 @@
 import { Head, router, useForm } from '@inertiajs/react';
-import { Banknote, CheckCircle2 } from 'lucide-react';
+import { Banknote, CheckCircle2, RotateCcw } from 'lucide-react';
 import type { FormEvent, ReactNode } from 'react';
 import { useMemo, useState } from 'react';
 import CashierController from '@/actions/App/Http/Controllers/Admin/CashierController';
 import { DateText } from '@/components/app/date-text';
 import { EmptyState } from '@/components/app/empty-state';
+import { FormDialog } from '@/components/app/form-dialog';
 import { MoneyText } from '@/components/app/money-text';
 import { PageHeader } from '@/components/app/page-header';
 import { StatusBadge } from '@/components/app/status-badge';
@@ -20,6 +21,11 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipTrigger,
+} from '@/components/ui/tooltip';
 import StaffLayout from '@/layouts/staff-layout';
 
 type StudentOption = {
@@ -65,6 +71,7 @@ type Props = {
     openInvoices: OpenInvoice[];
     recentPayments: RecentPayment[];
     methods: { value: string; label: string }[];
+    canReverse: boolean;
 };
 
 export default function CashierIndex({
@@ -73,9 +80,29 @@ export default function CashierIndex({
     openInvoices,
     recentPayments,
     methods,
+    canReverse,
 }: Props) {
     const [studentSearch, setStudentSearch] = useState('');
     const [selectedMap, setSelectedMap] = useState<Record<number, number>>({});
+    const [reversing, setReversing] = useState<RecentPayment | null>(null);
+
+    const reverseForm = useForm({
+        reason: '',
+    });
+
+    function submitReverse(e: FormEvent<HTMLFormElement>) {
+        e.preventDefault();
+        if (!reversing) {
+            return;
+        }
+        reverseForm.post(CashierController.reverse.url(reversing.id), {
+            preserveScroll: true,
+            onSuccess: () => {
+                setReversing(null);
+                reverseForm.reset();
+            },
+        });
+    }
 
     const form = useForm<{
         student_id: number | null;
@@ -450,6 +477,9 @@ export default function CashierIndex({
                                         <th className="px-3 py-2 text-left font-medium">
                                             Waktu
                                         </th>
+                                        <th className="px-3 py-2 text-center font-medium">
+                                            Aksi
+                                        </th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-border">
@@ -462,6 +492,11 @@ export default function CashierIndex({
                                                         strokeWidth={1.75}
                                                     />
                                                     {p.receipt_number}
+                                                    {p.is_reversed && (
+                                                        <StatusBadge variant="muted">
+                                                            Dibalik
+                                                        </StatusBadge>
+                                                    )}
                                                 </span>
                                             </td>
                                             <td className="px-3 py-2">
@@ -485,6 +520,41 @@ export default function CashierIndex({
                                                     mode="datetime"
                                                 />
                                             </td>
+                                            <td className="px-3 py-2 text-center">
+                                                {canReverse &&
+                                                    !p.is_reversed &&
+                                                    p.method !== 'midtrans' && (
+                                                        <Tooltip>
+                                                            <TooltipTrigger
+                                                                asChild
+                                                            >
+                                                                <Button
+                                                                    type="button"
+                                                                    variant="ghost"
+                                                                    size="icon"
+                                                                    aria-label={`Balik pembayaran ${p.receipt_number}`}
+                                                                    onClick={() => {
+                                                                        reverseForm.clearErrors();
+                                                                        reverseForm.reset();
+                                                                        setReversing(
+                                                                            p,
+                                                                        );
+                                                                    }}
+                                                                >
+                                                                    <RotateCcw
+                                                                        className="size-4 text-destructive"
+                                                                        strokeWidth={
+                                                                            1.75
+                                                                        }
+                                                                    />
+                                                                </Button>
+                                                            </TooltipTrigger>
+                                                            <TooltipContent>
+                                                                Balik pembayaran
+                                                            </TooltipContent>
+                                                        </Tooltip>
+                                                    )}
+                                            </td>
                                         </tr>
                                     ))}
                                 </tbody>
@@ -493,6 +563,35 @@ export default function CashierIndex({
                     </div>
                 )}
             </div>
+
+            <FormDialog
+                open={reversing !== null}
+                onOpenChange={(open) => {
+                    if (!open) {
+                        setReversing(null);
+                    }
+                }}
+                title={`Balik pembayaran ${reversing?.receipt_number ?? ''}?`}
+                description="Alokasi pembayaran akan dibalik dan status tagihan siswa akan dihitung ulang."
+                onSubmit={submitReverse}
+                processing={reverseForm.processing}
+                submitLabel="Balik pembayaran"
+            >
+                <div className="space-y-1.5">
+                    <Label htmlFor="reverse-reason">Alasan pembalikan</Label>
+                    <Input
+                        id="reverse-reason"
+                        value={reverseForm.data.reason}
+                        onChange={(e) =>
+                            reverseForm.setData('reason', e.target.value)
+                        }
+                        placeholder="Mis. Salah input nominal atau transfer gagal"
+                        maxLength={255}
+                        required
+                    />
+                    <InputError message={reverseForm.errors.reason} />
+                </div>
+            </FormDialog>
         </StaffLayout>
     );
 }

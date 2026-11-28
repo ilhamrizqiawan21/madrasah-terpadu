@@ -51,4 +51,8 @@ Route::prefix('keuangan')->group(function (): void {
             Route::get('kasir', 'index')->name('cashier.index');
             Route::post('kasir', 'store')->name('cashier.store');
         });
+
+    Route::post('pembayaran/{payment}/balik', [CashierController::class, 'reverse'])
+        ->middleware(['permission:'.Permission::PaymentsReverse->value, 'feature:'.Feature::Billing->value])
+        ->name('payments.reverse');
 });
