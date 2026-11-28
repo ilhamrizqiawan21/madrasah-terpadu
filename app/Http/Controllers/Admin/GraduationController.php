@@ -118,6 +118,7 @@ class GraduationController extends Controller
                 'foundation' => $identity['foundation_name'], 'unit' => $student->unit->name,
                 'address' => $identity['address'], 'phone' => $identity['phone'],
                 'head' => $student->unit->head?->name,
+                'city' => $identity['city'],
             ],
             'letter' => [
                 'number' => $graduation->letter_number, 'year' => $year->name,

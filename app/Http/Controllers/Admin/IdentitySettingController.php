@@ -24,6 +24,7 @@ class IdentitySettingController extends Controller
                 'app_name' => $identity['app_name'],
                 'foundation_name' => $identity['foundation_name'],
                 'address' => $identity['address'],
+                'city' => $identity['city'],
                 'phone' => $identity['phone'],
                 'email' => $identity['email'],
             ],

@@ -45,7 +45,7 @@ final class SettingsRepository
     }
 
     /**
-     * @return array{app_name: string, foundation_name: string, address: ?string, phone: ?string, email: ?string, logo_path: ?string, favicon_path: ?string, primary_color: ?string}
+     * @return array{app_name: string, foundation_name: string, address: ?string, city: ?string, phone: ?string, email: ?string, logo_path: ?string, favicon_path: ?string, primary_color: ?string}
      */
     public function identity(): array
     {
@@ -53,6 +53,7 @@ final class SettingsRepository
             'app_name' => $this->stringOr(SettingKey::AppName, (string) config('app.name')),
             'foundation_name' => $this->stringOr(SettingKey::FoundationName, (string) config('sekolah.foundation_name')),
             'address' => $this->stringOrNull(SettingKey::Address),
+            'city' => $this->stringOrNull(SettingKey::City),
             'phone' => $this->stringOrNull(SettingKey::Phone),
             'email' => $this->stringOrNull(SettingKey::Email),
             'logo_path' => $this->stringOrNull(SettingKey::LogoPath),

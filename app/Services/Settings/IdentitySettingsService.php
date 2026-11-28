@@ -28,7 +28,7 @@ final class IdentitySettingsService
     public function __construct(private readonly SettingsRepository $settings) {}
 
     /**
-     * @param  array{app_name: string, foundation_name: string, address: ?string, phone: ?string, email: ?string}  $data
+     * @param  array{app_name: string, foundation_name: string, address: ?string, city: ?string, phone: ?string, email: ?string}  $data
      */
     public function updateIdentity(array $data, User $actor): void
     {
@@ -36,6 +36,7 @@ final class IdentitySettingsService
             SettingKey::AppName->value => $data['app_name'],
             SettingKey::FoundationName->value => $data['foundation_name'],
             SettingKey::Address->value => $data['address'],
+            SettingKey::City->value => $data['city'],
             SettingKey::Phone->value => $data['phone'],
             SettingKey::Email->value => $data['email'],
         ], $actor);

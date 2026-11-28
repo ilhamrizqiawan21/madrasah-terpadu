@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Enums\Role as RoleEnum;
+use App\Enums\SettingKey;
 use App\Models\AcademicYear;
 use App\Models\Classroom;
 use App\Models\Enrollment;
@@ -10,6 +11,7 @@ use App\Models\Graduation;
 use App\Models\Student;
 use App\Models\Unit;
 use App\Models\User;
+use App\Services\Settings\SettingsRepository;
 use Database\Seeders\RolesAndPermissionsSeeder;
 use Inertia\Testing\AssertableInertia as Assert;
 
@@ -39,8 +41,10 @@ test('status kelulusan ditetapkan, nomor SKL tetap, dan SKL hanya untuk yang lul
         ->assertInertia(fn (Assert $page) => $page->component('admin/academic/graduations')
             ->where('rows.data.0.status', 'passed')->where('rows.data.0.classroom', '6-A'));
 
+    app(SettingsRepository::class)->setMany([SettingKey::City->value => 'Kolaka'], $this->admin);
+
     $this->actingAs($this->admin)->get(route('admin.graduations.letter', $this->student))
-        ->assertInertia(fn (Assert $page) => $page->component('admin/academic/graduation-letter')->where('letter.number', $number));
+        ->assertInertia(fn (Assert $page) => $page->component('admin/academic/graduation-letter')->where('letter.number', $number)->where('school.city', 'Kolaka'));
 });
 
 test('siswa yang tidak terdaftar di tahun aktif tidak bisa ditetapkan', function (): void {

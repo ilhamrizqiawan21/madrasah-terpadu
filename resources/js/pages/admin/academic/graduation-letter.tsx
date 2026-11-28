@@ -11,6 +11,7 @@ type Props = {
         address: string | null;
         phone: string | null;
         head: string | null;
+        city: string | null;
     };
     letter: { number: string; year: string; date: string };
     student: {
@@ -96,7 +97,9 @@ export default function GraduationLetter({ school, letter, student }: Props) {
                 </p>
 
                 <div className="mt-16 ml-auto w-64 text-center">
-                    <p>Ditetapkan, {letter.date}</p>
+                    <p>
+                        {school.city ?? '................'}, {letter.date}
+                    </p>
                     <p>Kepala {school.unit}</p>
                     <p className="mt-20 font-bold underline">
                         {school.head ?? '................................'}

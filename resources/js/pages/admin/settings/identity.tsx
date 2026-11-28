@@ -13,6 +13,7 @@ type Identity = {
     app_name: string;
     foundation_name: string;
     address: string | null;
+    city: string | null;
     phone: string | null;
     email: string | null;
 };
@@ -21,6 +22,7 @@ type IdentityForm = {
     app_name: string;
     foundation_name: string;
     address: string;
+    city: string;
     phone: string;
     email: string;
 };
@@ -30,6 +32,7 @@ function toForm(identity: Identity): IdentityForm {
         app_name: identity.app_name,
         foundation_name: identity.foundation_name,
         address: identity.address ?? '',
+        city: identity.city ?? '',
         phone: identity.phone ?? '',
         email: identity.email ?? '',
     };
@@ -114,6 +117,27 @@ export default function IdentitySettings({ identity }: { identity: Identity }) {
                         aria-invalid={Boolean(form.errors.address)}
                     />
                     <InputError message={form.errors.address} />
+                </div>
+
+                <div className="grid gap-2">
+                    <Label htmlFor="identity-city">
+                        Kota/kabupaten (opsional)
+                    </Label>
+                    <Input
+                        id="identity-city"
+                        value={form.data.city}
+                        onChange={(event) =>
+                            form.setData('city', event.target.value)
+                        }
+                        maxLength={100}
+                        placeholder="Mis. Kolaka"
+                        autoComplete="off"
+                        aria-invalid={Boolean(form.errors.city)}
+                    />
+                    <p className="text-xs text-muted-foreground">
+                        Dipakai sebagai tempat penetapan surat, mis. di SKL.
+                    </p>
+                    <InputError message={form.errors.city} />
                 </div>
 
                 <div className="grid items-start gap-6 sm:grid-cols-2 sm:gap-4">

@@ -25,6 +25,7 @@ class UpdateIdentitySettingsRequest extends FormRequest
             'app_name' => ['required', 'string', 'max:60'],
             'foundation_name' => ['required', 'string', 'max:120'],
             'address' => ['nullable', 'string', 'max:500'],
+            'city' => ['nullable', 'string', 'max:100'],
             'phone' => ['nullable', 'string', 'max:20', 'regex:/^[0-9+\-\s().]+$/'],
             'email' => ['nullable', 'email', 'max:120'],
         ];
@@ -39,22 +40,24 @@ class UpdateIdentitySettingsRequest extends FormRequest
             'app_name' => 'nama aplikasi',
             'foundation_name' => 'nama yayasan',
             'address' => 'alamat',
+            'city' => 'kota/kabupaten',
             'phone' => 'telepon',
         ];
     }
 
     /**
-     * @return array{app_name: string, foundation_name: string, address: ?string, phone: ?string, email: ?string}
+     * @return array{app_name: string, foundation_name: string, address: ?string, city: ?string, phone: ?string, email: ?string}
      */
     public function identityData(): array
     {
-        /** @var array{app_name: string, foundation_name: string, address?: ?string, phone?: ?string, email?: ?string} $validated */
+        /** @var array{app_name: string, foundation_name: string, address?: ?string, city?: ?string, phone?: ?string, email?: ?string} $validated */
         $validated = $this->validated();
 
         return [
             'app_name' => trim($validated['app_name']),
             'foundation_name' => trim($validated['foundation_name']),
             'address' => $this->nullableTrim($validated['address'] ?? null),
+            'city' => $this->nullableTrim($validated['city'] ?? null),
             'phone' => PhoneNumber::normalize($validated['phone'] ?? null),
             'email' => $this->nullableTrim($validated['email'] ?? null),
         ];

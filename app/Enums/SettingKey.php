@@ -13,6 +13,7 @@ enum SettingKey: string
     case AppName = 'identity.app_name';
     case FoundationName = 'identity.foundation_name';
     case Address = 'identity.address';
+    case City = 'identity.city';
     case Phone = 'identity.phone';
     case Email = 'identity.email';
     case LogoPath = 'identity.logo_path';
@@ -28,6 +29,7 @@ enum SettingKey: string
             self::AppName => 'Nama aplikasi',
             self::FoundationName => 'Nama yayasan',
             self::Address => 'Alamat',
+            self::City => 'Kota/kabupaten',
             self::Phone => 'Telepon',
             self::Email => 'Email',
             self::LogoPath => 'Logo',
