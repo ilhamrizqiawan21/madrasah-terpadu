@@ -141,6 +141,38 @@ final class WalletService
         );
     }
 
+    /**
+     * Membatalkan isi saldo TUNAI (salah siswa/nominal). Isi saldo online Midtrans tidak bisa dibatalkan di sini.
+     * Ditolak bila saldo sudah terpakai sehingga akan menjadi minus. Satu isi saldo hanya bisa dibatalkan sekali.
+     */
+    public function cancelCashTopUp(WalletEntry $topUp, User $actor, string $reason): WalletEntry
+    {
+        if ($topUp->type !== WalletEntryType::Topup || ! str_starts_with($topUp->idempotency_key, 'topup-cash:')) {
+            throw ValidationException::withMessages(['entry' => 'Hanya isi saldo tunai di loket yang bisa dibatalkan.']);
+        }
+
+        $cleanReason = trim($reason);
+        if ($cleanReason === '') {
+            throw ValidationException::withMessages(['reason' => 'Alasan pembatalan wajib diisi.']);
+        }
+
+        $wallet = Wallet::query()->findOrFail($topUp->wallet_id);
+        $student = Student::query()->findOrFail($wallet->student_id);
+
+        return $this->recordEntry(
+            student: $student,
+            type: WalletEntryType::Reversal,
+            signedAmount: -$topUp->amount,
+            idempotencyKey: "topup-cancel:{$topUp->id}",
+            actor: $actor,
+            description: "Batal isi saldo: {$cleanReason}",
+            referenceType: WalletEntry::class,
+            referenceId: $topUp->id,
+            enforcePurchaseGuards: false,
+            preventNegativeBalance: true,
+        );
+    }
+
     public function adjust(
         Student $student,
         int $signedAmount,

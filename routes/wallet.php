@@ -7,6 +7,7 @@ use App\Enums\Permission;
 use App\Http\Controllers\Admin\CanteenCatalogController;
 use App\Http\Controllers\Admin\CanteenReportController;
 use App\Http\Controllers\Admin\WalletController;
+use App\Http\Controllers\Admin\WalletTopupHistoryController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('kantin')->group(function (): void {
@@ -23,6 +24,20 @@ Route::prefix('kantin')->group(function (): void {
             Route::get('dompet/kuitansi/{entry}', 'receipt')->name('wallets.receipt');
         });
 });
+
+// Riwayat Isi Saldo: lihat & rekap (petugas isi saldo), batalkan setoran tunai (bendahara).
+Route::prefix('kantin/riwayat-isi-saldo')
+    ->controller(WalletTopupHistoryController::class)
+    ->middleware('feature:'.Feature::Wallet->value)
+    ->group(function (): void {
+        Route::middleware('permission:'.Permission::WalletTopup->value.'|'.Permission::WalletManage->value)->group(function (): void {
+            Route::get('/', 'index')->name('wallet-topups.index');
+            Route::get('pdf', 'exportPdf')->name('wallet-topups.pdf');
+            Route::get('excel', 'exportExcel')->name('wallet-topups.excel');
+        });
+        Route::post('{entry}/batal', 'cancel')->whereNumber('entry')
+            ->middleware('permission:'.Permission::WalletManage->value)->name('wallet-topups.cancel');
+    });
 
 // Kategori Menu & Daftar Menu kantin.
 Route::prefix('kantin')

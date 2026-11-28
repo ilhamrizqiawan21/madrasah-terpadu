@@ -18,6 +18,7 @@ use App\Notifications\WalletTopupNotification;
 use App\Services\Notifications\GuardianNotifier;
 use App\Services\Settings\SettingsRepository;
 use App\Services\Wallet\WalletService;
+use App\Support\Money;
 use App\Support\SchoolContext;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Database\Eloquent\Builder;
@@ -153,7 +154,14 @@ class WalletController extends Controller
             );
         }
 
-        return back()->with('success', 'Isi saldo tunai berhasil dicatat.');
+        Inertia::flash('toast', [
+            'type' => 'success',
+            'message' => $alreadyExists
+                ? 'Isi saldo ini sudah tercatat sebelumnya.'
+                : 'Isi saldo '.Money::format($entry->amount).' untuk '.$student->name.' tercatat. Saldo sekarang '.Money::format($entry->balance_after).'.',
+        ]);
+
+        return back();
     }
 
     public function receipt(WalletEntry $entry): HttpResponse
