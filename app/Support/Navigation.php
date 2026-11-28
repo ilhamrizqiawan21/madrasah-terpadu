@@ -277,7 +277,7 @@ final class Navigation
                         'plan' => 'Fase 6, U-12 (c)',
                     ],
                     [
-                        'label' => 'Pembayaran online', 'soon' => 'pembayaran-online', 'permission' => Permission::PaymentsReconcile->value, 'feature' => Feature::Midtrans,
+                        'label' => 'Pembayaran online', 'route' => 'admin.online-payments.index', 'permission' => Permission::PaymentsReconcile->value, 'feature' => Feature::Midtrans,
                         'description' => 'Pembayaran Midtrans dari wali dan antrean rekonsiliasi.',
                         'plan' => 'Paket P-08 Midtrans wali',
                     ],

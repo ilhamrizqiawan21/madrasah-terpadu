@@ -12,6 +12,7 @@ use App\Http\Controllers\Admin\ExamPeriodController;
 use App\Http\Controllers\Admin\FeeTypeController;
 use App\Http\Controllers\Admin\InvoiceAdjustmentController;
 use App\Http\Controllers\Admin\InvoiceController;
+use App\Http\Controllers\Admin\OnlinePaymentController;
 use App\Http\Controllers\Admin\OpeningBalanceController;
 use App\Http\Controllers\Admin\StudentDiscountController;
 use App\Http\Controllers\Admin\TransferProofController;
@@ -92,6 +93,15 @@ Route::prefix('keuangan')->group(function (): void {
             Route::get('bukti-transfer/{transferProof}/berkas', 'file')->name('transfer-proofs.file');
             Route::post('bukti-transfer/{transferProof}/setujui', 'approve')->name('transfer-proofs.approve');
             Route::post('bukti-transfer/{transferProof}/tolak', 'reject')->name('transfer-proofs.reject');
+        });
+
+    Route::controller(OnlinePaymentController::class)
+        ->middleware(['permission:'.Permission::PaymentsReconcile->value, 'feature:'.Feature::Midtrans->value])
+        ->group(function (): void {
+            Route::get('pembayaran-online', 'index')->name('online-payments.index');
+            Route::post('pembayaran-online/cocokkan', 'reconcile')->middleware('throttle:6,1')->name('online-payments.reconcile');
+            Route::post('pembayaran-online/{paymentOrder}/cek', 'check')->middleware('throttle:30,1')->name('online-payments.check');
+            Route::post('pembayaran-online/{paymentOrder}/tinjau', 'review')->name('online-payments.review');
         });
 
     Route::controller(ExamPeriodController::class)

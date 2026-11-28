@@ -44,3 +44,8 @@ Schedule::job(new ExpirePaymentOrders)
     ->everyFifteenMinutes()
     ->timezone('Asia/Makassar')
     ->withoutOverlapping();
+
+Schedule::command('payments:reconcile')
+    ->dailyAt('01:00')
+    ->timezone('Asia/Makassar')
+    ->withoutOverlapping();
