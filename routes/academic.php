@@ -7,6 +7,7 @@ use App\Enums\Permission;
 use App\Http\Controllers\Admin\AcademicMasterController;
 use App\Http\Controllers\Admin\ExtracurricularController;
 use App\Http\Controllers\Admin\FacilityController;
+use App\Http\Controllers\Admin\GraduationController;
 use App\Http\Controllers\Admin\LearningObjectiveController;
 use App\Http\Controllers\Admin\LessonScheduleController;
 use Illuminate\Support\Facades\Route;
@@ -83,4 +84,14 @@ Route::middleware('permission:'.Permission::ClassroomsManage->value)
         Route::post('/', 'store')->name('learning-objectives.store');
         Route::put('{objective}', 'update')->whereNumber('objective')->name('learning-objectives.update');
         Route::delete('{objective}', 'destroy')->whereNumber('objective')->name('learning-objectives.destroy');
+    });
+
+// Kelulusan & SKL.
+Route::middleware('permission:'.Permission::StudentsManage->value)
+    ->prefix('akademik/kelulusan')
+    ->controller(GraduationController::class)
+    ->group(function (): void {
+        Route::get('/', 'index')->name('graduations.index');
+        Route::put('{student}', 'decide')->whereNumber('student')->name('graduations.decide');
+        Route::get('{student}/skl', 'letter')->whereNumber('student')->name('graduations.letter');
     });

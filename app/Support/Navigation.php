@@ -170,7 +170,7 @@ final class Navigation
                     ['label' => 'Tujuan Pembelajaran', 'route' => 'admin.learning-objectives.index', 'permission' => Permission::ClassroomsManage->value],
                     ['label' => 'Jadwal Pelajaran', 'route' => 'admin.lesson-schedules.index', 'permission' => Permission::ClassroomsManage->value, 'feature' => Feature::LessonSchedule],
                     ['label' => 'Kenaikan Kelas', 'route' => 'admin.students.promotions.index', 'permission' => Permission::StudentsManage->value],
-                    self::soon('Kelulusan & SKL', 'kelulusan', Permission::StudentsManage->value, 'Kelulusan siswa tingkat akhir dan cetak Surat Keterangan Lulus.'),
+                    ['label' => 'Kelulusan & SKL', 'route' => 'admin.graduations.index', 'permission' => Permission::StudentsManage->value],
                     self::soon('Supervisi Modul Ajar', 'supervisi', $staff, 'Unggah modul ajar dan catatan supervisi kepala unit.'),
                     ['label' => 'Anggota & Nilai Ekskul', 'route' => 'admin.extracurriculars.members', 'permission' => Permission::ClassroomsManage->value],
                     self::soon('Peminjaman Ruangan', 'pinjam-ruangan', $staff, 'Reservasi ruangan dan laboratorium.'),
