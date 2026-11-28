@@ -85,3 +85,13 @@ test('kasir kantin tidak bisa membuka riwayat isi saldo', function (): void {
     $cashier->assignRole(RoleEnum::CanteenCashier->value);
     $this->actingAs($cashier)->get(route('admin.wallet-topups.index'))->assertForbidden();
 });
+
+test('halaman Saldo Siswa mengirim paginasi berbentuk data + meta', function (): void {
+    app(WalletService::class)->topUp($this->student, 15_000, 'topup-cash:'.Str::uuid(), $this->treasurer);
+
+    $this->actingAs($this->treasurer)->get(route('admin.wallets.index'))
+        ->assertInertia(fn (Assert $page) => $page->component('admin/wallets/index')
+            ->where('wallets.meta.current_page', 1)
+            ->where('wallets.meta.total', 1)
+            ->where('wallets.data.0.balance', 15_000));
+});

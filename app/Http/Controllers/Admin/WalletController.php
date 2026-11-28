@@ -108,7 +108,14 @@ class WalletController extends Controller
             ->all();
 
         return Inertia::render('admin/wallets/index', [
-            'wallets' => $wallets,
+            // Bentuk {data, meta} sama dengan halaman daftar lain (DataTable membaca meta).
+            'wallets' => [
+                'data' => array_values($wallets->items()),
+                'meta' => [
+                    'current_page' => $wallets->currentPage(), 'last_page' => $wallets->lastPage(), 'per_page' => $wallets->perPage(),
+                    'total' => $wallets->total(), 'from' => $wallets->firstItem(), 'to' => $wallets->lastItem(),
+                ],
+            ],
             'recentTopups' => $recentTopups,
             'students' => $students,
             'filters' => ['search' => $search],
