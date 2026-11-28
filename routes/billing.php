@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\CashierController;
 use App\Http\Controllers\Admin\FeeTypeController;
 use App\Http\Controllers\Admin\InvoiceAdjustmentController;
 use App\Http\Controllers\Admin\InvoiceController;
+use App\Http\Controllers\Admin\OpeningBalanceController;
 use App\Http\Controllers\Billing\ReceiptController;
 use Illuminate\Support\Facades\Route;
 
@@ -29,6 +30,15 @@ Route::prefix('keuangan')->group(function (): void {
             Route::get('terbitkan', 'create')->name('billing-runs.create');
             Route::post('terbitkan/pratinjau', 'preview')->name('billing-runs.preview');
             Route::post('terbitkan', 'store')->name('billing-runs.store');
+        });
+
+    Route::controller(OpeningBalanceController::class)
+        ->middleware(['permission:'.Permission::InvoicesIssue->value, 'feature:'.Feature::Billing->value])
+        ->group(function (): void {
+            Route::get('saldo-awal', 'index')->name('opening-balances.index');
+            Route::get('saldo-awal/template', 'template')->name('opening-balances.template');
+            Route::post('saldo-awal/pratinjau', 'preview')->name('opening-balances.preview');
+            Route::post('saldo-awal', 'store')->name('opening-balances.store');
         });
 
     Route::controller(InvoiceController::class)
