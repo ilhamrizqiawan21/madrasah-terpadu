@@ -294,7 +294,7 @@ final class Navigation
                 'icon' => 'store',
                 'items' => [
                     [
-                        'label' => 'Saldo & isi saldo', 'soon' => 'saldo-kantin', 'permission' => Permission::WalletManage->value, 'feature' => Feature::Wallet,
+                        'label' => 'Saldo & isi saldo', 'route' => 'admin.wallets.index', 'permission' => Permission::WalletManage->value, 'feature' => Feature::Wallet,
                         'description' => 'Saldo dompet kantin siswa, isi saldo di loket, dan batas jajan harian.',
                         'plan' => 'Paket P-10 Dompet kantin',
                     ],
