@@ -23,7 +23,7 @@ Aturan: singkat dan faktual. Jangan menyalin isi TODO/ADR; tautkan saja. Hapus b
 
 ## Terakhir diperbarui
 
-2026-11-28 · Claude — Duplikasi alur aplikasi lama: grup **Pengguna** dan **Akademik** selesai (lihat bagian "Duplikasi alur aplikasi lama"). Fase 7 Midtrans tetap seperti tercatat di bawah (T-708 dilewati).
+2026-11-28 · Gemini — Duplikasi alur aplikasi lama: **E-Learning > Tugas & PR** (`T-1603`), **E-Learning > E-Rapor** (`T-1604`), dan **Absensi > Presensi & Izin Pegawai** (`T-1601`) selesai. Sebelumnya: grup **Pengguna** dan **Akademik** selesai oleh Claude (lihat bagian "Duplikasi alur aplikasi lama"). Fase 7 Midtrans tetap seperti tercatat di bawah (T-708 dilewati).
 
 ## Keadaan sekarang
 
@@ -65,6 +65,12 @@ Pemilik memandu menu demi menu; nama menu dibuat ramah. Yang disamakan **alur**,
 - Data dummy lokal: `LegacyMenusDemoSeeder` (menolak jalan di produksi). Kota sekolah lokal belum diisi.
 - Pola: halaman master sederhana pakai `MasterCrudPage` (field `text|number|time|select|textarea`); layout halaman Inertia wajib fungsi panah (`Page.layout = (page) => page`).
 - PPDB dilewati atas arahan pemilik. `app/Services/Quran/MemorizationProgressService.php` punya perubahan Pint yang belum di-commit (bukan dari tugas ini).
+- **Sesi Gemini 2026-11-28 (belum di-commit, sudah di-stage)**:
+  - **E-Learning > Tugas & PR (`T-1603`)**: migrasi `000030`, `Assignment`, `AssignmentPolicy`, `AssignmentService`, `Admin\AssignmentController` + `Guardian\AssignmentController` (baca saja, 404 anak lain), `routes/elearning.php`, halaman `admin/elearning/assignments.tsx` & `guardian/assignments.tsx`, tes `AssignmentTest.php`.
+  - **E-Learning > E-Rapor (`T-1604`)**: migrasi `000031`, `ReportCard`, `ReportCardPolicy` (admin/wali kelas), `ReportCardService`, `Admin\ReportCardController` + `Guardian\ReportCardController` (unduh via URL bertanda tangan sementara 15 menit + middleware `signed`), halaman `admin/elearning/report-cards.tsx` & `guardian/report-cards.tsx`, tes `ReportCardTest.php`.
+  - **Absensi > Presensi & Izin Pegawai (`T-1601`)**: migrasi `000032`, `StaffAttendance` & `StaffLeaveRequest`, `StaffAttendanceService`, `StaffAttendanceController` + `StaffLeaveRequestController` (keputusan oleh `admin`/`kepala_unit`, persetujuan otomatis mengisi `staff_attendances`), `routes/staff-attendance.php`, halaman `admin/attendance/staff.tsx` & `admin/attendance/staff-leaves.tsx`, tes `StaffAttendanceTest.php`. Catatan: integrasi kartu gerbang pegawai (`GateScanController`) belum dihubungkan.
+  - **Belum dilakukan**: `git commit` tertahan bug hook `ecc_PreToolUse` (seluruh berkas `T-1603`, `T-1604`, `T-1601` sudah di-stage di index git, siap di-commit manual); cek langsung di browser belum dilakukan.
+  - **Langkah berikutnya**: lanjut **Jadwal Pelajaran (`T-1602`)** / sisa menu **E-Learning** (`Bank Soal`, `Pantau Ujian`, `Hasil Ujian`) & **Absensi**.
 
 ## Keuangan, Kantin, Akuntansi & Kas — milik Claude (2026-11-28)
 

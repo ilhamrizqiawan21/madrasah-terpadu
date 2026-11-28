@@ -69,6 +69,8 @@ Route::middleware(['auth:web'])->group(function (): void {
             require __DIR__.'/cbt.php';
             require __DIR__.'/character.php';
             require __DIR__.'/billing.php';
+            require __DIR__.'/elearning.php';
+            require __DIR__.'/staff-attendance.php';
             require __DIR__.'/wallet.php';
         });
 

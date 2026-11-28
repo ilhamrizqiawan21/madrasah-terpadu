@@ -6,6 +6,7 @@ use App\Enums\Feature;
 use App\Http\Controllers\Admin\StudentController;
 use App\Http\Controllers\Billing\ReceiptController;
 use App\Http\Controllers\Guardian\AccountController;
+use App\Http\Controllers\Guardian\AssignmentController;
 use App\Http\Controllers\Guardian\AttendanceController;
 use App\Http\Controllers\Guardian\BehaviorController;
 use App\Http\Controllers\Guardian\BillingController;
@@ -20,6 +21,7 @@ use App\Http\Controllers\Guardian\MemorizationController;
 use App\Http\Controllers\Guardian\NotificationInboxController;
 use App\Http\Controllers\Guardian\NotificationPreferenceController;
 use App\Http\Controllers\Guardian\PaymentController;
+use App\Http\Controllers\Guardian\ReportCardController;
 use App\Http\Controllers\Guardian\TransferProofController;
 use App\Http\Controllers\Guardian\WalletController;
 use Illuminate\Support\Facades\Route;
@@ -115,6 +117,21 @@ Route::prefix('anak/{student}')
             Route::get('karakter/{review}/pdf', [CharacterController::class, 'pdf'])
                 ->whereNumber('review')
                 ->name('students.character.pdf');
+        });
+
+        Route::middleware('feature:'.Feature::Assignments->value)->group(function (): void {
+            Route::get('tugas', [AssignmentController::class, 'index'])->name('students.assignments.index');
+            Route::get('tugas/{assignment}/lampiran', [AssignmentController::class, 'attachment'])
+                ->whereNumber('assignment')
+                ->name('students.assignments.attachment');
+        });
+
+        Route::middleware('feature:'.Feature::ReportCards->value)->group(function (): void {
+            Route::get('rapor', [ReportCardController::class, 'index'])->name('students.report-cards.index');
+            Route::get('rapor/{reportCard}/unduh', [ReportCardController::class, 'download'])
+                ->whereNumber('reportCard')
+                ->middleware('signed')
+                ->name('students.report-cards.download');
         });
 
         Route::middleware('feature:'.Feature::Quran->value)->group(function (): void {

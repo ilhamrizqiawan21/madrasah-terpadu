@@ -10,6 +10,7 @@ use App\Models\MemorizationRecord;
 use App\Models\MemorizationTarget;
 use App\Models\MemorizedAyah;
 use App\Models\Student;
+use Illuminate\Support\Collection;
 
 class MemorizationProgressService
 {
@@ -103,7 +104,7 @@ class MemorizationProgressService
     }
 
     /**
-     * @param  \Illuminate\Support\Collection<int, MemorizationTarget>  $targets
+     * @param  Collection<int, MemorizationTarget>  $targets
      * @param  list<int>  $passedMaterialIds
      * @return array{achieved: int, target: int, pct: float}
      */
