@@ -19,6 +19,7 @@ use App\Models\Building;
 use App\Models\ClassGroup;
 use App\Models\Classroom;
 use App\Models\Enrollment;
+use App\Models\Extracurricular;
 use App\Models\GradeLevel;
 use App\Models\Guardian;
 use App\Models\LessonPeriod;
@@ -67,6 +68,7 @@ class LegacyMenusDemoSeeder extends Seeder
         $this->facilities($units);
         $this->academicMasters($units);
         $this->lessonPeriods($units);
+        $this->extracurriculars($units);
     }
 
     private function staffProfiles(Unit $unit): void
@@ -286,6 +288,21 @@ class LegacyMenusDemoSeeder extends Seeder
                     'starts_at' => $start, 'ends_at' => $end, 'sort_order' => $order + 1, 'is_break' => $break,
                 ]);
             }
+        }
+    }
+
+    /**
+     * @param  Collection<int, Unit>  $units
+     */
+    private function extracurriculars($units): void
+    {
+        $unit = $units->first();
+        if ($unit === null) {
+            return;
+        }
+
+        foreach ([['Pramuka', 'Kak Rahmat'], ['Tahfidz', 'Ust. Hamzah'], ['Futsal', 'Coach Andi']] as [$name, $coach]) {
+            Extracurricular::query()->firstOrCreate(['unit_id' => $unit->id, 'name' => $name], ['coach_type' => 'external', 'coach_name' => $coach]);
         }
     }
 }

@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Enums\Feature;
 use App\Enums\Permission;
 use App\Http\Controllers\Admin\AcademicMasterController;
+use App\Http\Controllers\Admin\ExtracurricularController;
 use App\Http\Controllers\Admin\FacilityController;
 use App\Http\Controllers\Admin\LessonScheduleController;
 use Illuminate\Support\Facades\Route;
@@ -53,4 +54,21 @@ Route::middleware(['permission:'.Permission::ClassroomsManage->value, 'feature:'
         Route::get('jadwal', 'schedule')->name('lesson-schedules.index');
         Route::post('jadwal', 'plot')->name('lesson-schedules.plot');
         Route::post('jadwal/kosongkan', 'clear')->name('lesson-schedules.clear');
+    });
+
+// Ekstrakurikuler, Anggota & Nilai Ekskul.
+Route::middleware('permission:'.Permission::ClassroomsManage->value)
+    ->prefix('akademik/ekskul')
+    ->controller(ExtracurricularController::class)
+    ->group(function (): void {
+        Route::get('/', 'index')->name('extracurriculars.index');
+        Route::post('/', 'store')->name('extracurriculars.store');
+        Route::put('{extracurricular}', 'update')->whereNumber('extracurricular')->name('extracurriculars.update');
+        Route::delete('{extracurricular}', 'destroy')->whereNumber('extracurricular')->name('extracurriculars.destroy');
+
+        Route::get('anggota', 'members')->name('extracurriculars.members');
+        Route::post('{extracurricular}/anggota', 'enroll')->whereNumber('extracurricular')->name('extracurriculars.enroll');
+        Route::post('{extracurricular}/presensi', 'attendance')->whereNumber('extracurricular')->name('extracurriculars.attendance');
+        Route::patch('anggota/{member}/predikat', 'grade')->whereNumber('member')->name('extracurriculars.grade');
+        Route::delete('anggota/{member}', 'removeMember')->whereNumber('member')->name('extracurriculars.remove-member');
     });
