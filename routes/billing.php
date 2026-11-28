@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\CashierController;
 use App\Http\Controllers\Admin\FeeTypeController;
 use App\Http\Controllers\Admin\InvoiceAdjustmentController;
 use App\Http\Controllers\Admin\InvoiceController;
+use App\Http\Controllers\Billing\ReceiptController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('keuangan')->group(function (): void {
@@ -55,4 +56,8 @@ Route::prefix('keuangan')->group(function (): void {
     Route::post('pembayaran/{payment}/balik', [CashierController::class, 'reverse'])
         ->middleware(['permission:'.Permission::PaymentsReverse->value, 'feature:'.Feature::Billing->value])
         ->name('payments.reverse');
+
+    Route::get('pembayaran/{payment}/kuitansi', [ReceiptController::class, 'staff'])
+        ->middleware(['permission:'.Permission::InvoicesView->value.'|'.Permission::PaymentsReceive->value, 'feature:'.Feature::Billing->value])
+        ->name('payments.receipt');
 });

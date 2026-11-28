@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Enums\Feature;
 use App\Http\Controllers\Admin\StudentController;
+use App\Http\Controllers\Billing\ReceiptController;
 use App\Http\Controllers\Guardian\AccountController;
 use App\Http\Controllers\Guardian\AttendanceController;
 use App\Http\Controllers\Guardian\BehaviorController;
@@ -55,6 +56,12 @@ Route::prefix('anak/{student}')
             Route::get('izin/{leaveRequest}/lampiran', [LeaveRequestController::class, 'attachment'])
                 ->whereNumber('leaveRequest')
                 ->name('students.leave.attachment');
+        });
+
+        Route::middleware('feature:'.Feature::Billing->value)->group(function (): void {
+            Route::get('pembayaran/{payment}/kuitansi', [ReceiptController::class, 'guardian'])
+                ->whereNumber('payment')
+                ->name('students.payments.receipt');
         });
 
         Route::middleware('feature:'.Feature::Cbt->value)->group(function (): void {

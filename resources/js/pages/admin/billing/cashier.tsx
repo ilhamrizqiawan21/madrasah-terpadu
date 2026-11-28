@@ -1,8 +1,9 @@
 import { Head, router, useForm } from '@inertiajs/react';
-import { Banknote, CheckCircle2, RotateCcw } from 'lucide-react';
+import { Banknote, CheckCircle2, FileDown, RotateCcw } from 'lucide-react';
 import type { FormEvent, ReactNode } from 'react';
 import { useMemo, useState } from 'react';
 import CashierController from '@/actions/App/Http/Controllers/Admin/CashierController';
+import ReceiptController from '@/actions/App/Http/Controllers/Billing/ReceiptController';
 import { DateText } from '@/components/app/date-text';
 import { EmptyState } from '@/components/app/empty-state';
 import { FormDialog } from '@/components/app/form-dialog';
@@ -521,39 +522,71 @@ export default function CashierIndex({
                                                 />
                                             </td>
                                             <td className="px-3 py-2 text-center">
-                                                {canReverse &&
-                                                    !p.is_reversed &&
-                                                    p.method !== 'midtrans' && (
-                                                        <Tooltip>
-                                                            <TooltipTrigger
+                                                <div className="inline-flex items-center justify-center gap-1">
+                                                    <Tooltip>
+                                                        <TooltipTrigger asChild>
+                                                            <Button
+                                                                variant="ghost"
+                                                                size="icon"
                                                                 asChild
+                                                                aria-label={`Unduh kuitansi ${p.receipt_number}`}
                                                             >
-                                                                <Button
-                                                                    type="button"
-                                                                    variant="ghost"
-                                                                    size="icon"
-                                                                    aria-label={`Balik pembayaran ${p.receipt_number}`}
-                                                                    onClick={() => {
-                                                                        reverseForm.clearErrors();
-                                                                        reverseForm.reset();
-                                                                        setReversing(
-                                                                            p,
-                                                                        );
-                                                                    }}
+                                                                <a
+                                                                    href={ReceiptController.staff.url(
+                                                                        p.id,
+                                                                    )}
+                                                                    target="_blank"
+                                                                    rel="noreferrer"
                                                                 >
-                                                                    <RotateCcw
-                                                                        className="size-4 text-destructive"
+                                                                    <FileDown
+                                                                        className="size-4"
                                                                         strokeWidth={
                                                                             1.75
                                                                         }
                                                                     />
-                                                                </Button>
-                                                            </TooltipTrigger>
-                                                            <TooltipContent>
-                                                                Balik pembayaran
-                                                            </TooltipContent>
-                                                        </Tooltip>
-                                                    )}
+                                                                </a>
+                                                            </Button>
+                                                        </TooltipTrigger>
+                                                        <TooltipContent>
+                                                            Unduh kuitansi PDF
+                                                        </TooltipContent>
+                                                    </Tooltip>
+                                                    {canReverse &&
+                                                        !p.is_reversed &&
+                                                        p.method !==
+                                                            'midtrans' && (
+                                                            <Tooltip>
+                                                                <TooltipTrigger
+                                                                    asChild
+                                                                >
+                                                                    <Button
+                                                                        type="button"
+                                                                        variant="ghost"
+                                                                        size="icon"
+                                                                        aria-label={`Balik pembayaran ${p.receipt_number}`}
+                                                                        onClick={() => {
+                                                                            reverseForm.clearErrors();
+                                                                            reverseForm.reset();
+                                                                            setReversing(
+                                                                                p,
+                                                                            );
+                                                                        }}
+                                                                    >
+                                                                        <RotateCcw
+                                                                            className="size-4 text-destructive"
+                                                                            strokeWidth={
+                                                                                1.75
+                                                                            }
+                                                                        />
+                                                                    </Button>
+                                                                </TooltipTrigger>
+                                                                <TooltipContent>
+                                                                    Balik
+                                                                    pembayaran
+                                                                </TooltipContent>
+                                                            </Tooltip>
+                                                        )}
+                                                </div>
                                             </td>
                                         </tr>
                                     ))}
