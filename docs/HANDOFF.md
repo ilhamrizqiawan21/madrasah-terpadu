@@ -23,7 +23,7 @@ Aturan: singkat dan faktual. Jangan menyalin isi TODO/ADR; tautkan saja. Hapus b
 
 ## Terakhir diperbarui
 
-2026-11-28 · Gemini — Fase 8: **T-801**–**T-804**, **T-806** selesai dan di-commit. Fase 6 selesai seluruhnya (**T-601**–**T-617**).
+2026-11-28 · Gemini — Fase 8: **T-801**–**T-804**, **T-806**, **T-807** (dan **T-1304**) selesai dan di-commit (**T-805** menunggu Fase 7 T-702). Fase 6 selesai seluruhnya (**T-601**–**T-617**).
 
 ## Keadaan sekarang
 
@@ -55,12 +55,12 @@ Aturan: singkat dan faktual. Jangan menyalin isi TODO/ADR; tautkan saja. Hapus b
 
 ## Sedang dikerjakan
 
-Fase 8 (Dompet kantin): **T-801**–**T-804**, **T-806** selesai; lanjut **T-807 Laporan kantin** (dan **T-805** menunggu Fase 7 T-702).
+Fase 8 (Dompet kantin): **T-801**–**T-804**, **T-806**, **T-807** selesai; **T-805** menunggu **Fase 7 — Midtrans (T-702)**.
 
 ## Langkah berikutnya
 
-1. Lanjutkan **T-802 `wallet:verify-balances`**, **T-803 POS kantin**, **T-804 Top-up tunai**, **T-806 Portal wali**, **T-807 Laporan kantin** (dan **T-805** setelah Fase 7).
-2. Jalankan migrasi `2026_11_28_000001` s.d. `2026_11_28_000010` pada DB lokal/staging saat fitur `billing` / `exam_eligibility` diaktifkan.
+1. Lanjutkan **Fase 7 — Pembayaran online Midtrans** (**T-701–T-708**, Paket P-04 & P-08), lalu sambungkan **T-805 Top-up online**.
+2. Jalankan migrasi `2026_11_28_000001` s.d. `2026_11_28_000012` pada DB lokal/staging saat fitur `billing` / `exam_eligibility` / `wallet` diaktifkan.
 
 ## Arahan pemilik yang berlaku
 

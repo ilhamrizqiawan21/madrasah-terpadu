@@ -362,6 +362,9 @@ final class Navigation
                         'label' => 'Laporan hafalan & PIB', 'route' => 'admin.reports.quran.index', 'permission' => Permission::ReportsView->value, 'feature' => Feature::Quran,
                     ],
                     [
+                        'label' => 'Laporan kantin', 'route' => 'admin.reports.canteen.index', 'permission' => Permission::ReportsView->value, 'feature' => Feature::Wallet,
+                    ],
+                    [
                         'label' => 'Leger hasil belajar', 'soon' => 'leger', 'permission' => Permission::ReportsView->value,
                         'description' => 'Leger nilai per rombel dan semester.',
                         'plan' => 'Celah dari aplikasi lama, bergantung e-rapor (U-13)',
