@@ -53,6 +53,8 @@ Palet aktif per layar maksimal: netral + primary + satu warna status yang releva
 - Gerak: 150 ms (`ease-out`) untuk hover/fokus, 200 ms untuk sheet/dialog. Hormati `prefers-reduced-motion`. Tidak ada animasi berulang selain spinner saat menunggu.
 - Ikon: Lucide (bawaan shadcn) dengan **stroke 1.75**, ukuran 16 (staf) / 20 (wali). Ikon hanya bila menambah makna atau untuk aksi icon-only. Tanpa ikon dekoratif di setiap judul.
 
+**Latar kontrol form (2026-11-28, arahan pemilik):** `Input`, `Textarea`, dan `SelectTrigger` memakai `bg-card`, bukan transparan, agar tidak menyatu dengan latar body hangat. Di mode terang `--card` = putih; saat mode gelap diaktifkan, `--card` di blok `.dark` otomatis dipakai sehingga kontrol tetap kontras tanpa perubahan komponen. Komponen form baru wajib mengikuti token ini (jangan `bg-transparent`/`bg-white`).
+
 ## 3. Layout per area
 
 ### Staf (`staff-layout`)
