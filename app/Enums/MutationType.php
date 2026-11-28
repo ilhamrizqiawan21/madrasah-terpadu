@@ -9,6 +9,7 @@ enum MutationType: string
     case In = 'in';
     case Out = 'out';
     case Graduated = 'graduated';
+    case DropOut = 'dropout';
 
     public function label(): string
     {
@@ -16,6 +17,7 @@ enum MutationType: string
             self::In => 'Mutasi masuk',
             self::Out => 'Mutasi keluar',
             self::Graduated => 'Lulus',
+            self::DropOut => 'Drop out',
         };
     }
 

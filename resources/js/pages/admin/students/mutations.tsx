@@ -1,6 +1,6 @@
 import { DateInput } from '@/components/app/date-input';
 import { Head, router, useForm } from '@inertiajs/react';
-import { ArrowDownLeft, ArrowUpRight, Search } from 'lucide-react';
+import { ArrowDownLeft, ArrowUpRight, Printer, Search } from 'lucide-react';
 import type { FormEvent } from 'react';
 import { useState } from 'react';
 import StudentController from '@/actions/App/Http/Controllers/Admin/StudentController';
@@ -10,6 +10,7 @@ import { DataTable } from '@/components/app/data-table';
 import { DateText } from '@/components/app/date-text';
 import { ErrorState } from '@/components/app/error-state';
 import { FormDialog } from '@/components/app/form-dialog';
+import { MoneyText } from '@/components/app/money-text';
 import { PageHeader } from '@/components/app/page-header';
 import type { StatusBadgeVariant } from '@/components/app/status-badge';
 import { StatusBadge } from '@/components/app/status-badge';
@@ -27,7 +28,7 @@ import {
 import StaffLayout from '@/layouts/staff-layout';
 import type { PaginatedResource } from '@/types';
 
-type MutationType = 'in' | 'out' | 'graduated';
+type MutationType = 'in' | 'out' | 'graduated' | 'dropout';
 
 type MutationRow = {
     id: number;
@@ -37,6 +38,7 @@ type MutationRow = {
     reason: string;
     student: { id: number; nis: string; name: string; unit: string };
     recorded_by: string;
+    outstanding: number | null;
 };
 
 type UnitOption = { id: number; code: string; name: string };
@@ -63,8 +65,9 @@ const ALL = 'all';
 
 const typeVariant: Record<MutationType, StatusBadgeVariant> = {
     in: 'success',
-    out: 'warning',
+    out: 'attention',
     graduated: 'default',
+    dropout: 'destructive',
 };
 
 const todayWita = (): string =>
@@ -220,8 +223,26 @@ export default function StudentMutations({
             ),
         },
         {
+            key: 'outstanding',
+            label: 'Sisa tagihan',
+            align: 'right',
+            className: 'hidden @3xl:table-cell',
+            render: (row) =>
+                row.outstanding === null ? (
+                    <span className="text-muted-foreground">—</span>
+                ) : row.outstanding > 0 ? (
+                    <MoneyText
+                        amount={row.outstanding}
+                        className="text-destructive"
+                    />
+                ) : (
+                    <span className="text-muted-foreground">Lunas</span>
+                ),
+        },
+        {
             key: 'recorder',
             label: 'Dicatat oleh',
+            className: 'hidden @4xl:table-cell',
             render: (row) => (
                 <span className="text-muted-foreground">{row.recorded_by}</span>
             ),
@@ -234,19 +255,27 @@ export default function StudentMutations({
                 { title: 'Pengguna', href: StudentController.index() },
                 { title: 'Siswa', href: StudentController.index() },
                 {
-                    title: 'Mutasi siswa',
+                    title: 'Mutasi Siswa',
                     href: StudentMutationController.index(),
                 },
             ]}
         >
-            <Head title="Mutasi siswa" />
+            <Head title="Mutasi Siswa" />
 
-            <div className="space-y-4">
+            <div className="@container space-y-4">
                 <PageHeader
-                    title="Mutasi siswa"
-                    description="Catatan siswa pindah masuk, pindah keluar, dan kelulusan."
+                    title="Mutasi Siswa"
+                    description="Arsip siswa pindah masuk, pindah keluar, drop out, dan kelulusan."
                     actions={
                         <>
+                            <Button
+                                type="button"
+                                variant="outline"
+                                onClick={() => window.print()}
+                            >
+                                <Printer className="size-4" />
+                                Cetak berkas mutasi
+                            </Button>
                             <Button
                                 type="button"
                                 variant="outline"

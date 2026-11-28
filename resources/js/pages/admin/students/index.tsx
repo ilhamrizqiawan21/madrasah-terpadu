@@ -260,6 +260,7 @@ export default function StudentsIndex({
             ...data,
             student_id: mutation.student.id,
             graduate: mutation.kind === 'graduate',
+            dropout: mutation.kind === 'dropout',
         }));
         mutationForm.post(StudentMutationController.storeOut.url(), {
             preserveScroll: true,

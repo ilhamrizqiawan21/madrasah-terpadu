@@ -97,16 +97,21 @@ final class StudentMutationService
         string $reason,
         User $actor,
         bool $graduate = false,
+        bool $dropout = false,
     ): Student {
         if ($student->status !== StudentStatus::Active) {
             throw new RuntimeException('Hanya siswa berstatus aktif yang dapat dimutasikan keluar.');
         }
 
         // Luluskan per siswa (aksi "Luluskan Siswa" aplikasi lama) memakai jalur yang sama dengan mutasi keluar.
-        $newStatus = $graduate ? StudentStatus::Graduated : StudentStatus::Moved;
-        $type = $graduate ? MutationType::Graduated : MutationType::Out;
+        // Drop out dicatat terpisah dari pindah sekolah (arsip mutasi aplikasi lama); status siswa menjadi nonaktif.
+        [$newStatus, $type] = match (true) {
+            $graduate => [StudentStatus::Graduated, MutationType::Graduated],
+            $dropout => [StudentStatus::Inactive, MutationType::DropOut],
+            default => [StudentStatus::Moved, MutationType::Out],
+        };
 
-        return DB::transaction(function () use ($student, $mutatedOn, $schoolName, $reason, $actor, $newStatus, $type, $graduate): Student {
+        return DB::transaction(function () use ($student, $mutatedOn, $schoolName, $reason, $actor, $newStatus, $type): Student {
             $before = ['status' => $student->status->value];
 
             $student->forceFill(['status' => $newStatus])->save();
@@ -123,7 +128,11 @@ final class StudentMutationService
             $deactivatedGuardians = $this->syncGuardianActivityAfterDeparture($student, $actor);
 
             $this->auditLogger->record(
-                action: $graduate ? 'student_graduated' : 'student_mutated_out',
+                action: match ($type) {
+                    MutationType::Graduated => 'student_graduated',
+                    MutationType::DropOut => 'student_dropped_out',
+                    default => 'student_mutated_out',
+                },
                 subject: $student,
                 before: $before,
                 after: [

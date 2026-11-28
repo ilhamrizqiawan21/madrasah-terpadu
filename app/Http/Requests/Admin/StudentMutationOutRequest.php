@@ -44,6 +44,7 @@ class StudentMutationOutRequest extends FormRequest
             'school_name' => ['nullable', 'string', 'max:120'],
             'reason' => ['required', 'string', 'max:255'],
             'graduate' => ['sometimes', 'boolean'],
+            'dropout' => ['sometimes', 'boolean', 'prohibited_if_accepted:graduate'],
         ];
     }
 

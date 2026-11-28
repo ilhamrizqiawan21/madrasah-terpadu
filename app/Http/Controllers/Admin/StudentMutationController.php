@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Admin;
 
+use App\Enums\Feature;
 use App\Enums\Gender;
+use App\Enums\InvoiceStatus;
 use App\Enums\MutationType;
 use App\Enums\StudentStatus;
 use App\Http\Controllers\Controller;
@@ -12,10 +14,12 @@ use App\Http\Requests\Admin\StudentMutationInRequest;
 use App\Http\Requests\Admin\StudentMutationOutRequest;
 use App\Models\AcademicYear;
 use App\Models\Classroom;
+use App\Models\Invoice;
 use App\Models\Student;
 use App\Models\StudentMutation;
 use App\Models\Unit;
 use App\Models\User;
+use App\Services\Features\FeatureFlags;
 use App\Services\Students\StudentMutationService;
 use App\Support\SchoolContext;
 use Illuminate\Database\Eloquent\Builder;
@@ -47,7 +51,7 @@ class StudentMutationController extends Controller
         $query = StudentMutation::query()
             ->with(['student.unit', 'recorder'])
             ->when($unitId !== null, fn (Builder $q) => $q->whereHas('student', fn (Builder $s) => $s->where('unit_id', $unitId)))
-            ->when(in_array($type, ['in', 'out', 'graduated'], true), fn (Builder $q) => $q->where('type', $type))
+            ->when(MutationType::tryFrom($type) !== null, fn (Builder $q) => $q->where('type', $type))
             ->when($search !== '', function (Builder $q) use ($search): void {
                 $like = '%'.addcslashes($search, '%_\\').'%';
                 $q->whereHas('student', fn (Builder $s) => $s->where('name', 'like', $like)->orWhere('nis', 'like', $like));
@@ -77,7 +81,19 @@ class StudentMutationController extends Controller
             ->limit(250)
             ->get(['id', 'unit_id', 'nis', 'name']);
 
+        // Keterangan tagihan (arsip mutasi aplikasi lama): sisa tagihan terbuka siswa saat keluar.
+        $billingOn = app(FeatureFlags::class)->enabled(Feature::Billing);
+        $outstanding = $billingOn
+            ? Invoice::query()
+                ->whereIn('student_id', $mutations->getCollection()->pluck('student_id')->unique()->values()->all())
+                ->whereIn('status', [InvoiceStatus::Unpaid->value, InvoiceStatus::Partial->value])
+                ->selectRaw('student_id, coalesce(sum(CASE WHEN (amount - adjustment_total - paid_total) > 0 THEN (amount - adjustment_total - paid_total) ELSE 0 END), 0) as remaining')
+                ->groupBy('student_id')
+                ->pluck('remaining', 'student_id')
+            : collect();
+
         return Inertia::render('admin/students/mutations', [
+            'billingEnabled' => $billingOn,
             'mutations' => [
                 'data' => $mutations->getCollection()->map(fn (StudentMutation $mutation): array => [
                     'id' => $mutation->id,
@@ -92,6 +108,7 @@ class StudentMutationController extends Controller
                         'unit' => $mutation->student->unit->code,
                     ],
                     'recorded_by' => $mutation->recorder->name,
+                    'outstanding' => $billingOn ? (int) ($outstanding[$mutation->student_id] ?? 0) : null,
                 ])->values(),
                 'meta' => [
                     'current_page' => $mutations->currentPage(),
@@ -174,6 +191,7 @@ class StudentMutationController extends Controller
                 reason: (string) $data['reason'],
                 actor: $actor,
                 graduate: $request->boolean('graduate'),
+                dropout: $request->boolean('dropout'),
             );
         } catch (RuntimeException $exception) {
             throw ValidationException::withMessages(['student_id' => $exception->getMessage()]);

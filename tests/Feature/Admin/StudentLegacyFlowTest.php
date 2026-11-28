@@ -63,3 +63,24 @@ test('luluskan satu siswa mencatat mutasi kelulusan dan mengubah status', functi
         ->and(StudentMutation::query()->sole()->type)->toBe(MutationType::Graduated);
     $this->assertDatabaseHas('audit_logs', ['action' => 'student_graduated', 'subject_id' => $student->id]);
 });
+
+test('drop out tercatat terpisah dari pindah sekolah dan arsip menampilkan sisa tagihan', function (): void {
+    $student = Student::factory()->create(['unit_id' => $this->unit->id, 'name' => 'Siswa DO']);
+
+    $this->actingAs($this->admin)->post(route('admin.students.mutations.store-out'), [
+        'student_id' => $student->id, 'mutated_on' => now('Asia/Makassar')->toDateString(), 'reason' => 'Drop out', 'dropout' => true,
+    ])->assertSessionHasNoErrors();
+
+    expect($student->fresh()->status)->toBe(StudentStatus::Inactive)
+        ->and(StudentMutation::query()->sole()->type)->toBe(MutationType::DropOut);
+
+    $this->actingAs($this->admin)->get(route('admin.students.mutations.index', ['type' => 'dropout']))
+        ->assertInertia(fn (Assert $page) => $page->has('mutations.data', 1)
+            ->where('mutations.data.0.type.label', 'Drop out')
+            ->where('mutations.data.0.outstanding', null));
+
+    $this->actingAs($this->admin)->post(route('admin.students.mutations.store-out'), [
+        'student_id' => Student::factory()->create(['unit_id' => $this->unit->id])->id,
+        'mutated_on' => now('Asia/Makassar')->toDateString(), 'reason' => 'x', 'dropout' => true, 'graduate' => true,
+    ])->assertSessionHasErrors('dropout');
+});
