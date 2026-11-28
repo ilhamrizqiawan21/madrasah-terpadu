@@ -1,6 +1,6 @@
-import { DateInput } from '@/components/app/date-input';
 import { Head, Link, router, useForm } from '@inertiajs/react';
 import {
+    Ellipsis,
     ImageUp,
     Plus,
     Power,
@@ -12,10 +12,14 @@ import {
 import type { ChangeEvent, FormEvent, ReactNode } from 'react';
 import { useEffect, useRef, useState } from 'react';
 import ClassroomController from '@/actions/App/Http/Controllers/Admin/ClassroomController';
+import ComingSoonController from '@/actions/App/Http/Controllers/Admin/ComingSoonController';
+import InvoiceController from '@/actions/App/Http/Controllers/Admin/InvoiceController';
+import StudentMutationController from '@/actions/App/Http/Controllers/Admin/StudentMutationController';
 import StudentController from '@/actions/App/Http/Controllers/Admin/StudentController';
 import StudentProfileController from '@/actions/App/Http/Controllers/Admin/StudentProfileController';
 import StudentImportController from '@/actions/App/Http/Controllers/Admin/StudentImportController';
 import { ConfirmDialog } from '@/components/app/confirm-dialog';
+import { DateInput } from '@/components/app/date-input';
 import type { DataTableColumn } from '@/components/app/data-table';
 import { DataTable } from '@/components/app/data-table';
 import { ErrorState } from '@/components/app/error-state';
@@ -33,6 +37,13 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
@@ -64,6 +75,12 @@ type Student = {
     birth_place: string | null;
     birth_date: string | null;
     address: string | null;
+    family_card_number: string | null;
+    religion: string | null;
+    father_name: string | null;
+    father_occupation: string | null;
+    mother_name: string | null;
+    mother_occupation: string | null;
     status: { value: StudentStatus; label: string };
     classroom: { id: number; name: string } | null;
     active_classroom_id: number | null;
@@ -82,7 +99,10 @@ type Filters = {
     classroom_id: string | null;
     status: string;
     search: string;
+    gender: string | null;
 };
+
+type MutationKind = 'moved' | 'dropout' | 'graduate';
 
 type Props = {
     students: PaginatedResource<Student>;
@@ -95,6 +115,9 @@ type Props = {
     enrollmentClassroomOptions: Option[];
     statusOptions: StatusOption[];
     canImport: boolean;
+    canManage: boolean;
+    canViewBilling: boolean;
+    genderOptions: { value: Gender; label: string }[];
 };
 
 type StudentForm = {
@@ -107,6 +130,12 @@ type StudentForm = {
     birth_place: string;
     birth_date: string;
     address: string;
+    family_card_number: string;
+    religion: string;
+    father_name: string;
+    father_occupation: string;
+    mother_name: string;
+    mother_occupation: string;
     status: StudentStatus;
     classroom_id: number | null;
     photo: File | null;
@@ -135,6 +164,12 @@ const emptyForm = (unitId: number | null): StudentForm => ({
     birth_place: '',
     birth_date: '',
     address: '',
+    family_card_number: '',
+    religion: '',
+    father_name: '',
+    father_occupation: '',
+    mother_name: '',
+    mother_occupation: '',
     status: 'active',
     classroom_id: null,
     photo: null,
@@ -182,7 +217,55 @@ export default function StudentsIndex({
     enrollmentClassroomOptions,
     statusOptions,
     canImport,
+    canManage,
+    canViewBilling,
+    genderOptions,
 }: Props) {
+    const [mutation, setMutation] = useState<{
+        student: Student;
+        kind: MutationKind;
+    } | null>(null);
+    const mutationForm = useForm({
+        mutated_on: new Date().toLocaleDateString('sv-SE', {
+            timeZone: 'Asia/Makassar',
+        }),
+        school_name: '',
+        reason: '',
+    });
+
+    const openMutation = (student: Student, kind: MutationKind): void => {
+        mutationForm.clearErrors();
+        mutationForm.setData({
+            mutated_on: new Date().toLocaleDateString('sv-SE', {
+                timeZone: 'Asia/Makassar',
+            }),
+            school_name: '',
+            reason:
+                kind === 'graduate'
+                    ? 'Lulus'
+                    : kind === 'dropout'
+                      ? 'Drop out'
+                      : '',
+        });
+        setMutation({ student, kind });
+    };
+
+    const submitMutation = (event: FormEvent<HTMLFormElement>): void => {
+        event.preventDefault();
+        if (!mutation) {
+            return;
+        }
+
+        mutationForm.transform((data) => ({
+            ...data,
+            student_id: mutation.student.id,
+            graduate: mutation.kind === 'graduate',
+        }));
+        mutationForm.post(StudentMutationController.storeOut.url(), {
+            preserveScroll: true,
+            onSuccess: () => setMutation(null),
+        });
+    };
     const [search, setSearch] = useState(filters.search);
     const [loading, setLoading] = useState(false);
     const [loadFailed, setLoadFailed] = useState(false);
@@ -294,6 +377,12 @@ export default function StudentsIndex({
             birth_place: student.birth_place ?? '',
             birth_date: student.birth_date ?? '',
             address: student.address ?? '',
+            family_card_number: student.family_card_number ?? '',
+            religion: student.religion ?? '',
+            father_name: student.father_name ?? '',
+            father_occupation: student.father_occupation ?? '',
+            mother_name: student.mother_name ?? '',
+            mother_occupation: student.mother_occupation ?? '',
             status: student.status.value,
             classroom_id: student.active_classroom_id,
             photo: null,
@@ -479,14 +568,29 @@ export default function StudentsIndex({
         },
         {
             key: 'nis',
-            label: 'NIS',
+            label: 'NIS & identitas',
+            className: 'hidden @3xl:table-cell',
             render: (student) => (
-                <span className="tabular-nums">{student.nis}</span>
+                <div className="text-xs whitespace-nowrap tabular-nums">
+                    <div className="text-sm">NIS {student.nis}</div>
+                    <div className="text-muted-foreground">
+                        NISN {student.nisn ?? '—'}
+                    </div>
+                </div>
             ),
         },
         {
+            key: 'family_card_number',
+            label: 'No. Kartu Keluarga',
+            className: 'hidden @6xl:table-cell tabular-nums',
+            render: (student) =>
+                student.family_card_number ?? (
+                    <span className="text-muted-foreground">—</span>
+                ),
+        },
+        {
             key: 'classroom',
-            label: 'Rombel',
+            label: 'Unit & rombel',
             render: (student) =>
                 student.classroom?.name ?? (
                     <span className="text-muted-foreground">
@@ -496,7 +600,8 @@ export default function StudentsIndex({
         },
         {
             key: 'guardian',
-            label: 'Wali',
+            label: 'Wali & WhatsApp',
+            className: 'hidden @4xl:table-cell',
             render: (student) =>
                 student.primary_guardian ? (
                     <span className="whitespace-nowrap">
@@ -535,6 +640,84 @@ export default function StudentsIndex({
                         onView={() => setViewing(student)}
                         onEdit={() => openEdit(student)}
                     >
+                        <DropdownMenu>
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <DropdownMenuTrigger asChild>
+                                        <Button
+                                            type="button"
+                                            variant="ghost"
+                                            size="icon"
+                                            aria-label={`Pilihan lain untuk ${student.name}`}
+                                        >
+                                            <Ellipsis
+                                                className="size-4"
+                                                strokeWidth={1.75}
+                                            />
+                                        </Button>
+                                    </DropdownMenuTrigger>
+                                </TooltipTrigger>
+                                <TooltipContent>Pilihan lain</TooltipContent>
+                            </Tooltip>
+                            <DropdownMenuContent align="end">
+                                <DropdownMenuItem asChild>
+                                    <Link
+                                        href={StudentProfileController(
+                                            student.id,
+                                        )}
+                                    >
+                                        Profil lengkap
+                                    </Link>
+                                </DropdownMenuItem>
+                                {canViewBilling && (
+                                    <DropdownMenuItem asChild>
+                                        <Link
+                                            href={InvoiceController.studentCard(
+                                                student.id,
+                                            )}
+                                        >
+                                            Kartu SPP & tagihan
+                                        </Link>
+                                    </DropdownMenuItem>
+                                )}
+                                <DropdownMenuItem asChild>
+                                    <Link
+                                        href={ComingSoonController('e-rapor')}
+                                    >
+                                        Lembar e-rapor
+                                    </Link>
+                                </DropdownMenuItem>
+                                {canManage && active && (
+                                    <>
+                                        <DropdownMenuSeparator />
+                                        <DropdownMenuItem
+                                            onSelect={() =>
+                                                openMutation(student, 'moved')
+                                            }
+                                        >
+                                            Pindah sekolah
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem
+                                            onSelect={() =>
+                                                openMutation(student, 'dropout')
+                                            }
+                                        >
+                                            Drop out (DO)
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem
+                                            onSelect={() =>
+                                                openMutation(
+                                                    student,
+                                                    'graduate',
+                                                )
+                                            }
+                                        >
+                                            Luluskan siswa
+                                        </DropdownMenuItem>
+                                    </>
+                                )}
+                            </DropdownMenuContent>
+                        </DropdownMenu>
                         <Tooltip>
                             <TooltipTrigger asChild>
                                 <Button
@@ -585,7 +768,7 @@ export default function StudentsIndex({
         >
             <Head title="Siswa" />
 
-            <div className="space-y-4">
+            <div className="@container space-y-4">
                 <PageHeader
                     title="Siswa"
                     description={
@@ -606,7 +789,7 @@ export default function StudentsIndex({
                         type="search"
                         value={search}
                         onChange={(event) => changeSearch(event.target.value)}
-                        placeholder="Cari nama atau NIS"
+                        placeholder="Cari nama, NIS, NISN, No. KK"
                         aria-label="Cari siswa"
                         className="w-full sm:max-w-xs"
                     />
@@ -672,6 +855,36 @@ export default function StudentsIndex({
                                     value={String(option.id)}
                                 >
                                     {option.name}
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                    <Select
+                        value={filters.gender ?? ALL}
+                        onValueChange={(value) =>
+                            visit({
+                                gender: value === ALL ? null : value,
+                                page: 1,
+                            })
+                        }
+                        disabled={!ready}
+                    >
+                        <SelectTrigger
+                            className="w-full sm:w-44"
+                            aria-label="Saring jenis kelamin"
+                        >
+                            <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value={ALL}>
+                                Semua jenis kelamin
+                            </SelectItem>
+                            {genderOptions.map((option) => (
+                                <SelectItem
+                                    key={option.value}
+                                    value={option.value}
+                                >
+                                    {option.label}
                                 </SelectItem>
                             ))}
                         </SelectContent>
@@ -938,6 +1151,38 @@ export default function StudentsIndex({
                     />
                     <InputError message={form.errors.address} />
                 </div>
+                <div className="grid gap-4 sm:grid-cols-2">
+                    {(
+                        [
+                            ['family_card_number', 'No. Kartu Keluarga', 16],
+                            ['religion', 'Agama', 20],
+                            ['father_name', 'Nama ayah kandung', 100],
+                            ['father_occupation', 'Pekerjaan ayah', 60],
+                            ['mother_name', 'Nama ibu kandung', 100],
+                            ['mother_occupation', 'Pekerjaan ibu', 60],
+                        ] as const
+                    ).map(([key, label, max]) => (
+                        <div key={key} className="grid gap-2">
+                            <Label htmlFor={`student-${key}`}>{label}</Label>
+                            <Input
+                                id={`student-${key}`}
+                                value={form.data[key]}
+                                onChange={(event) =>
+                                    setField(key, event.target.value)
+                                }
+                                maxLength={max}
+                                inputMode={
+                                    key === 'family_card_number'
+                                        ? 'numeric'
+                                        : undefined
+                                }
+                                autoComplete="off"
+                                aria-invalid={Boolean(form.errors[key])}
+                            />
+                            <InputError message={form.errors[key]} />
+                        </div>
+                    ))}
+                </div>
                 <div className="grid gap-2">
                     <Label htmlFor="student-photo">Foto</Label>
                     <div className="flex items-center gap-3">
@@ -1108,6 +1353,66 @@ export default function StudentsIndex({
                 loading={acting}
                 onConfirm={confirmStatus}
             />
+            <FormDialog
+                open={mutation !== null}
+                onOpenChange={(open) => !open && setMutation(null)}
+                title={
+                    mutation?.kind === 'graduate'
+                        ? `Luluskan ${mutation.student.name}?`
+                        : mutation?.kind === 'dropout'
+                          ? `Drop out ${mutation?.student.name ?? ''}?`
+                          : `Pindah sekolah: ${mutation?.student.name ?? ''}`
+                }
+                description="Status siswa berubah dan tercatat di Mutasi Siswa. Riwayat tagihan dan presensi tetap tersimpan."
+                onSubmit={submitMutation}
+                processing={mutationForm.processing}
+                submitLabel="Simpan"
+            >
+                <div className="grid gap-2">
+                    <Label htmlFor="mutation-date">Tanggal</Label>
+                    <DateInput
+                        id="mutation-date"
+                        value={mutationForm.data.mutated_on}
+                        onChange={(event) =>
+                            mutationForm.setData(
+                                'mutated_on',
+                                event.target.value,
+                            )
+                        }
+                    />
+                    <InputError message={mutationForm.errors.mutated_on} />
+                </div>
+                {mutation?.kind === 'moved' && (
+                    <div className="grid gap-2">
+                        <Label htmlFor="mutation-school">Sekolah tujuan</Label>
+                        <Input
+                            id="mutation-school"
+                            value={mutationForm.data.school_name}
+                            onChange={(event) =>
+                                mutationForm.setData(
+                                    'school_name',
+                                    event.target.value,
+                                )
+                            }
+                            maxLength={120}
+                        />
+                        <InputError message={mutationForm.errors.school_name} />
+                    </div>
+                )}
+                <div className="grid gap-2">
+                    <Label htmlFor="mutation-reason">Keterangan</Label>
+                    <Input
+                        id="mutation-reason"
+                        value={mutationForm.data.reason}
+                        onChange={(event) =>
+                            mutationForm.setData('reason', event.target.value)
+                        }
+                        maxLength={255}
+                        required
+                    />
+                    <InputError message={mutationForm.errors.reason} />
+                </div>
+            </FormDialog>
         </StaffLayout>
     );
 }

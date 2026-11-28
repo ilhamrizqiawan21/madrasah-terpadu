@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Admin;
 
+use App\Enums\Feature;
+use App\Enums\Gender;
 use App\Enums\Permission;
 use App\Enums\StudentStatus;
 use App\Http\Controllers\Controller;
@@ -15,6 +17,7 @@ use App\Models\Classroom;
 use App\Models\Student;
 use App\Models\Unit;
 use App\Models\User;
+use App\Services\Features\FeatureFlags;
 use App\Services\Students\StudentService;
 use App\Support\SchoolContext;
 use Illuminate\Database\Eloquent\Builder;
@@ -64,6 +67,7 @@ class StudentController extends Controller
             ? null
             : (StudentStatus::tryFrom($statusFilter) ?? StudentStatus::Active);
         $search = trim((string) $request->query('search', ''));
+        $gender = Gender::tryFrom((string) $request->query('gender', ''));
 
         $students = Student::query()
             ->with(['enrollments.classroom', 'enrollments.academicYear', 'primaryGuardians'])
@@ -73,8 +77,12 @@ class StudentController extends Controller
                 fn (Builder $query) => $query->where('unit_id', $unit?->id),
             )
             ->when($status !== null, fn (Builder $query) => $query->where('status', $status))
+            ->when($gender !== null, fn (Builder $query) => $query->where('gender', $gender))
             ->when($search !== '', fn (Builder $query) => $query->where(
-                fn (Builder $query) => $query->whereLike('name', "%{$search}%")->orWhereLike('nis', "%{$search}%"),
+                fn (Builder $query) => $query->whereLike('name', "%{$search}%")
+                    ->orWhereLike('nis', "%{$search}%")
+                    ->orWhereLike('nisn', "%{$search}%")
+                    ->orWhereLike('family_card_number', "%{$search}%"),
             ))
             ->when($classroomId !== null, fn (Builder $query) => $query->whereHas(
                 'enrollments',
@@ -114,6 +122,7 @@ class StudentController extends Controller
                 'classroom_id' => $withoutClassroom ? self::WITHOUT_CLASSROOM : ($classroomId === null ? null : (string) $classroomId),
                 'status' => $status === null ? self::ALL_STATUSES : $status->value,
                 'search' => $search,
+                'gender' => $gender?->value,
             ],
             // Membedakan "belum ada siswa" dari "tidak ada yang cocok dengan saringan" di empty state.
             'unitHasStudents' => $unit !== null && Student::query()->where('unit_id', $unit->id)->exists(),
@@ -136,6 +145,14 @@ class StudentController extends Controller
             // Impor bisa membuat akun wali (T-207), jadi tombolnya butuh kedua izin.
             'canImport' => $request->user('web')?->can(Permission::StudentsManage->value) === true
                 && $request->user('web')->can(Permission::GuardiansManage->value),
+            'canManage' => $request->user('web')?->can(Permission::StudentsManage->value) === true,
+            // Menu "Kartu SPP & Tagihan" hanya bila modul tagihan aktif dan pengguna boleh melihat tagihan.
+            'canViewBilling' => app(FeatureFlags::class)->enabled(Feature::Billing)
+                && $request->user('web')?->can(Permission::InvoicesView->value) === true,
+            'genderOptions' => array_map(
+                fn (Gender $g): array => ['value' => $g->value, 'label' => $g->label()],
+                Gender::cases(),
+            ),
         ]);
     }
 

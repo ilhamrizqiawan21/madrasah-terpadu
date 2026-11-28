@@ -173,6 +173,7 @@ class StudentMutationController extends Controller
                 schoolName: $data['school_name'] ?? null,
                 reason: (string) $data['reason'],
                 actor: $actor,
+                graduate: $request->boolean('graduate'),
             );
         } catch (RuntimeException $exception) {
             throw ValidationException::withMessages(['student_id' => $exception->getMessage()]);

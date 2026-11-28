@@ -123,6 +123,12 @@ class StudentRequest extends FormRequest
             'birth_place' => ['nullable', 'string', 'max:60'],
             'birth_date' => ['nullable', 'date_format:Y-m-d', 'before_or_equal:today'],
             'address' => ['nullable', 'string', 'max:500'],
+            'family_card_number' => ['nullable', 'digits:16'],
+            'religion' => ['nullable', 'string', 'max:20'],
+            'father_name' => ['nullable', 'string', 'max:100'],
+            'father_occupation' => ['nullable', 'string', 'max:60'],
+            'mother_name' => ['nullable', 'string', 'max:100'],
+            'mother_occupation' => ['nullable', 'string', 'max:60'],
         ];
     }
 
@@ -156,7 +162,7 @@ class StudentRequest extends FormRequest
     }
 
     /**
-     * @return array{nis: string, nisn: string|null, name: string, nickname: string|null, gender: string, birth_place: string|null, birth_date: string|null, address: string|null, status: string, classroom_id: int|null}
+     * @return array{nis: string, nisn: string|null, name: string, nickname: string|null, gender: string, birth_place: string|null, birth_date: string|null, address: string|null, family_card_number: string|null, religion: string|null, father_name: string|null, father_occupation: string|null, mother_name: string|null, mother_occupation: string|null, status: string, classroom_id: int|null}
      */
     public function studentData(): array
     {
@@ -172,6 +178,12 @@ class StudentRequest extends FormRequest
             'birth_place' => $optional('birth_place'),
             'birth_date' => $optional('birth_date'),
             'address' => $optional('address'),
+            'family_card_number' => $optional('family_card_number'),
+            'religion' => $optional('religion'),
+            'father_name' => $optional('father_name'),
+            'father_occupation' => $optional('father_occupation'),
+            'mother_name' => $optional('mother_name'),
+            'mother_occupation' => $optional('mother_occupation'),
             'status' => (string) $this->validated('status'),
             'classroom_id' => $classroomId === null ? null : (int) $classroomId,
         ];

@@ -29,6 +29,12 @@ use Illuminate\Support\Carbon;
  * @property int $unit_id
  * @property string $nis
  * @property string|null $nisn
+ * @property string|null $family_card_number
+ * @property string|null $religion
+ * @property string|null $father_name
+ * @property string|null $father_occupation
+ * @property string|null $mother_name
+ * @property string|null $mother_occupation
  * @property string $name
  * @property string|null $nickname
  * @property Gender $gender
@@ -47,8 +53,7 @@ use Illuminate\Support\Carbon;
  */
 #[Fillable([
     'unit_id', 'nis', 'nisn', 'name', 'nickname', 'gender',
-    'birth_place', 'birth_date', 'address', 'photo_path', 'status',
-])]
+    'birth_place', 'birth_date', 'address', 'photo_path', 'status', 'family_card_number', 'religion', 'father_name', 'father_occupation', 'mother_name', 'mother_occupation'])]
 class Student extends Model implements AuthenticatableContract
 {
     use Authenticatable;

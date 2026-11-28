@@ -43,6 +43,7 @@ class StudentMutationOutRequest extends FormRequest
             'mutated_on' => ['required', 'date_format:Y-m-d', 'before_or_equal:today'],
             'school_name' => ['nullable', 'string', 'max:120'],
             'reason' => ['required', 'string', 'max:255'],
+            'graduate' => ['sometimes', 'boolean'],
         ];
     }
 

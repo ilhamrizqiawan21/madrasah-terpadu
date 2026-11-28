@@ -35,6 +35,12 @@ use Throwable;
  *     birth_place: string|null,
  *     birth_date: string|null,
  *     address: string|null,
+ *     family_card_number?: string|null,
+ *     religion?: string|null,
+ *     father_name?: string|null,
+ *     father_occupation?: string|null,
+ *     mother_name?: string|null,
+ *     mother_occupation?: string|null,
  *     status: string,
  *     classroom_id: int|null
  * }
@@ -250,6 +256,12 @@ final class StudentService
             'birth_place' => $data['birth_place'],
             'birth_date' => $data['birth_date'],
             'address' => $data['address'],
+            'family_card_number' => $data['family_card_number'] ?? null,
+            'religion' => $data['religion'] ?? null,
+            'father_name' => $data['father_name'] ?? null,
+            'father_occupation' => $data['father_occupation'] ?? null,
+            'mother_name' => $data['mother_name'] ?? null,
+            'mother_occupation' => $data['mother_occupation'] ?? null,
             'status' => $data['status'],
         ];
     }

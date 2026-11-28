@@ -96,19 +96,24 @@ final class StudentMutationService
         ?string $schoolName,
         string $reason,
         User $actor,
+        bool $graduate = false,
     ): Student {
         if ($student->status !== StudentStatus::Active) {
             throw new RuntimeException('Hanya siswa berstatus aktif yang dapat dimutasikan keluar.');
         }
 
-        return DB::transaction(function () use ($student, $mutatedOn, $schoolName, $reason, $actor): Student {
+        // Luluskan per siswa (aksi "Luluskan Siswa" aplikasi lama) memakai jalur yang sama dengan mutasi keluar.
+        $newStatus = $graduate ? StudentStatus::Graduated : StudentStatus::Moved;
+        $type = $graduate ? MutationType::Graduated : MutationType::Out;
+
+        return DB::transaction(function () use ($student, $mutatedOn, $schoolName, $reason, $actor, $newStatus, $type, $graduate): Student {
             $before = ['status' => $student->status->value];
 
-            $student->forceFill(['status' => StudentStatus::Moved])->save();
+            $student->forceFill(['status' => $newStatus])->save();
 
             $mutation = StudentMutation::query()->create([
                 'student_id' => $student->id,
-                'type' => MutationType::Out,
+                'type' => $type,
                 'mutated_on' => $mutatedOn,
                 'school_name' => $schoolName,
                 'reason' => $reason,
@@ -118,11 +123,11 @@ final class StudentMutationService
             $deactivatedGuardians = $this->syncGuardianActivityAfterDeparture($student, $actor);
 
             $this->auditLogger->record(
-                action: 'student_mutated_out',
+                action: $graduate ? 'student_graduated' : 'student_mutated_out',
                 subject: $student,
                 before: $before,
                 after: [
-                    'status' => StudentStatus::Moved->value,
+                    'status' => $newStatus->value,
                     'mutation_id' => $mutation->id,
                     'mutated_on' => $mutatedOn,
                     'school_name' => $schoolName,
