@@ -33,6 +33,8 @@ class GuardianResource extends JsonResource
             'username' => $this->user->username,
             'relation' => ['value' => $this->relation->value, 'label' => $this->relation->label()],
             'address' => $this->address,
+            'family_card_number' => $this->family_card_number,
+            'email' => $this->user->email,
             'is_active' => $this->user->is_active,
             // Akun staf yang juga wali: kata sandi & status dikelola di Pengguna staf.
             'is_staff_account' => $this->user->roles->pluck('name')->intersect($staffRoles)->isNotEmpty(),

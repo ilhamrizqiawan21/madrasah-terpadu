@@ -76,6 +76,7 @@ class GuardianController extends Controller
             ->when($search !== '', fn (Builder $query) => $query->where(function (Builder $inner) use ($search, $phoneSearch): void {
                 $inner->whereLike('name', "%{$search}%")
                     ->orWhereLike('phone', '%'.($phoneSearch ?? $search).'%')
+                    ->orWhereLike('family_card_number', "%{$search}%")
                     ->orWhereHas('students', fn (Builder $students) => $students
                         ->whereLike('name', "%{$search}%")
                         ->orWhereLike('nis', "%{$search}%"));

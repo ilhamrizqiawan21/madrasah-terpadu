@@ -74,6 +74,8 @@ type Guardian = {
     username: string | null;
     relation: { value: Relation; label: string };
     address: string | null;
+    family_card_number: string | null;
+    email: string | null;
     is_active: boolean;
     is_staff_account: boolean;
     children: Child[];
@@ -114,8 +116,21 @@ type GuardianForm = {
     phone: string;
     relation: Relation | '';
     address: string;
+    family_card_number: string;
+    email: string;
+    username: string;
+    password: string;
     children: { student_id: number; is_primary: boolean }[];
 };
+
+/** Tautan WhatsApp berisi info akun (tanpa kata sandi) untuk dikirim manual oleh admin. */
+function whatsappLink(guardian: Guardian): string {
+    const digits = guardian.phone.replace(/\D/g, '');
+    const number = digits.startsWith('0') ? `62${digits.slice(1)}` : digits;
+    const text = `Assalamu'alaikum ${guardian.name}. Akun aplikasi madrasah Anda: username ${guardian.username ?? guardian.phone}. Masuk di ${window.location.origin}/login. Bila lupa kata sandi, hubungi admin sekolah.`;
+
+    return `https://wa.me/${number}?text=${encodeURIComponent(text)}`;
+}
 
 type SearchState = 'idle' | 'loading' | 'done' | 'failed';
 
@@ -124,6 +139,10 @@ const emptyForm: GuardianForm = {
     phone: '',
     relation: '',
     address: '',
+    family_card_number: '',
+    email: '',
+    username: '',
+    password: '',
     children: [],
 };
 
@@ -425,6 +444,10 @@ export default function GuardiansIndex({
             phone: guardian.phone,
             relation: guardian.relation.value,
             address: guardian.address ?? '',
+            family_card_number: guardian.family_card_number ?? '',
+            email: guardian.email ?? '',
+            username: guardian.username ?? '',
+            password: '',
             children: children.map((child) => ({
                 student_id: child.id,
                 is_primary: child.is_primary,
@@ -599,23 +622,49 @@ export default function GuardiansIndex({
     const columns: DataTableColumn<Guardian>[] = [
         {
             key: 'name',
-            label: 'Wali',
+            label: 'Nama orang tua / wali',
             render: (guardian) => (
                 <div className="min-w-36">
                     <div className="font-medium text-foreground">
                         {guardian.name}
                     </div>
                     <div className="text-xs text-muted-foreground">
-                        {guardian.relation.label}
+                        {guardian.relation.label} · @
+                        {guardian.username ?? guardian.phone}
+                    </div>
+                </div>
+            ),
+        },
+        {
+            key: 'family_card_number',
+            label: 'No. KK & alamat',
+            className: 'hidden @5xl:table-cell',
+            render: (guardian) => (
+                <div className="max-w-56 text-xs">
+                    <div className="tabular-nums">
+                        {guardian.family_card_number ?? '—'}
+                    </div>
+                    <div className="line-clamp-2 text-muted-foreground">
+                        {guardian.address ?? '—'}
                     </div>
                 </div>
             ),
         },
         {
             key: 'phone',
-            label: 'Nomor HP',
+            label: 'WhatsApp',
             className: 'tabular-nums whitespace-nowrap',
-            render: (guardian) => guardian.phone,
+            render: (guardian) => (
+                <a
+                    href={whatsappLink(guardian)}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-primary hover:underline"
+                    aria-label={`Kirim info akun lewat WhatsApp ke ${guardian.name}`}
+                >
+                    {guardian.phone}
+                </a>
+            ),
         },
         {
             key: 'children',
@@ -711,20 +760,35 @@ export default function GuardiansIndex({
         <StaffLayout
             breadcrumbs={[
                 { title: 'Pengguna', href: StudentController.index() },
-                { title: 'Wali', href: GuardianController.index() },
+                { title: 'Orang Tua / Wali', href: GuardianController.index() },
             ]}
         >
-            <Head title="Wali" />
+            <Head title="Orang Tua / Wali" />
 
-            <div className="space-y-4">
+            <div className="@container space-y-4">
                 <PageHeader
-                    title="Wali"
+                    title="Orang Tua / Wali"
                     description={
                         academicYearLabel
                             ? `Akun orang tua/wali dan anak yang terhubung. Rombel ditampilkan untuk ${academicYearLabel}.`
                             : 'Akun orang tua/wali dan anak yang terhubung.'
                     }
-                    actions={addButton}
+                    actions={
+                        <>
+                            <Button
+                                type="button"
+                                variant="outline"
+                                onClick={() => window.print()}
+                            >
+                                <Printer
+                                    className="size-4"
+                                    strokeWidth={1.75}
+                                />
+                                Cetak daftar wali
+                            </Button>
+                            {addButton}
+                        </>
+                    }
                 />
 
                 <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
@@ -732,7 +796,7 @@ export default function GuardiansIndex({
                         type="search"
                         value={search}
                         onChange={(event) => changeSearch(event.target.value)}
-                        placeholder="Cari wali, nomor HP, atau anak"
+                        placeholder="Cari nama, No. KK, nomor HP, atau anak"
                         aria-label="Cari wali"
                         className="w-full sm:max-w-xs"
                     />
@@ -902,6 +966,75 @@ export default function GuardiansIndex({
                         autoComplete="off"
                     />
                     <InputError message={form.errors.address} />
+                </div>
+                <div className="grid gap-4 sm:grid-cols-2">
+                    <div className="grid gap-2">
+                        <Label htmlFor="guardian-kk">
+                            No. Kartu Keluarga (opsional)
+                        </Label>
+                        <Input
+                            id="guardian-kk"
+                            value={form.data.family_card_number}
+                            onChange={(event) =>
+                                setField(
+                                    'family_card_number',
+                                    event.target.value,
+                                )
+                            }
+                            inputMode="numeric"
+                            maxLength={16}
+                            autoComplete="off"
+                        />
+                        <InputError message={form.errors.family_card_number} />
+                    </div>
+                    <div className="grid gap-2">
+                        <Label htmlFor="guardian-email">Email (opsional)</Label>
+                        <Input
+                            id="guardian-email"
+                            type="email"
+                            value={form.data.email}
+                            onChange={(event) =>
+                                setField('email', event.target.value)
+                            }
+                            autoComplete="off"
+                        />
+                        <InputError message={form.errors.email} />
+                    </div>
+                    <div className="grid gap-2">
+                        <Label htmlFor="guardian-username">
+                            Username (kosongkan = nomor HP)
+                        </Label>
+                        <Input
+                            id="guardian-username"
+                            value={form.data.username}
+                            onChange={(event) =>
+                                setField(
+                                    'username',
+                                    event.target.value.toLowerCase(),
+                                )
+                            }
+                            autoComplete="off"
+                            autoCapitalize="none"
+                        />
+                        <InputError message={form.errors.username} />
+                    </div>
+                    <div className="grid gap-2">
+                        <Label htmlFor="guardian-password">
+                            {editing
+                                ? 'Kata sandi baru (kosongkan bila tetap)'
+                                : 'Kata sandi (kosongkan = dibuat otomatis)'}
+                        </Label>
+                        <Input
+                            id="guardian-password"
+                            type="password"
+                            value={form.data.password}
+                            onChange={(event) =>
+                                setField('password', event.target.value)
+                            }
+                            autoComplete="new-password"
+                        />
+                        <InputError message={form.errors.password} />
+                    </div>
                 </div>
                 <fieldset className="grid gap-2">
                     <legend className="mb-1 text-sm font-medium">

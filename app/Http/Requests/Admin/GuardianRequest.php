@@ -67,6 +67,10 @@ class GuardianRequest extends FormRequest
             ...$rules,
             'phone' => $phone,
             'address' => ['nullable', 'string', 'max:500'],
+            'family_card_number' => ['nullable', 'digits:16'],
+            'email' => ['nullable', 'email', 'max:255', Rule::unique('users', 'email')->ignore($guardian?->user_id)],
+            'username' => ['nullable', 'string', 'min:3', 'max:50', 'regex:/^[a-z0-9._-]+$/', Rule::unique('users', 'username')->ignore($guardian?->user_id)],
+            'password' => ['nullable', 'string', 'min:8', 'max:100'],
             'children' => ['required', 'array', 'min:1', 'max:'.self::MAX_CHILDREN],
             'children.*' => ['required', 'array:student_id,is_primary'],
             'children.*.student_id' => [
@@ -101,6 +105,10 @@ class GuardianRequest extends FormRequest
             'phone' => 'nomor HP',
             'relation' => 'hubungan',
             'address' => 'alamat',
+            'family_card_number' => 'No. KK',
+            'email' => 'email',
+            'username' => 'username',
+            'password' => 'kata sandi',
             'children' => 'anak',
             'children.*.student_id' => 'anak',
             'children.*.is_primary' => 'wali utama',
@@ -115,6 +123,7 @@ class GuardianRequest extends FormRequest
         return [
             'phone.regex' => self::PHONE_MESSAGE,
             'phone.unique' => 'Nomor HP ini sudah dipakai akun lain.',
+            'username.regex' => 'Username hanya boleh huruf kecil, angka, titik, tanda hubung, dan garis bawah.',
             'children.required' => 'Pilih minimal satu anak.',
             'children.min' => 'Pilih minimal satu anak.',
             'children.max' => 'Satu wali paling banyak terhubung dengan '.self::MAX_CHILDREN.' anak.',
@@ -124,7 +133,7 @@ class GuardianRequest extends FormRequest
     }
 
     /**
-     * @return array{name: string, phone: string, relation: GuardianRelation, address: string|null, children: list<array{student_id: int, is_primary: bool}>}
+     * @return array{name: string, phone: string, relation: GuardianRelation, address: string|null, family_card_number: string|null, email: string|null, username: string|null, password: string|null, children: list<array{student_id: int, is_primary: bool}>}
      */
     public function guardianData(): array
     {
@@ -137,11 +146,22 @@ class GuardianRequest extends FormRequest
             'phone' => (string) $this->validated('phone'),
             'relation' => GuardianRelation::from((string) $this->validated('relation')),
             'address' => $address === null ? null : (string) $address,
+            'family_card_number' => $this->optionalString('family_card_number'),
+            'email' => $this->optionalString('email'),
+            'username' => $this->optionalString('username'),
+            'password' => $this->optionalString('password'),
             'children' => array_values(array_map(fn (array $child): array => [
                 'student_id' => (int) $child['student_id'],
                 'is_primary' => filter_var($child['is_primary'], FILTER_VALIDATE_BOOLEAN),
             ], $children)),
         ];
+    }
+
+    private function optionalString(string $key): ?string
+    {
+        $value = $this->validated($key);
+
+        return is_string($value) && trim($value) !== '' ? trim($value) : null;
     }
 
     private function editedGuardian(): ?Guardian

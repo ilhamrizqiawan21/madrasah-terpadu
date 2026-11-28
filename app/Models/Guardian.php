@@ -25,13 +25,14 @@ use Illuminate\Support\Carbon;
  * @property string $phone
  * @property GuardianRelation $relation
  * @property string|null $address
+ * @property string|null $family_card_number
  * @property Carbon $created_at
  * @property Carbon $updated_at
  * @property Carbon|null $deleted_at
  * @property-read User $user
  * @property-read Collection<int, Student> $students
  */
-#[Fillable(['user_id', 'name', 'phone', 'relation', 'address'])]
+#[Fillable(['user_id', 'name', 'phone', 'relation', 'address', 'family_card_number'])]
 class Guardian extends Model
 {
     /** @use HasFactory<GuardianFactory> */

@@ -40,6 +40,10 @@ use Illuminate\Support\Str;
  *     phone: string,
  *     relation: GuardianRelation,
  *     address: string|null,
+ *     family_card_number?: string|null,
+ *     email?: string|null,
+ *     username?: string|null,
+ *     password?: string|null,
  *     children: list<ChildLink>
  * }
  */
@@ -94,11 +98,13 @@ final class GuardianService
             $user = $existing;
 
             if ($user === null) {
-                $password = InitialPassword::generate();
+                // Username & kata sandi boleh ditetapkan admin (alur aplikasi lama); bawaannya nomor HP & sandi acak.
+                $password = ($data['password'] ?? null) ?? InitialPassword::generate();
                 $user = User::query()->create([
                     'name' => $data['name'],
-                    'username' => $data['phone'],
+                    'username' => ($data['username'] ?? null) ?? $data['phone'],
                     'phone' => $data['phone'],
+                    'email' => $data['email'] ?? null,
                     'password' => $password,
                     'is_active' => true,
                 ]);
@@ -112,6 +118,7 @@ final class GuardianService
                 'phone' => $data['phone'],
                 'relation' => $data['relation'],
                 'address' => $data['address'],
+                'family_card_number' => $data['family_card_number'] ?? null,
             ]);
 
             $this->applyChildren($guardian, $data['children'], $data['relation'], detachMissing: false);
@@ -147,6 +154,7 @@ final class GuardianService
                 'phone' => $data['phone'],
                 'relation' => $data['relation'],
                 'address' => $data['address'],
+                'family_card_number' => $data['family_card_number'] ?? null,
             ])->save();
 
             if ($this->isSharedStaffAccount($user)) {
@@ -155,9 +163,14 @@ final class GuardianService
             } else {
                 $user->fill([
                     'name' => $data['name'],
-                    'username' => $data['phone'],
+                    'username' => ($data['username'] ?? null) ?? $data['phone'],
                     'phone' => $data['phone'],
+                    'email' => $data['email'] ?? null,
                 ])->save();
+
+                if (($data['password'] ?? null) !== null) {
+                    $user->forceFill(['password' => $data['password']])->save();
+                }
             }
 
             $this->applyChildren($guardian, $data['children'], $data['relation'], detachMissing: true);
