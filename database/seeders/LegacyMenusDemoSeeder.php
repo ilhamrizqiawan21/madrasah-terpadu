@@ -17,6 +17,7 @@ use App\Models\AcademicYear;
 use App\Models\AlumniTracerResponse;
 use App\Models\Building;
 use App\Models\CanteenProduct;
+use App\Models\CashAccount;
 use App\Models\ClassGroup;
 use App\Models\Classroom;
 use App\Models\Enrollment;
@@ -72,6 +73,7 @@ class LegacyMenusDemoSeeder extends Seeder
         $this->lessonPeriods($units);
         $this->extracurriculars($units);
         $this->canteenMenu($units);
+        $this->cashAccounts($units);
     }
 
     private function staffProfiles(Unit $unit): void
@@ -336,6 +338,28 @@ class LegacyMenusDemoSeeder extends Seeder
 
         foreach (['Seragam & atribut', 'Alat tulis & buku'] as $name) {
             ProductCategory::query()->firstOrCreate(['unit_id' => $unit->id, 'module' => 'cooperative', 'name' => $name]);
+        }
+    }
+
+    /**
+     * Pos akun contoh (nama mengikuti aplikasi lama), tanpa transaksi.
+     *
+     * @param  Collection<int, Unit>  $units
+     */
+    private function cashAccounts($units): void
+    {
+        $unit = $units->first();
+        if ($unit === null) {
+            return;
+        }
+
+        $accounts = [
+            ['4.1', 'Penerimaan SPP', 'in'], ['4.2', 'Penerimaan uang pangkal', 'in'], ['4.3', 'Hibah & donasi', 'in'], ['4.4', 'Sewa gedung', 'in'],
+            ['5.1', 'Biaya operasional', 'out'], ['5.2', 'Biaya pembangunan', 'out'], ['5.3', 'Gaji guru & staf', 'out'],
+            ['5.4', 'Biaya listrik, air & internet', 'out'], ['5.5', 'Biaya program', 'out'],
+        ];
+        foreach ($accounts as [$code, $name, $direction]) {
+            CashAccount::query()->firstOrCreate(['unit_id' => $unit->id, 'name' => $name], ['code' => $code, 'direction' => $direction, 'is_active' => true]);
         }
     }
 }

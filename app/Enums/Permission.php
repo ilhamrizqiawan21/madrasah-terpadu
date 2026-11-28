@@ -18,6 +18,8 @@ enum Permission: string
     case TeachingModulesUpload = 'teaching_modules.upload';
     case TeachingModulesReview = 'teaching_modules.review';
     case RoomsBook = 'rooms.book';
+    case CashBookManage = 'cash_book.manage';
+    case PayrollManage = 'payroll.manage';
     case StudentsView = 'students.view';
     case StudentsManage = 'students.manage';
     case GuardiansManage = 'guardians.manage';
@@ -74,6 +76,8 @@ enum Permission: string
             self::TeachingModulesUpload => 'Unggah modul ajar',
             self::TeachingModulesReview => 'Supervisi modul ajar',
             self::RoomsBook => 'Booking ruangan & lab',
+            self::CashBookManage => 'Kelola buku kas, BOS & ZIS',
+            self::PayrollManage => 'Kelola penggajian',
             self::StudentsView => 'Lihat data siswa',
             self::StudentsManage => 'Kelola data siswa',
             self::GuardiansManage => 'Kelola data wali',

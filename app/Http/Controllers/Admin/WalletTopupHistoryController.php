@@ -22,6 +22,7 @@ use App\Services\Reports\ReportExportService;
 use App\Services\Wallet\WalletService;
 use App\Support\AppTimezone;
 use App\Support\Money;
+use App\Support\PeriodRange;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
@@ -37,16 +38,6 @@ use Symfony\Component\HttpFoundation\Response as HttpResponse;
  */
 class WalletTopupHistoryController extends Controller
 {
-    public const array PERIODS = [
-        'today' => 'Hari ini',
-        'yesterday' => 'Kemarin',
-        'this_week' => 'Minggu ini',
-        'this_month' => 'Bulan ini',
-        'last_month' => 'Bulan lalu',
-        'all' => 'Semua waktu',
-        'custom' => 'Rentang tanggal',
-    ];
-
     private const string CASH_PREFIX = 'topup-cash:';
 
     private const string CANCEL_PREFIX = 'topup-cancel:';
@@ -86,7 +77,7 @@ class WalletTopupHistoryController extends Controller
                 'unit' => $filters['unit'], 'classroom' => $filters['classroom'], 'method' => $filters['method'], 'search' => $filters['search'],
             ],
             'periodLabel' => $filters['label'],
-            'periodOptions' => array_map(fn (string $k, string $v): array => ['value' => $k, 'label' => $v], array_keys(self::PERIODS), self::PERIODS),
+            'periodOptions' => PeriodRange::options(),
             'unitOptions' => array_values(Unit::query()->where('is_active', true)->orderBy('id')->get(['id', 'name'])
                 ->map(fn (Unit $u): array => ['value' => (string) $u->id, 'label' => $u->name])->all()),
             'classroomOptions' => $yearId === null ? [] : array_values(Classroom::query()->where('academic_year_id', $yearId)->where('is_active', true)
@@ -187,36 +178,12 @@ class WalletTopupHistoryController extends Controller
      */
     private function filters(Request $request): array
     {
-        $tz = AppTimezone::name();
-        $now = CarbonImmutable::now($tz);
-        $period = array_key_exists($request->string('period')->toString(), self::PERIODS) ? $request->string('period')->toString() : 'today';
-        $fromInput = $request->date('from')?->toDateString();
-        $toInput = $request->date('to')?->toDateString();
-
-        [$start, $end] = match ($period) {
-            'today' => [$now->startOfDay(), $now->endOfDay()],
-            'yesterday' => [$now->subDay()->startOfDay(), $now->subDay()->endOfDay()],
-            'this_week' => [$now->startOfWeek(CarbonImmutable::MONDAY), $now->endOfDay()],
-            'this_month' => [$now->startOfMonth(), $now->endOfDay()],
-            'last_month' => [$now->subMonthNoOverflow()->startOfMonth(), $now->subMonthNoOverflow()->endOfMonth()],
-            'custom' => [
-                $fromInput !== null ? CarbonImmutable::parse($fromInput, $tz)->startOfDay() : null,
-                $toInput !== null ? CarbonImmutable::parse($toInput, $tz)->endOfDay() : null,
-            ],
-            default => [null, null],
-        };
-
-        $label = match ($period) {
-            'custom' => 'Rentang '.($start?->format('d/m/Y') ?? '…').' – '.($end?->format('d/m/Y') ?? '…'),
-            'all' => 'Semua waktu',
-            default => self::PERIODS[$period].' ('.$start?->format('d/m/Y').($start?->isSameDay($end) ? '' : ' – '.$end?->format('d/m/Y')).')',
-        };
-
+        $range = PeriodRange::fromRequest($request, 'today');
         $method = in_array($request->string('method')->toString(), ['cash', 'online'], true) ? $request->string('method')->toString() : null;
 
         return [
-            'period' => $period, 'label' => $label, 'start' => $start, 'end' => $end,
-            'fromInput' => $fromInput, 'toInput' => $toInput,
+            'period' => $range->period, 'label' => $range->label, 'start' => $range->start, 'end' => $range->end,
+            'fromInput' => $range->fromInput, 'toInput' => $range->toInput,
             'unit' => $request->integer('unit') ?: null, 'classroom' => $request->integer('classroom') ?: null,
             'method' => $method, 'search' => trim($request->string('search')->toString()),
         ];

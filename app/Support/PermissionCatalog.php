@@ -54,6 +54,10 @@ final class PermissionCatalog
                 self::row('Penilaian karakter', P::AttitudeView, P::AttitudeLock),
                 self::row('Persetujuan penilaian karakter', null, P::AttitudeApprove),
             ]],
+            ['label' => 'Akuntansi & Kas', 'rows' => [
+                self::row('Pos akun, buku kas, pemasukan lain, BOS & ZIS', null, P::CashBookManage),
+                self::row('Penggajian pegawai', null, P::PayrollManage),
+            ]],
             ['label' => 'Keuangan Siswa', 'rows' => [
                 self::row('Jenis & tarif biaya, diskon', null, P::FeeTypesManage),
                 self::row('Tagihan', P::InvoicesView, P::InvoicesIssue),

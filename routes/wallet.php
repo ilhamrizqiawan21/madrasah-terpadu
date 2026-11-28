@@ -64,3 +64,5 @@ Route::prefix('laporan/kantin')
         Route::get('pdf', 'exportPdf')->name('pdf');
         Route::get('excel', 'exportExcel')->name('excel');
     });
+
+require __DIR__.'/accounting.php';

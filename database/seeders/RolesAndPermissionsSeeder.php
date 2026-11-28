@@ -63,6 +63,8 @@ class RolesAndPermissionsSeeder extends Seeder
                 PermissionEnum::WalletTopup,
                 PermissionEnum::WalletManage,
                 PermissionEnum::ReportsView,
+                PermissionEnum::CashBookManage,
+                PermissionEnum::PayrollManage,
             ],
             RoleEnum::Teacher->value => [
                 PermissionEnum::StudentsView,
