@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
+use App\Domain\Payments\MidtransSignature;
 use App\Notifications\Channels\WhatsAppChannel;
+use App\Services\Payments\MidtransClient;
 use App\Services\Settings\SettingsRepository;
 use App\Support\Branding;
 use Carbon\CarbonImmutable;
@@ -24,7 +26,17 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        // Kunci Midtrans hanya dibaca dari config (PAYMENTS §1.6); dibuat saat dipakai agar aplikasi tetap
+        // berjalan ketika kunci belum diisi dan fitur pembayaran online nonaktif.
+        $this->app->bind(MidtransSignature::class, static fn (): MidtransSignature => new MidtransSignature(
+            (string) config('services.midtrans.server_key'),
+        ));
+
+        $this->app->bind(MidtransClient::class, static fn (): MidtransClient => new MidtransClient(
+            serverKey: (string) config('services.midtrans.server_key'),
+            isProduction: (bool) config('services.midtrans.is_production'),
+            notificationUrl: rtrim((string) config('app.url'), '/').'/webhooks/midtrans',
+        ));
     }
 
     /**
