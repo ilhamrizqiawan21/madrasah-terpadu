@@ -23,7 +23,7 @@ Aturan: singkat dan faktual. Jangan menyalin isi TODO/ADR; tautkan saja. Hapus b
 
 ## Terakhir diperbarui
 
-2026-11-28 · Gemini — Fase 8: **T-801**–**T-804**, **T-806**, **T-807** (dan **T-1304**) selesai dan di-commit (**T-805** menunggu Fase 7 T-702). Fase 6 selesai seluruhnya (**T-601**–**T-617**).
+2026-11-28 · Claude — Fase 7 Midtrans: **T-701, T-703, T-704, T-706, T-707** selesai; **T-702, T-705, T-805** kode & tes selesai tetapi gerbang UI (browser + antislop) belum; **T-708** belum (butuh kunci sandbox + tunnel).
 
 ## Keadaan sekarang
 
@@ -55,12 +55,15 @@ Aturan: singkat dan faktual. Jangan menyalin isi TODO/ADR; tautkan saja. Hapus b
 
 ## Sedang dikerjakan
 
-Fase 8 (Dompet kantin): **T-801**–**T-804**, **T-806**, **T-807** selesai; **T-805** menunggu **Fase 7 — Midtrans (T-702)**.
+Fase 7 (Midtrans) + T-805: semua kode di-commit (`4504da2`…`4156bf4`), `composer check` hijau (Pest 740 tes). Belum: gerbang UI T-702/T-705/T-805 dan T-708.
 
 ## Langkah berikutnya
 
-1. Lanjutkan **Fase 7 — Pembayaran online Midtrans** (**T-701–T-708**, Paket P-04 & P-08), lalu sambungkan **T-805 Top-up online**.
-2. Jalankan migrasi `2026_11_28_000001` s.d. `2026_11_28_000012` pada DB lokal/staging saat fitur `billing` / `exam_eligibility` / `wallet` diaktifkan.
+1. **Cek UI** halaman `guardian/payment`, portal Tagihan (centang + bilah "Bayar sekarang"), `admin/billing/online-payments`, form "Isi saldo online" di dompet wali — 360/768/1280, keyboard, empat keadaan, antislop. Pemilik membatalkan pengisian data pratinjau ke DB lokal (2026-11-28); minta izin/cara lain dulu (mis. DB terpisah) sebelum menulis data uji.
+2. **T-708 uji sandbox**: pemilik mengisi `MIDTRANS_SERVER_KEY`/`MIDTRANS_CLIENT_KEY` sandbox di `.env` + tunnel (`cloudflared tunnel --url http://localhost:8000`), `APP_URL` = URL tunnel (header `X-Override-Notification` memakai `APP_URL`). Verifikasi khusus: header override berlaku untuk Snap (PAYMENTS §2a).
+3. `composer check:mysql` dengan user DB khusus (tes grup `mysql` baru: `PaymentOrderTest`, `MidtransWebhookTest`).
+4. Keputusan pemilik: **U-14** (tagihan `partial` dibayar online sebesar sisa, sesuai mockup 16) dan **U-05** (kelebihan bayar; bawaan saldo kantin, flag `PAYMENTS_OVERPAYMENT_TO_WALLET`).
+5. Deploy: migrasi `2026_11_28_000013`–`000014`; worker sudah mendengar antrean `payments`; jadwal baru `ExpirePaymentOrders` (15 menit) dan `payments:reconcile` (01.00 WITA).
 
 ## Arahan pemilik yang berlaku
 

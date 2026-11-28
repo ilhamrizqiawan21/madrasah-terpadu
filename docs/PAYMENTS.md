@@ -143,3 +143,11 @@ Pakai simulator pembayaran sandbox Midtrans untuk QRIS/GoPay/VA. Untuk webhook d
 - **Tanggal peralihan** ditetapkan klien. Mulai tanggal itu, tagihan baru **hanya** terbit di aplikasi ini; aplikasi lama hanya untuk melihat riwayat.
 - Tunggakan aplikasi lama per tanggal peralihan diimpor sebagai **saldo awal** (T-610) dan diperiksa bersama bendahara (T-1411).
 - Setelah aplikasi lama berhenti menerima pembayaran, URL notifikasi di dasbor boleh diarahkan ke aplikasi ini; header override tetap dikirim.
+
+## 9. Catatan implementasi (2026-11-28, T-701–T-707)
+
+- Kode: `MidtransClient` (HTTP, retry 5xx 2x, timeout 10 dtk), `PaymentOrderService` (§3), `MidtransWebhookController` + job `ProcessMidtransNotification` (antrean `payments`) + `MidtransNotificationProcessor` (§4), `MidtransStatusMapper` (Domain), `ExpirePaymentOrders` + `PaymentReconciliationService`/`payments:reconcile` (§5), `payments:check-config` (§2).
+- Get Status menjawab `status_code` 201/202/407 di body untuk pending/deny/expire; klien memperlakukan body yang memuat `transaction_status` sebagai status sah. Body tanpa `transaction_status` dengan `status_code` 404 = order belum punya transaksi (wali tidak memilih metode) → `ExpirePaymentOrders` menandai `expired` setelah lewat batas.
+- "Tandai `needs_review`" (§4 tabel) disimpan sebagai `payment_orders.review_reason` (`amount_mismatch|needs_review|overpaid|challenge`) tanpa mengubah status order; bendahara menutupnya lewat "Tandai sudah ditinjau" di Keuangan > Pembayaran online.
+- Kelebihan bayar (§4 langkah 6, ADR-009) → entri `adjustment` dompet berkunci `midtrans-overpaid:<order_id>`; dimatikan dengan `PAYMENTS_OVERPAYMENT_TO_WALLET=false`.
+- `payment_notifications` append-only; satu-satunya perubahan adalah pengisian `processed_at` + `process_result` sekali oleh pemroses.
