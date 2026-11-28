@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Enums\Permission;
+use App\Http\Controllers\Admin\MeetingController;
 use App\Http\Controllers\Admin\RolePermissionController;
 use App\Http\Controllers\Admin\StaffUserController;
 use App\Services\Users\StaffUserService;
@@ -39,4 +40,16 @@ Route::middleware('permission:'.Permission::UsersManage->value)
     ->group(function (): void {
         Route::get('/', 'index')->name('index');
         Route::put('{role}', 'update')->where('role', '[a-z_]+')->name('update');
+    });
+
+// Undangan rapat & notulen (alur aplikasi lama).
+Route::middleware('permission:'.Permission::UsersManage->value)
+    ->prefix('rapat')
+    ->name('meetings.')
+    ->controller(MeetingController::class)
+    ->group(function (): void {
+        Route::get('/', 'index')->name('index');
+        Route::post('/', 'store')->name('store');
+        Route::put('{meeting}', 'update')->whereNumber('meeting')->name('update');
+        Route::delete('{meeting}', 'destroy')->whereNumber('meeting')->name('destroy');
     });

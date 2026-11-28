@@ -144,7 +144,7 @@ final class Navigation
                 'items' => [
                     ['label' => 'Peran & Hak Akses', 'route' => 'admin.roles.index', 'permission' => Permission::UsersManage->value],
                     ['label' => 'Guru & Staf', 'route' => 'admin.users.index', 'permission' => Permission::UsersManage->value],
-                    self::soon('Undangan Rapat', 'rapat', Permission::UsersManage->value, 'Undangan rapat guru dan staf beserta notulen.'),
+                    ['label' => 'Undangan Rapat', 'route' => 'admin.meetings.index', 'permission' => Permission::UsersManage->value],
                     ['label' => 'Siswa', 'route' => 'admin.students.index', 'permission' => $staff],
                     ['label' => 'Orang Tua / Wali', 'route' => 'admin.guardians.index', 'permission' => Permission::GuardiansManage->value],
                     ['label' => 'Mutasi Siswa', 'route' => 'admin.students.mutations.index', 'permission' => Permission::StudentsManage->value],
