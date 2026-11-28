@@ -167,7 +167,7 @@ final class Navigation
                     ['label' => 'Kelas & Wali Kelas', 'route' => 'admin.classrooms.index', 'permission' => Permission::ClassroomsManage->value],
                     ['label' => 'Ekstrakurikuler', 'route' => 'admin.extracurriculars.index', 'permission' => Permission::ClassroomsManage->value],
                     ['label' => 'Mata Pelajaran', 'route' => 'admin.cbt.subjects.index', 'permission' => Permission::CbtView->value, 'feature' => Feature::Cbt],
-                    self::soon('Tujuan Pembelajaran', 'capaian-belajar', $staff, 'Tujuan pembelajaran per mapel dan tingkat.'),
+                    ['label' => 'Tujuan Pembelajaran', 'route' => 'admin.learning-objectives.index', 'permission' => Permission::ClassroomsManage->value],
                     ['label' => 'Jadwal Pelajaran', 'route' => 'admin.lesson-schedules.index', 'permission' => Permission::ClassroomsManage->value, 'feature' => Feature::LessonSchedule],
                     ['label' => 'Kenaikan Kelas', 'route' => 'admin.students.promotions.index', 'permission' => Permission::StudentsManage->value],
                     self::soon('Kelulusan & SKL', 'kelulusan', Permission::StudentsManage->value, 'Kelulusan siswa tingkat akhir dan cetak Surat Keterangan Lulus.'),

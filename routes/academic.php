@@ -7,6 +7,7 @@ use App\Enums\Permission;
 use App\Http\Controllers\Admin\AcademicMasterController;
 use App\Http\Controllers\Admin\ExtracurricularController;
 use App\Http\Controllers\Admin\FacilityController;
+use App\Http\Controllers\Admin\LearningObjectiveController;
 use App\Http\Controllers\Admin\LessonScheduleController;
 use Illuminate\Support\Facades\Route;
 
@@ -71,4 +72,15 @@ Route::middleware('permission:'.Permission::ClassroomsManage->value)
         Route::post('{extracurricular}/presensi', 'attendance')->whereNumber('extracurricular')->name('extracurriculars.attendance');
         Route::patch('anggota/{member}/predikat', 'grade')->whereNumber('member')->name('extracurriculars.grade');
         Route::delete('anggota/{member}', 'removeMember')->whereNumber('member')->name('extracurriculars.remove-member');
+    });
+
+// Tujuan Pembelajaran (TP) per mapel dan tingkat kelas.
+Route::middleware('permission:'.Permission::ClassroomsManage->value)
+    ->prefix('akademik/tujuan-pembelajaran')
+    ->controller(LearningObjectiveController::class)
+    ->group(function (): void {
+        Route::get('/', 'index')->name('learning-objectives.index');
+        Route::post('/', 'store')->name('learning-objectives.store');
+        Route::put('{objective}', 'update')->whereNumber('objective')->name('learning-objectives.update');
+        Route::delete('{objective}', 'destroy')->whereNumber('objective')->name('learning-objectives.destroy');
     });

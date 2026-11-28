@@ -12,6 +12,7 @@ import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import {
     Select,
     SelectContent,
@@ -27,7 +28,7 @@ export type MasterOption = { value: string; label: string };
 export type MasterField = {
     key: string;
     label: string;
-    type?: 'text' | 'number' | 'time' | 'select';
+    type?: 'text' | 'number' | 'time' | 'select' | 'textarea';
     options?: MasterOption[];
     required?: boolean;
     placeholder?: string;
@@ -309,6 +310,17 @@ export function MasterCrudPage<T extends Row>({
                                         ))}
                                     </SelectContent>
                                 </Select>
+                            ) : field.type === 'textarea' ? (
+                                <Textarea
+                                    id={`master-${field.key}`}
+                                    value={form.data[field.key] ?? ''}
+                                    onChange={(e) =>
+                                        form.setData(field.key, e.target.value)
+                                    }
+                                    placeholder={field.placeholder}
+                                    required={field.required}
+                                    rows={4}
+                                />
                             ) : field.type === 'time' ? (
                                 <TimeInput
                                     id={`master-${field.key}`}
