@@ -23,7 +23,7 @@ Aturan: singkat dan faktual. Jangan menyalin isi TODO/ADR; tautkan saja. Hapus b
 
 ## Terakhir diperbarui
 
-2026-11-28 · Claude — Fase 7 Midtrans: **T-701, T-703, T-704, T-706, T-707** selesai; **T-702, T-705, T-805** kode & tes selesai tetapi gerbang UI (browser + antislop) belum; **T-708** belum (butuh kunci sandbox + tunnel).
+2026-11-28 · Claude — Duplikasi alur aplikasi lama: grup **Pengguna** dan **Akademik** selesai (lihat bagian "Duplikasi alur aplikasi lama"). Fase 7 Midtrans tetap seperti tercatat di bawah (T-708 dilewati).
 
 ## Keadaan sekarang
 
@@ -53,9 +53,22 @@ Aturan: singkat dan faktual. Jangan menyalin isi TODO/ADR; tautkan saja. Hapus b
 - Belum dicek: tampilan ponsel 360 px (browser otomasi tidak bisa < ±700 px), halaman wali penilaian karakter & isi PDF, panel Ujian beranda.
 - Sisa usulan polesan: strip ringkasan yang bisa diklik di atas daftar utama, aksi massal (pindah rombel, cetak kartu terpilih, setujui izin), Cetak kartu di profil siswa, filter status yang tidak menghapus kata kunci cari.
 
+## Duplikasi alur aplikasi lama (2026-11-28)
+
+Pemilik memandu menu demi menu; nama menu dibuat ramah. Yang disamakan **alur**, tampilan dipoles nanti.
+
+- **Aplikasi lama (amaljayaberkah.id) = produksi, HANYA BACA.** Buka lewat tautan sidebar, baca teks/atribut DOM saja; jangan klik tombol aksi baris. 2026-11-28 tombol "Ubah Status" di Kelulusan langsung membalik status satu siswa tanpa konfirmasi; sudah dikembalikan ke "Lulus" dan dicek ulang.
+- Selesai: sidebar 15 grup, Dasbor, grup Pengguna (Peran & Hak Akses, Guru & Staf, Undangan Rapat, Siswa, Orang Tua, Mutasi, Alumni), perbaikan zona waktu WITA.
+- **Akademik** (semua di `routes/academic.php`): Gedung, Ruangan & Lab, Tingkat Kelas/Rombel/Jurusan (master), Kelas & Wali Kelas (jurusan+kuota), Jam Pelajaran & Jadwal mingguan (cek bentrok guru, kelas paralel), Ekstrakurikuler + Anggota & Nilai (presensi, predikat A–D), Tujuan Pembelajaran (per mapel + **tingkat**, bukan rombel — perlu konfirmasi pemilik), Kelulusan & SKL (konfirmasi sebelum ubah status, nomor SKL `001/SKL/MI/2026`, kota dari Pengaturan Identitas), Supervisi Modul Ajar (unggah PDF/DOCX → review/revisi), Peminjaman Ruangan (cek jam beririsan).
+- Izin baru: `teaching_modules.upload` (guru), `teaching_modules.review` (kepala unit), `rooms.book` (guru, kepala unit). Item menu boleh berisi beberapa izin dipisah `|` (cukup salah satu).
+- Migrasi baru `2026_11_28_000015`–`000028`. Deploy: `migrate --force` + `db:seed --class=RolesAndPermissionsSeeder --force`.
+- Data dummy lokal: `LegacyMenusDemoSeeder` (menolak jalan di produksi). Kota sekolah lokal belum diisi.
+- Pola: halaman master sederhana pakai `MasterCrudPage` (field `text|number|time|select|textarea`); layout halaman Inertia wajib fungsi panah (`Page.layout = (page) => page`).
+- PPDB dilewati atas arahan pemilik. `app/Services/Quran/MemorizationProgressService.php` punya perubahan Pint yang belum di-commit (bukan dari tugas ini).
+
 ## Sedang dikerjakan
 
-Fase 7 (Midtrans) + T-805: semua kode di-commit (`4504da2`…`4156bf4`), `composer check` hijau (Pest 740 tes). T-702/T-705/T-805 dicentang (fungsi dicek; antislop & 360 px ditunda ke fase poles UI). T-708 dilewati dulu atas arahan pemilik.
+Menunggu arahan grup menu berikutnya dari pemilik (urutan sidebar setelah Akademik: E-Learning).
 
 ## Langkah berikutnya
 
