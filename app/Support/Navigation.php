@@ -173,7 +173,7 @@ final class Navigation
                     ['label' => 'Kelulusan & SKL', 'route' => 'admin.graduations.index', 'permission' => Permission::StudentsManage->value],
                     ['label' => 'Supervisi Modul Ajar', 'route' => 'admin.teaching-modules.index', 'permission' => Permission::TeachingModulesUpload->value.'|'.Permission::TeachingModulesReview->value],
                     ['label' => 'Anggota & Nilai Ekskul', 'route' => 'admin.extracurriculars.members', 'permission' => Permission::ClassroomsManage->value],
-                    self::soon('Peminjaman Ruangan', 'pinjam-ruangan', $staff, 'Reservasi ruangan dan laboratorium.'),
+                    ['label' => 'Peminjaman Ruangan', 'route' => 'admin.room-bookings.index', 'permission' => Permission::RoomsBook->value],
                 ],
             ],
             [

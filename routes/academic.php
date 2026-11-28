@@ -10,6 +10,7 @@ use App\Http\Controllers\Admin\FacilityController;
 use App\Http\Controllers\Admin\GraduationController;
 use App\Http\Controllers\Admin\LearningObjectiveController;
 use App\Http\Controllers\Admin\LessonScheduleController;
+use App\Http\Controllers\Admin\RoomBookingController;
 use App\Http\Controllers\Admin\TeachingModuleController;
 use Illuminate\Support\Facades\Route;
 
@@ -112,4 +113,14 @@ Route::prefix('akademik/supervisi-modul')
         });
         Route::put('{module}/supervisi', 'review')->whereNumber('module')
             ->middleware('permission:'.Permission::TeachingModulesReview->value)->name('teaching-modules.review');
+    });
+
+// Peminjaman Ruangan & Lab.
+Route::middleware('permission:'.Permission::RoomsBook->value)
+    ->prefix('akademik/pinjam-ruangan')
+    ->controller(RoomBookingController::class)
+    ->group(function (): void {
+        Route::get('/', 'index')->name('room-bookings.index');
+        Route::post('/', 'store')->name('room-bookings.store');
+        Route::delete('{booking}', 'destroy')->whereNumber('booking')->name('room-bookings.destroy');
     });

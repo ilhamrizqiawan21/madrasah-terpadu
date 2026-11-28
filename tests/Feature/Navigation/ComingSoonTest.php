@@ -24,12 +24,12 @@ function soonUser(RoleEnum $role): User
 
 test('menu segera membuka halaman sedang disiapkan, bukan beranda', function (): void {
     $this->actingAs(soonUser(RoleEnum::Admin))
-        ->get(route('admin.soon', ['module' => 'pinjam-ruangan']))
+        ->get(route('admin.soon', ['module' => 'tugas']))
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
             ->component('admin/coming-soon')
-            ->where('module.label', 'Peminjaman Ruangan')
-            ->where('module.group', 'Akademik')
+            ->where('module.label', 'Tugas & PR')
+            ->where('module.group', 'E-Learning')
         );
 
     $this->actingAs(soonUser(RoleEnum::Admin))
@@ -68,7 +68,7 @@ test('item menu menandai modul yang belum dibangun dan setiap grup punya ikon', 
 
     expect(collect($groups)->pluck('icon')->filter()->count())->toBe(count($groups))
         ->and($items->firstWhere('label', 'Siswa')['soon'])->toBeFalse()
-        ->and($items->firstWhere('label', 'Peminjaman Ruangan')['soon'])->toBeTrue()
+        ->and($items->firstWhere('label', 'Tugas & PR')['soon'])->toBeTrue()
         ->and($items->pluck('href')->duplicates())->toBeEmpty();
 });
 
