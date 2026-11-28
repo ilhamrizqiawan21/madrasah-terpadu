@@ -145,3 +145,13 @@ it('mengikat MidtransSignature dan MidtransClient dari config di container', fun
     expect($signature->isValid($payload))->toBeTrue()
         ->and(app(MidtransClient::class)->snapJsUrl())->toBe('https://app.sandbox.midtrans.com/snap/snap.js');
 });
+
+it('mengembalikan status expire/pending walau status_code di body bukan 200', function (): void {
+    Http::fake([
+        'api.sandbox.midtrans.com/v2/INV-EXP/status' => Http::response(['status_code' => '407', 'transaction_status' => 'expire', 'gross_amount' => '1000.00']),
+        'api.sandbox.midtrans.com/v2/INV-PEND/status' => Http::response(['status_code' => '201', 'transaction_status' => 'pending', 'gross_amount' => '1000.00']),
+    ]);
+
+    expect(midtransTestClient()->getStatus('INV-EXP')['transaction_status'])->toBe('expire')
+        ->and(midtransTestClient()->getStatus('INV-PEND')['transaction_status'])->toBe('pending');
+});

@@ -71,7 +71,13 @@ final class MidtransClient
         /** @var array<string, mixed> $body */
         $body = $response->json() ?? [];
 
-        // Core API dapat menjawab HTTP 200 dengan `status_code` galat di body.
+        // Body yang memuat transaction_status adalah status sah walau status_code-nya bukan 200
+        // (mis. 201 pending, 202 deny, 407 expire).
+        if (is_string($body['transaction_status'] ?? null)) {
+            return $body;
+        }
+
+        // Tanpa transaction_status, status_code di body (HTTP tetap 200) menandakan galat.
         $bodyStatus = (int) ($body['status_code'] ?? 200);
 
         if ($bodyStatus === 404) {

@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Jobs\CloseExpiredExamSessions;
+use App\Jobs\ExpirePaymentOrders;
 use App\Jobs\MarkDailyAbsences;
 use App\Jobs\SendExamEligibilityReminders;
 use App\Jobs\SendInvoiceDueReminders;
@@ -36,5 +37,10 @@ Schedule::job(new SendExamEligibilityReminders)
 
 Schedule::command('wallet:verify-balances')
     ->dailyAt('01:00')
+    ->timezone('Asia/Makassar')
+    ->withoutOverlapping();
+
+Schedule::job(new ExpirePaymentOrders)
+    ->everyFifteenMinutes()
     ->timezone('Asia/Makassar')
     ->withoutOverlapping();
